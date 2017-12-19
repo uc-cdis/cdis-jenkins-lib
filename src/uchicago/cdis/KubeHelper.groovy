@@ -24,7 +24,7 @@ class KubeHelper implements Serializable {
    *    <li> create a namespace for the branch </li>
    *   </ul>
    * <li> Reapply the service and deployment in the branch namespace
-   *        with the docker image tagged with git's commitSha
+   *        with the docker image tagged with git's branch name - quay does not yet tag with commit-sha :-(
    * </ul>
    *
    * @param serviceName should work with 'kubectl get services/serviceName'
@@ -44,9 +44,12 @@ class KubeHelper implements Serializable {
     
     // Fetch the default service and deployment into ./service.json and ./deployment.json
     String appLabel = steps.sh( script: "kubectl get services/$serviceName -ojson | tee service.json | jq -r .spec.selector.app", returnStdout: true);
-    steps.sh( script: "kubectl get deployments -l app='$appLabel' -ojson | jq '.items[0] | { apiVersion:.apiVersion, kind:.kind, spec:.spec, metadata:{ name: .metadata.name }}' | tee deployment.json")
+    String nowStr = new java.util.Date().toString();
+    steps.sh( script: "kubectl get deployments -l app='$appLabel' -ojson | jq '.items[0] | { apiVersion:.apiVersion, kind:.kind, spec:(.spec.template.metadata.labels.date=\"$nowStr\"), metadata:{ name: .metadata.name }}' | tee deployment.json")
     
     String namespace = "branch-" + branchName.replaceAll("\\W+", "-");
+    String dockerTag = branchName.replaceAll("/", "_").replaceAll("\\W+", "-");
+
     // First - check if the branch namespace already exists ...
     if (steps.sh( script: "kubectl get namespaces -ojsonpath='{ .items[?(@.metadata.name==\"$namespace\")].metadata.name }'", returnStdout: true).trim().isEmpty()) {
       // branch namespace does not yet exist - create it!
@@ -56,7 +59,7 @@ class KubeHelper implements Serializable {
     }
     
     // update the deployment to point at the latest Docker image
-    steps.sh( script: "cat deployment.json | jq '.spec.template.spec.containers[].image=(.spec.template.spec.containers[].image | gsub(\":.+\$\";\":$commitSha\"))' | kubectl apply --namespace $namespace -f -");
+    steps.sh( script: "cat deployment.json | jq '.spec.template.spec.containers[].image=(.spec.template.spec.containers[].image | gsub(\":.+\$\";\":$dockerTag\"))' | kubectl apply --namespace $namespace -f -");
     // update the service in the branch namespace
     steps.sh( script: "cat service.json | jq '.metadata={namespace:\"$namespace\",name:.metadata.name} | del(.status) | del(.spec.ports[].nodePort) | del(.spec.clusterIP)' | kubectl apply --namespace $namespace -f -");
     // All done!
