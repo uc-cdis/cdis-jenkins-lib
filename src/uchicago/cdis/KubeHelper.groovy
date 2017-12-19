@@ -1,7 +1,18 @@
 package uchicago.cdis;
 
+/**
+ * Groovy helper for deploying services to k8s in Jenkins pipelines.
+ *
+ * @see https://jenkins.io/doc/book/pipeline/shared-libraries/
+ */
 class KubeHelper implements Serializable {
   def steps
+  
+  /**
+   * Constructor
+   *
+   * @param steps injects hook to Jenkins Pipeline runtime
+   */
   KubeHelper(steps) { this.steps = steps; }
 
   /**
@@ -37,7 +48,7 @@ class KubeHelper implements Serializable {
     
     String namespace = "branch-" + branchName.replaceAll("\\W+", "-");
     // First - check if the branch namespace already exists ...
-    if (steps.sh( script: "kubectl get namespaces -ojsonpath='{ .items[?(@.metadata.name=\"$namespace\")].metadata.name }'", returnStdout: true).trim().isEmpty()) {
+    if (steps.sh( script: "kubectl get namespaces -ojsonpath='{ .items[?(@.metadata.name==\"$namespace\")].metadata.name }'", returnStdout: true).trim().isEmpty()) {
       // branch namespace does not yet exist - create it!
       steps.sh( script: "kubectl create namespace $namespace");
       // copy the secrets and configs into the namespace
