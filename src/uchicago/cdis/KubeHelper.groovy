@@ -20,7 +20,7 @@ class KubeHelper implements Serializable {
    * @param branchName defaults to env.GIT_BRANCH
    * @param commitSha defaults to env.GIT_COMMIT
    */
-  def deployBranch(String serviceName, String branchName=env.GIT_BRANCH, String commitSha=env.GIT_COMMIT) {
+  def deployBranch(String serviceName, String branchName=steps.env.GIT_BRANCH, String commitSha=steps.env.GIT_COMMIT) {
     if (null == branchName) {
       throw new IllegalStateException("unable to determine branch");    
     }
@@ -37,7 +37,7 @@ class KubeHelper implements Serializable {
     
     String namespace = "branch-" + branchName.replaceAll("\\W+", "-");
     // First - check if the branch namespace already exists ...
-    if (steps.sh( script: "kubectl get namespaces -ojsonpath='{ .items[?(@.metadata.name=\"$namespace\")].metadata.name }", returnStdout: true).trim().isEmpty()) {
+    if (steps.sh( script: "kubectl get namespaces -ojsonpath='{ .items[?(@.metadata.name=\"$namespace\")].metadata.name }'", returnStdout: true).trim().isEmpty()) {
       // branch namespace does not yet exist - create it!
       steps.sh( script: "kubectl create namespace $namespace");
       // copy the secrets and configs into the namespace

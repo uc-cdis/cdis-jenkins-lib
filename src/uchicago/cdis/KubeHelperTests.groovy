@@ -28,6 +28,7 @@ class  KubeHelperTests extends GroovyTestCase {
       this.shResponseQueue = new ArrayList(shResponseQueue);
     }
 
+    def env = Map[ GIT_BRANCH: "branch", GIT_COMMIT: "sha" ];
     String sh(Map args) {
       String response = "";
       if (!shResponseQueue.isEmpty()) {
@@ -56,8 +57,8 @@ class  KubeHelperTests extends GroovyTestCase {
   void testDeployExistingBranch() {
     JenkinsStepsMock mock = new JenkinsStepsMock(Collections.singletonList("branch"));
     KubeHelper helper = new KubeHelper(mock);
-    helper.deployBranch("service", "branch", "sha");
-    assert mock.shHistory.size() == 6;
+    helper.deployBranch("service"); // branch and commit come from mock.env ...
+    assert mock.shHistory.size() == 5;
     mock.shHistory.stream().forEach(
       {
         arg -> 
