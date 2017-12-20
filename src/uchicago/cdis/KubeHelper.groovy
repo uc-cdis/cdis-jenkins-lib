@@ -47,7 +47,8 @@ class KubeHelper implements Serializable {
     String nowStr = "" + new java.util.Date().getTime(); // label must be alphanumeric ...
     steps.sh( script: "kubectl get deployments -l app='$appLabel' -ojson | jq '.items[0] | { apiVersion:.apiVersion, kind:.kind, spec:(.spec | .template.metadata.labels.date=\"$nowStr\"), metadata:{ name: .metadata.name }}' | tee deployment.json")
     
-    String namespace = "branch-" + branchName.replaceAll("\\W+", "-");
+    // namespace needs to be lower case and DNS conformant
+    String namespace = "branch-" + branchName.replaceAll("\\W+", "-").toLowerCase();
     String dockerTag = branchName.replaceAll("/", "_").replaceAll("\\W+", "-");
 
     // First - check if the branch namespace already exists ...
