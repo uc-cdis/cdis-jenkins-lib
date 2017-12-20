@@ -44,7 +44,7 @@ class KubeHelper implements Serializable {
     
     // Fetch the default service and deployment into ./service.json and ./deployment.json
     String appLabel = steps.sh( script: "kubectl get services/$serviceName -ojson | tee service.json | jq -r .spec.selector.app", returnStdout: true);
-    String nowStr = new java.util.Date().toString();
+    String nowStr = "" + new java.util.Date().getTime(); // label must be alphanumeric ...
     steps.sh( script: "kubectl get deployments -l app='$appLabel' -ojson | jq '.items[0] | { apiVersion:.apiVersion, kind:.kind, spec:(.spec | .template.metadata.labels.date=\"$nowStr\"), metadata:{ name: .metadata.name }}' | tee deployment.json")
     
     String namespace = "branch-" + branchName.replaceAll("\\W+", "-");
