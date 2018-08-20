@@ -1,6 +1,6 @@
 #!groovy
 
-def call(Map pipelineParams) {
+def call() {
   pipeline {
     agent any
   
