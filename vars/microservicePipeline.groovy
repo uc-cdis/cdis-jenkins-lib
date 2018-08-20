@@ -9,13 +9,6 @@ def call() {
     }
   
     stages {
-      stage('testPipeline') {
-        steps {
-          script {
-            println pipelineParams.name
-          }
-        }
-      }
       stage('FetchCode') {
         steps {
           dir('gen3-qa') {
