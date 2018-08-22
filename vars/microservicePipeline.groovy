@@ -1,6 +1,6 @@
 #!groovy
 
-def call() {
+def call(Map config) {
   pipeline {
     agent any
   
@@ -11,43 +11,37 @@ def call() {
     stages {
       stage('FetchCode') {
         steps {
-          dir('gen3-qa') {
-            git(
-              url: 'https://github.com/uc-cdis/gen3-qa.git',
-              branch: 'master'
-            )
+          script {
+            fetchCode()
+            env.service = "$env.JOB_NAME".split('/')[1]
+            env.quaySuffix = "$env.GIT_BRANCH".replaceAll("/", "_")
           }
-          dir('data-simulator') {
-            git(
-              url: 'https://github.com/occ-data/data-simulator.git',
-              branch: 'master'
-            )
-          }
-          dir('cdis-manifest') {
-            git(
-              url: 'https://github.com/uc-cdis/cdis-manifest.git',
-              branch: 'QA'
-            )
-          }
-          dir('cloud-automation') {
-            git(
-              url: 'https://github.com/uc-cdis/cloud-automation.git',
-              branch: 'master'
-            )
-            script {
-              env.GEN3_HOME=env.WORKSPACE+"/cloud-automation"
-            }
+        }
+      }
+      stage('PrepForTesting') {
+        when {
+          expression { "$env.JOB_NAME".split('/')[1] == 'cdis-jenkins-lib' }
+        }
+        steps {
+          script {
+            env.service = config.JOB_NAME
+            env.quaySuffix = config.GIT_BRANCH
+            println "set test mock environment variables"
           }
         }
       }
       stage('WaitForQuayBuild') {
+        when {
+          expression { "$env.JOB_NAME".split('/')[1] != 'cdis-jenkins-lib' }
+        }
         steps {
           script {
-            service = "$env.JOB_NAME".split('/')[1]
-            def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 300)
+            def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 60)
             def timeout = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) + 3600)
-            curlUrl = "$env.QUAY_API"+service+"/build/?since="+timestamp
-            fullQuery = "curl -s "+curlUrl+/ | jq '.builds[] | "\(.tags[]),\(.display_name),\(.phase)"'/
+            timeUrl = "$env.QUAY_API"+env.service+"/build/?since="+timestamp
+            timeQuery = "curl -s "+timeUrl+/ | jq '.builds[] | "\(.tags[]),\(.display_name),\(.phase)"'/
+            limitUrl = "$env.QUAY_API"+env.service+"/build/?limit=25"
+            limitQuery = "curl -s "+limitUrl+/ | jq '.builds[] | "\(.tags[]),\(.display_name),\(.phase)"'/
             
             def testBool = false
             while(testBool != true) {
@@ -60,7 +54,24 @@ def call() {
               }
   
               sleep(30)
-              resList = sh(script: fullQuery, returnStdout: true).trim().split('"\n"')
+              println "running time query"
+              resList = sh(script: timeQuery, returnStdout: true).trim().split('"\n"')
+              for (String res in resList) {
+                fields = res.replaceAll('"', "").split(',')
+  
+                if(fields[0].startsWith("$env.GIT_BRANCH".replaceAll("/", "_"))) {
+                  if("$env.GIT_COMMIT".startsWith(fields[1])) {
+                    testBool = fields[2].endsWith("complete")
+                    break
+                  } else {
+                    currentBuild.result = 'ABORTED'
+                    error("aborting build due to out of date git hash\npipeline: $env.GIT_COMMIT\nquay: "+fields[1])
+                  }
+                }
+              }
+
+              println "time query failed, running limit query"
+              resList = sh(script: limitQuery, returnStdout: true).trim().split('"\n"')
               for (String res in resList) {
                 fields = res.replaceAll('"', "").split(',')
   
@@ -89,7 +100,7 @@ def call() {
             println "selected namespace $env.KUBECTL_NAMESPACE on executor $env.EXECUTOR_NUMBER"
   
             println "attempting to lock namespace with a wait time of 5 minutes"
-            uid = BUILD_TAG.replaceAll(' ', '_').replaceAll('%2F', '_')
+            uid = env.service+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
             sh("bash cloud-automation/gen3/bin/kube-lock.sh jenkins "+uid+" 3600 -w 300")
           }
         }
@@ -98,11 +109,9 @@ def call() {
         steps {
           script {
             dirname = sh(script: "kubectl -n $env.KUBECTL_NAMESPACE get configmap global -o jsonpath='{.data.hostname}'", returnStdout: true)
-            service = "$env.JOB_NAME".split('/')[1]
-            quaySuffix = "$env.GIT_BRANCH".replaceAll("/", "_")
           }
           dir("cdis-manifest/$dirname") {
-            withEnv(["masterBranch=$service:master", "targetBranch=$service:$quaySuffix"]) {
+            withEnv(["masterBranch=$env.service:master", "targetBranch=$env.service:$env.quaySuffix"]) {
               sh 'sed -i -e "s,'+"$env.masterBranch,$env.targetBranch"+',g" manifest.json'
             }
           }
@@ -155,7 +164,7 @@ def call() {
       }
       always {
         script {
-          uid = BUILD_TAG.replaceAll(' ', '_').replaceAll('%2F', '_')
+          uid = env.service+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
           sh("bash cloud-automation/gen3/bin/kube-unlock.sh jenkins "+uid)
         }
         echo "done"
