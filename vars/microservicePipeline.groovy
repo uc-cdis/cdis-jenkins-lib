@@ -31,16 +31,14 @@ def call(Map config) {
         }
       }
       stage('WaitForQuayBuild') {
-        when {
-          expression { "$env.JOB_NAME".split('/')[1] != 'cdis-jenkins-lib' }
-        }
         steps {
           script {
+            service = "$env.JOB_NAME".split('/')[1]
             def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 60)
             def timeout = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) + 3600)
-            timeUrl = "$env.QUAY_API"+env.service+"/build/?since="+timestamp
+            timeUrl = "$env.QUAY_API"+service+"/build/?since="+timestamp
             timeQuery = "curl -s "+timeUrl+/ | jq '.builds[] | "\(.tags[]),\(.display_name),\(.phase)"'/
-            limitUrl = "$env.QUAY_API"+env.service+"/build/?limit=25"
+            limitUrl = "$env.QUAY_API"+service+"/build/?limit=25"
             limitQuery = "curl -s "+limitUrl+/ | jq '.builds[] | "\(.tags[]),\(.display_name),\(.phase)"'/
             
             def testBool = false
