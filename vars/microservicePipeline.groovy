@@ -34,6 +34,9 @@ def call(Map config) {
         steps {
           script {
             service = "$env.JOB_NAME".split('/')[1]
+            if (service == 'cdis-jenkins-lib') {
+              service = 'jenkins-lib'
+            }
             def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 60)
             def timeout = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) + 3600)
             timeUrl = "$env.QUAY_API"+service+"/build/?since="+timestamp
