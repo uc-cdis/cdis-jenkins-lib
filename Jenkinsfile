@@ -6,5 +6,3 @@ testPipeline {
   JOB_NAME = 'fence'
   GIT_BRANCH = 'master'
 }
-
-// microservicePipeline name: 'test', age: 6
