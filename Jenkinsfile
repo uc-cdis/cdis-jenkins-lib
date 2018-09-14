@@ -1,6 +1,6 @@
 #!groovy
 
-@Library('cdis-jenkins-lib@feat/jenkins-gen-pipeline') _
+@Library('cdis-jenkins-lib@master') _
 
 testPipeline { 
   JOB_NAME = 'fence'
