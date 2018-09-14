@@ -128,6 +128,7 @@ def call(Map config) {
             echo "WORKSPACE is $env.WORKSPACE"
             sh "bash cloud-automation/gen3/bin/kube-roll-all.sh"
             sh "bash cloud-automation/gen3/bin/kube-wait4-pods.sh || true"
+            sh "bash ./gen3-qa/check-pod-health.sh"
           }
         }
       }
@@ -143,7 +144,8 @@ def call(Map config) {
       stage('RunTests') {
         steps {
           dir('gen3-qa') {
-            withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {
+            withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=$env.WORKSPACE/testData/"]) {
+              sh "bash ./jenkins-simulate-data.sh $env.KUBECTL_NAMESPACE"
               sh "bash ./run-tests.sh $env.KUBECTL_NAMESPACE"
             }
           }
