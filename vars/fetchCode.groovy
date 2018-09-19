@@ -16,7 +16,7 @@ def call() {
   dir('cdis-manifest') {
     git(
       url: 'https://github.com/uc-cdis/cdis-manifest.git',
-      branch: 'QA'
+      branch: 'master'
     )
   }
   dir('cloud-automation') {
