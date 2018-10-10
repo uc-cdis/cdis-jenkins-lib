@@ -102,7 +102,9 @@ def call(Map config) {
   
             println "attempting to lock namespace with a wait time of 5 minutes"
             uid = env.service+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
-            sh("bash cloud-automation/gen3/bin/kube-lock.sh jenkins "+uid+" 3600 -w 300")
+            withEnv(['GEN3_NOPROXY=true', "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {
+              sh("bash cloud-automation/gen3/bin/klock.sh lock jenkins "+uid+" 3600 -w 300")
+            }
           }
         }
       }
@@ -159,7 +161,9 @@ def call(Map config) {
       always {
         script {
           uid = env.service+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
-          sh("bash cloud-automation/gen3/bin/kube-unlock.sh jenkins "+uid)
+          withEnv(['GEN3_NOPROXY=true', "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {         
+            sh("bash cloud-automation/gen3/bin/klock.sh unlock jenkins "+uid)
+          }
         }
         echo "done"
         junit "gen3-qa/output/*.xml"
