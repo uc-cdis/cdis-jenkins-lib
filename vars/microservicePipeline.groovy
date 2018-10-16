@@ -116,14 +116,21 @@ def call(Map config) {
             String[] namespaces = ['jenkins-brain', 'jenkins-niaid']
             int modNum = namespaces.length/2
             int randNum = (new Random().nextInt(modNum) + ((env.EXECUTOR_NUMBER as Integer) * 2)) % namespaces.length
-  
-            env.KUBECTL_NAMESPACE = namespaces[randNum]
-            println "selected namespace $env.KUBECTL_NAMESPACE on executor $env.EXECUTOR_NUMBER"
-  
-            println "attempting to lock namespace with a wait time of 5 minutes"
             uid = env.service+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
-            withEnv(['GEN3_NOPROXY=true', "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {
-              sh("bash cloud-automation/gen3/bin/klock.sh lock jenkins "+uid+" 3600 -w 300")
+            int lockStatus = 1;
+
+            // try to find an unlocked namespace
+            for (int i=0; i < namespaces.length && lockStatus != 0; ++i) {
+              randNum = (randNum + i) % namespaces.length;
+              env.KUBECTL_NAMESPACE = namespaces[randNum]
+              println "selected namespace $env.KUBECTL_NAMESPACE on executor $env.EXECUTOR_NUMBER"
+              println "attempting to lock namespace $env.KUBECTL_NAMESPACE with a wait time of 1 minutes"
+              withEnv(['GEN3_NOPROXY=true', "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {
+                lockStatus = sh( script: "bash cloud-automation/gen3/bin/klock.sh lock jenkins "+uid+" 3600 -w 60", returnStatus: true)
+              }
+            }
+            if (lockStatus != 0) {
+              error("aborting - no available workspace")
             }
           }
         }
