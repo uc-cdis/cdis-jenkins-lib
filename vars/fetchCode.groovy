@@ -4,7 +4,7 @@ def call() {
   dir('gen3-qa') {
     git(
       url: 'https://github.com/uc-cdis/gen3-qa.git',
-  branch: 'master'
+      branch: 'master'
     )
   }
   dir('data-simulator') {
@@ -15,7 +15,7 @@ def call() {
   }
   dir('cdis-manifest') {
     git(
-      url: 'https://github.com/uc-cdis/cdis-manifest.git',
+      url: 'https://github.com/uc-cdis/gitops-qa.git',
       branch: 'master'
     )
   }

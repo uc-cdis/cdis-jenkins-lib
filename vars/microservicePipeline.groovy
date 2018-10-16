@@ -44,8 +44,10 @@ def call(Map config) {
             limitUrl = "$env.QUAY_API"+service+"/build/?limit=25"
             limitQuery = "curl -s "+limitUrl+/ | jq '.builds[] | "\(.tags[]),\(.display_name),\(.phase)"'/
             
-            def testBool = false
-            while(testBool != true) {
+            def quayImageReady = false
+            def noPendingQuayBuilds = false
+            while(quayImageReady != true && noPendingQuayBuilds != true) {
+              noPendingQueyBuilds = true
               currentTime = new Date().getTime()/1000 as Integer
               println "currentTime is: "+currentTime
   
@@ -60,29 +62,47 @@ def call(Map config) {
               for (String res in resList) {
                 fields = res.replaceAll('"', "").split(',')
   
-                if(fields[0].startsWith("$env.GIT_BRANCH".replaceAll("/", "_"))) {
-                  if("$env.GIT_COMMIT".startsWith(fields[1])) {
-                    testBool = fields[2].endsWith("complete")
-                    break
-                  } else {
-                    currentBuild.result = 'ABORTED'
-                    error("aborting build due to out of date git hash\npipeline: $env.GIT_COMMIT\nquay: "+fields[1])
+                //
+                // if all quay builds are complete, then assume there's nothing to wait
+                // for even if a build for our commit is not pending.
+                // that can happen if someone re-runs a Jenkins job interactively or whatever
+                //
+                if (fields.length > 2) {
+                  noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
+                  if(fields[0].startsWith("$env.GIT_BRANCH".replaceAll("/", "_"))) {
+                    if("$env.GIT_COMMIT".startsWith(fields[1])) {
+                      quayImageReady = fields[2].endsWith("complete")
+                      break
+                    } else {
+                      currentBuild.result = 'ABORTED'
+                      error("aborting build due to out of date git hash\npipeline: $env.GIT_COMMIT\nquay: "+fields[1])
+                    }
                   }
                 }
               }
 
-              println "time query failed, running limit query"
-              resList = sh(script: limitQuery, returnStdout: true).trim().split('"\n"')
-              for (String res in resList) {
-                fields = res.replaceAll('"', "").split(',')
-  
-                if(fields[0].startsWith("$env.GIT_BRANCH".replaceAll("/", "_"))) {
-                  if("$env.GIT_COMMIT".startsWith(fields[1])) {
-                    testBool = fields[2].endsWith("complete")
-                    break
-                  } else {
-                    currentBuild.result = 'ABORTED'
-                    error("aborting build due to out of date git hash\npipeline: $env.GIT_COMMIT\nquay: "+fields[1])
+              if (!quayImageReady) {
+                println "time query failed, running limit query"
+                resList = sh(script: limitQuery, returnStdout: true).trim().split('"\n"')
+                for (String res in resList) {
+                  fields = res.replaceAll('"', "").split(',')
+                  //
+                  // if all quay builds are complete, then assume there's nothing to wait
+                  // for even if a build for our commit is not pending.
+                  // that can happen if someone re-runs a Jenkins job interactively or whatever
+                  //
+                  if (fields.length > 2) {
+                    noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
+                    
+                    if(fields[0].startsWith("$env.GIT_BRANCH".replaceAll("/", "_"))) {
+                      if("$env.GIT_COMMIT".startsWith(fields[1])) {
+                        quayImageReady = fields[2].endsWith("complete")
+                        break
+                      } else {
+                        currentBuild.result = 'ABORTED'
+                        error("aborting build due to out of date git hash\npipeline: $env.GIT_COMMIT\nquay: "+fields[1])
+                      }
+                    }
                   }
                 }
               }
@@ -93,7 +113,7 @@ def call(Map config) {
       stage('SelectNamespace') {
         steps {
           script {
-            String[] namespaces = ['qa-bloodpac', 'qa-brain', 'qa-kidsfirst', 'qa-niaid']
+            String[] namespaces = ['jenkins-brain', 'jenkins-niaid']
             int modNum = namespaces.length/2
             int randNum = (new Random().nextInt(modNum) + ((env.EXECUTOR_NUMBER as Integer) * 2)) % namespaces.length
   
