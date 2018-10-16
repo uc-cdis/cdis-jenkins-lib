@@ -19,14 +19,18 @@ def call(Map config) {
         }
       }
       stage('PrepForTesting') {
-        when {
-          expression { "$env.JOB_NAME".split('/')[1] == 'cdis-jenkins-lib' }
-        }
         steps {
           script {
-            env.service = config.JOB_NAME
-            env.quaySuffix = config.GIT_BRANCH
-            println "set test mock environment variables"
+            // caller overrides of the service image to deploy
+            if (config) {
+              println "set test mock environment variables"
+              if (config.JOB_NAME) {
+                env.service = config.JOB_NAME
+              }
+              if (config.GIT_BRANCH) {
+                env.quaySuffix = config.GIT_BRANCH
+              }
+            }
           }
         }
       }
@@ -44,8 +48,10 @@ def call(Map config) {
             limitUrl = "$env.QUAY_API"+service+"/build/?limit=25"
             limitQuery = "curl -s "+limitUrl+/ | jq '.builds[] | "\(.tags[]),\(.display_name),\(.phase)"'/
             
-            def testBool = false
-            while(testBool != true) {
+            def quayImageReady = false
+            def noPendingQuayBuilds = false
+            while(quayImageReady != true && noPendingQuayBuilds != true) {
+              noPendingQuayBuilds = true
               currentTime = new Date().getTime()/1000 as Integer
               println "currentTime is: "+currentTime
   
@@ -60,29 +66,47 @@ def call(Map config) {
               for (String res in resList) {
                 fields = res.replaceAll('"', "").split(',')
   
-                if(fields[0].startsWith("$env.GIT_BRANCH".replaceAll("/", "_"))) {
-                  if("$env.GIT_COMMIT".startsWith(fields[1])) {
-                    testBool = fields[2].endsWith("complete")
-                    break
-                  } else {
-                    currentBuild.result = 'ABORTED'
-                    error("aborting build due to out of date git hash\npipeline: $env.GIT_COMMIT\nquay: "+fields[1])
+                //
+                // if all quay builds are complete, then assume there's nothing to wait
+                // for even if a build for our commit is not pending.
+                // that can happen if someone re-runs a Jenkins job interactively or whatever
+                //
+                if (fields.length > 2) {
+                  noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
+                  if(fields[0].startsWith("$env.GIT_BRANCH".replaceAll("/", "_"))) {
+                    if("$env.GIT_COMMIT".startsWith(fields[1])) {
+                      quayImageReady = fields[2].endsWith("complete")
+                      break
+                    } else {
+                      currentBuild.result = 'ABORTED'
+                      error("aborting build due to out of date git hash\npipeline: $env.GIT_COMMIT\nquay: "+fields[1])
+                    }
                   }
                 }
               }
 
-              println "time query failed, running limit query"
-              resList = sh(script: limitQuery, returnStdout: true).trim().split('"\n"')
-              for (String res in resList) {
-                fields = res.replaceAll('"', "").split(',')
-  
-                if(fields[0].startsWith("$env.GIT_BRANCH".replaceAll("/", "_"))) {
-                  if("$env.GIT_COMMIT".startsWith(fields[1])) {
-                    testBool = fields[2].endsWith("complete")
-                    break
-                  } else {
-                    currentBuild.result = 'ABORTED'
-                    error("aborting build due to out of date git hash\npipeline: $env.GIT_COMMIT\nquay: "+fields[1])
+              if (!quayImageReady) {
+                println "time query failed, running limit query"
+                resList = sh(script: limitQuery, returnStdout: true).trim().split('"\n"')
+                for (String res in resList) {
+                  fields = res.replaceAll('"', "").split(',')
+                  //
+                  // if all quay builds are complete, then assume there's nothing to wait
+                  // for even if a build for our commit is not pending.
+                  // that can happen if someone re-runs a Jenkins job interactively or whatever
+                  //
+                  if (fields.length > 2) {
+                    noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
+                    
+                    if(fields[0].startsWith("$env.GIT_BRANCH".replaceAll("/", "_"))) {
+                      if("$env.GIT_COMMIT".startsWith(fields[1])) {
+                        quayImageReady = fields[2].endsWith("complete")
+                        break
+                      } else {
+                        currentBuild.result = 'ABORTED'
+                        error("aborting build due to out of date git hash\npipeline: $env.GIT_COMMIT\nquay: "+fields[1])
+                      }
+                    }
                   }
                 }
               }
@@ -93,17 +117,23 @@ def call(Map config) {
       stage('SelectNamespace') {
         steps {
           script {
-            String[] namespaces = ['qa-bloodpac', 'qa-brain', 'qa-kidsfirst', 'qa-niaid']
-            int modNum = namespaces.length/2
-            int randNum = (new Random().nextInt(modNum) + ((env.EXECUTOR_NUMBER as Integer) * 2)) % namespaces.length
-  
-            env.KUBECTL_NAMESPACE = namespaces[randNum]
-            println "selected namespace $env.KUBECTL_NAMESPACE on executor $env.EXECUTOR_NUMBER"
-  
-            println "attempting to lock namespace with a wait time of 5 minutes"
+            String[] namespaces = ['jenkins-brain', 'jenkins-niaid']
+            int randNum = new Random().nextInt(namespaces.length);
             uid = env.service+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
-            withEnv(['GEN3_NOPROXY=true', "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {
-              sh("bash cloud-automation/gen3/bin/klock.sh lock jenkins "+uid+" 3600 -w 300")
+            int lockStatus = 1;
+
+            // try to find an unlocked namespace
+            for (int i=0; i < namespaces.length && lockStatus != 0; ++i) {
+              randNum = (randNum + i) % namespaces.length;
+              env.KUBECTL_NAMESPACE = namespaces[randNum]
+              println "selected namespace $env.KUBECTL_NAMESPACE on executor $env.EXECUTOR_NUMBER"
+              println "attempting to lock namespace $env.KUBECTL_NAMESPACE with a wait time of 1 minutes"
+              withEnv(['GEN3_NOPROXY=true', "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {
+                lockStatus = sh( script: "bash cloud-automation/gen3/bin/klock.sh lock jenkins "+uid+" 3600 -w 60", returnStatus: true)
+              }
+            }
+            if (lockStatus != 0) {
+              error("aborting - no available workspace")
             }
           }
         }
@@ -114,7 +144,7 @@ def call(Map config) {
             dirname = sh(script: "kubectl -n $env.KUBECTL_NAMESPACE get configmap global -o jsonpath='{.data.hostname}'", returnStdout: true)
           }
           dir("cdis-manifest/$dirname") {
-            withEnv(["masterBranch=$env.service:master", "targetBranch=$env.service:$env.quaySuffix"]) {
+            withEnv(["masterBranch=$env.service:[a-zA-Z0-9._-]*", "targetBranch=$env.service:$env.quaySuffix"]) {
               sh 'sed -i -e "s,'+"$env.masterBranch,$env.targetBranch"+',g" manifest.json'
             }
           }
