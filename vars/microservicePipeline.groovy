@@ -51,7 +51,7 @@ def call(Map config) {
             def quayImageReady = false
             def noPendingQuayBuilds = false
             while(quayImageReady != true && noPendingQuayBuilds != true) {
-              noPendingQueyBuilds = true
+              noPendingQuayBuilds = true
               currentTime = new Date().getTime()/1000 as Integer
               println "currentTime is: "+currentTime
   
