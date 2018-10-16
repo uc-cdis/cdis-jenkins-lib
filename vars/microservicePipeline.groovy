@@ -19,14 +19,18 @@ def call(Map config) {
         }
       }
       stage('PrepForTesting') {
-        when {
-          expression { "$env.JOB_NAME".split('/')[1] == 'cdis-jenkins-lib' }
-        }
         steps {
           script {
-            env.service = config.JOB_NAME
-            env.quaySuffix = config.GIT_BRANCH
-            println "set test mock environment variables"
+            // caller overrides of the service image to deploy
+            if (config) {
+              println "set test mock environment variables"
+              if (config.JOB_NAME) {
+                env.service = config.JOB_NAME
+              }
+              if (config.GIT_BRANCH) {
+                env.quaySuffix = config.GIT_BRANCH
+              }
+            }
           }
         }
       }
@@ -114,8 +118,7 @@ def call(Map config) {
         steps {
           script {
             String[] namespaces = ['jenkins-brain', 'jenkins-niaid']
-            int modNum = namespaces.length/2
-            int randNum = (new Random().nextInt(modNum) + ((env.EXECUTOR_NUMBER as Integer) * 2)) % namespaces.length
+            int randNum = new Random().nextInt(namespaces.length);
             uid = env.service+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
             int lockStatus = 1;
 
@@ -141,7 +144,7 @@ def call(Map config) {
             dirname = sh(script: "kubectl -n $env.KUBECTL_NAMESPACE get configmap global -o jsonpath='{.data.hostname}'", returnStdout: true)
           }
           dir("cdis-manifest/$dirname") {
-            withEnv(["masterBranch=$env.service:master", "targetBranch=$env.service:$env.quaySuffix"]) {
+            withEnv(["masterBranch=$env.service:[a-zA-Z0-9._-]*", "targetBranch=$env.service:$env.quaySuffix"]) {
               sh 'sed -i -e "s,'+"$env.masterBranch,$env.targetBranch"+',g" manifest.json'
             }
           }
