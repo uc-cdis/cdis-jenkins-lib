@@ -2,7 +2,7 @@
 
 def call(config) {
   script {
-    def namespaces = config.namespaceChoices.replaceAll('\\s','').split(',')
+    def namespaces = config.namespaceChoices.replaceAll("\\s","").split(',')
     int randNum = new Random().nextInt(namespaces.length);
     uid = env.service+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
     int lockStatus = 1;
