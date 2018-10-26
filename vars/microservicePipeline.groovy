@@ -117,6 +117,7 @@ def call(Map config) {
       stage('SelectNamespace') {
         steps {
           script {
+            println config.toMapString(1000)
             selectAndLockNamespace(config.get('namespaceChoices'))
           }
         }
