@@ -168,7 +168,7 @@ def call(Map config) {
       always {
         script {
           uid = env.service+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
-          klockNamespace( mehod: 'unlock', uid: uid )
+          klockNamespace( method: 'unlock', uid: uid )
         }
         echo "done"
         junit "gen3-qa/output/*.xml"
