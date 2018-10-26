@@ -5,7 +5,8 @@
 // See 'Loading libraries dynamically' here: https://jenkins.io/doc/book/pipeline/shared-libraries/
 library identifier: "cdis-jenkins-lib@${env.BRANCH_NAME}"
 
-testPipeline { 
-  JOB_NAME = 'fence'
-  GIT_BRANCH = 'master'
+runPipeline {
+  pipeline = 'microservice'
+  serviceTesting = [name: 'fence', branch: 'master']
+  skipQuay = true
 }
