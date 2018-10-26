@@ -115,8 +115,10 @@ def call(Map config) {
         }
       }
       stage('SelectNamespace') {
-        script {
-          selectAndLockNamespace(config.get('namespaceChoices'))
+        steps {
+          script {
+            selectAndLockNamespace(config.get('namespaceChoices'))
+          }
         }
       }
       stage('ModifyManifest') {
@@ -132,13 +134,17 @@ def call(Map config) {
         }
       }
       stage('K8sDeploy') {
-        script {
-          kubeDeploy()
+        steps {
+          script {
+            kubeDeploy()
+          }
         }
       }
       stage('RunTests') {
-        script {
-          runIntegrationTests()
+        steps {
+          script {
+            runIntegrationTests()
+          }
         }
       }
     }
