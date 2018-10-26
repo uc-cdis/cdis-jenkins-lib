@@ -118,7 +118,7 @@ def call(Map config) {
         steps {
           script {
             println config.toMapString(1000)
-            selectAndLockNamespace(config.get('namespaceChoices'))
+            selectAndLockNamespace(config)
           }
         }
       }

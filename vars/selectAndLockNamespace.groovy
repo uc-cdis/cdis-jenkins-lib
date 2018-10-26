@@ -1,7 +1,8 @@
 #!groovy
 
-def call(String[] namespaces) {
+def call(config) {
   script {
+    def namespaces = config.namespaceChoices
     int randNum = new Random().nextInt(namespaces.length);
     uid = env.service+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
     int lockStatus = 1;
