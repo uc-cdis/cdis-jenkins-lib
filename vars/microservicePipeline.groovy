@@ -36,7 +36,7 @@ def call(Map config) {
       }
       stage('WaitForQuayBuild') {
         when {
-          config.skipDeploy 'false'
+          branch 'dontrun'
         }
         steps {
           script {
