@@ -115,27 +115,8 @@ def call(Map config) {
         }
       }
       stage('SelectNamespace') {
-        steps {
-          script {
-            String[] namespaces = ['jenkins-brain', 'jenkins-niaid']
-            int randNum = new Random().nextInt(namespaces.length);
-            uid = env.service+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
-            int lockStatus = 1;
-
-            // try to find an unlocked namespace
-            for (int i=0; i < namespaces.length && lockStatus != 0; ++i) {
-              randNum = (randNum + i) % namespaces.length;
-              env.KUBECTL_NAMESPACE = namespaces[randNum]
-              println "selected namespace $env.KUBECTL_NAMESPACE on executor $env.EXECUTOR_NUMBER"
-              println "attempting to lock namespace $env.KUBECTL_NAMESPACE with a wait time of 1 minutes"
-              withEnv(['GEN3_NOPROXY=true', "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {
-                lockStatus = sh( script: "bash cloud-automation/gen3/bin/klock.sh lock jenkins "+uid+" 3600 -w 60", returnStatus: true)
-              }
-            }
-            if (lockStatus != 0) {
-              error("aborting - no available workspace")
-            }
-          }
+        script {
+          selectAndLockNamespace(config.get('namespaceChoices'))
         }
       }
       stage('ModifyManifest') {
@@ -151,27 +132,13 @@ def call(Map config) {
         }
       }
       stage('K8sDeploy') {
-        steps {
-          withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {
-            echo "GEN3_HOME is $env.GEN3_HOME"
-            echo "GIT_BRANCH is $env.GIT_BRANCH"
-            echo "GIT_COMMIT is $env.GIT_COMMIT"
-            echo "KUBECTL_NAMESPACE is $env.KUBECTL_NAMESPACE"
-            echo "WORKSPACE is $env.WORKSPACE"
-            sh "bash cloud-automation/gen3/bin/kube-roll-all.sh"
-            sh "bash cloud-automation/gen3/bin/kube-wait4-pods.sh || true"
-            sh "bash ./gen3-qa/check-pod-health.sh"
-          }
+        script {
+          kubeDeploy()
         }
       }
       stage('RunTests') {
-        steps {
-          dir('gen3-qa') {
-            withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=$env.WORKSPACE/testData/"]) {
-              sh "bash ./jenkins-simulate-data.sh $env.KUBECTL_NAMESPACE"
-              sh "bash ./run-tests.sh $env.KUBECTL_NAMESPACE"
-            }
-          }
+        script {
+          runIntegrationTests()
         }
       }
     }
@@ -191,9 +158,7 @@ def call(Map config) {
       always {
         script {
           uid = env.service+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
-          withEnv(['GEN3_NOPROXY=true', "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {         
-            sh("bash cloud-automation/gen3/bin/klock.sh unlock jenkins "+uid)
-          }
+          klockNamespace( mehod: 'unlock', uid: uid )
         }
         echo "done"
         junit "gen3-qa/output/*.xml"
