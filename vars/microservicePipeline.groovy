@@ -35,6 +35,9 @@ def call(Map config) {
         }
       }
       stage('WaitForQuayBuild') {
+        when {
+          config.skipDeploy 'false'
+        }
         steps {
           script {
             service = "$env.JOB_NAME".split('/')[1]
