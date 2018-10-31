@@ -4,7 +4,7 @@ package uchicago.cdis;
 class StdPipeline implements Serializable {
   def myVariable
 
-  stdPipeline(Map pipelineDefinition) {
+  StdPipeline(Map pipelineDefinition) {
     myVariable = pipelineDefinition.myVariable
   }
 
