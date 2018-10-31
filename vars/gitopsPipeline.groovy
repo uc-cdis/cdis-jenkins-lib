@@ -19,8 +19,7 @@ def call(Map config) {
       stage('DetectChanges') {
         steps {
           script {
-            // parse config for a list of commons names to search for
-            def commonsList = config.commonsNamespaces.replaceAll("\\s","").split(',')
+            List<String> commonsList = config.namespaces
 
             // search the change logs for a manifest edit
             def changeLogSets = currentBuild.changeSets
@@ -30,11 +29,11 @@ def call(Map config) {
               // for each entry, check it's affected paths to see if the manifest of a commons was edited
               for (int j = 0; !foundMatch && j < entries.length; j++) {
                 def affectedPaths = entries[j].getAffectedPaths()
-                for (int k = 0; !foundMatch && k < commonsList.length; k++) {
-                  def commonsManifest = commonsList[k]+'/manifest.json'
+                for (int k = 0; !foundMatch && k < commonsList.size(); k++) {
+                  def commonsManifest = commonsList.get(k)+'/manifest.json'
                   if (affectedPaths.contains(commonsManifest) {
                     env.AFFECTED_PATH = commonsManifest
-                    env.KUBECTL_NAMESPACE = commonsList[k]
+                    env.KUBECTL_NAMESPACE = commonsList.get(k)
                     env.COPY_MANIFEST = 'true';
                     foundMatch = true;
                   }
