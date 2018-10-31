@@ -7,13 +7,20 @@ package uchicago.cdis;
  */
 class KubeHelper implements Serializable {
   def steps
+  def cloudAutomationPath
   
   /**
    * Constructor
    *
    * @param steps injects hook to Jenkins Pipeline runtime
    */
-  KubeHelper(steps) { this.steps = steps; }
+  KubeHelper(steps, cloudAutomationPath) {
+    this.steps = steps;
+    this.cloudAutomationPath = cloudAutomationPath
+    // assert the given cloud automation directory exists
+    def folder = new File(cloudAutomationPath)
+    assert folder.exists() : "Provided path for cloud-automation does not exist: "+cloudAutomationPath
+  }
 
   /**
    * Deploy the current env.GIT_BRANCH to the k8s
@@ -64,5 +71,17 @@ class KubeHelper implements Serializable {
     // update the service in the branch namespace
     steps.sh( script: "cat service.json | jq '.metadata={namespace:\"$namespace\",name:.metadata.name} | del(.status) | del(.spec.ports[].nodePort) | del(.spec.clusterIP)' | kubectl apply --namespace $namespace -f -");
     // All done!
+  }
+
+  /**
+   * Attempts to lock or unlock given namespace
+   *
+   */
+  def klock(String action, String uid) {
+    // check we have access to cloud-automation
+    String klockPath = "/gen3/bin/klock.sh"
+    withEnv(['GEN3_NOPROXY=true', "GEN3_HOME=$cloudAutomationPath"]) {
+      return steps.sh( script: "bash "+cloudAutomationPath+klockPath+" "+action+" jenkins "+uid+" 3600 -w 60", returnStatus: true)
+    }
   }
 }

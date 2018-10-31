@@ -1,6 +1,7 @@
 #!groovy
 
 def call(Map config) {
+  KubeHelper helper
   pipeline {
     agent any
   
@@ -21,6 +22,8 @@ def call(Map config) {
       stage('PrepForTesting') {
         steps {
           script {
+            // setup the kube helper
+            helper = KubeHelper(this, "$env.WORKSPACE/cloud-automation")
             // caller overrides of the service image to deploy
             if (config) {
               println "set test mock environment variables"
