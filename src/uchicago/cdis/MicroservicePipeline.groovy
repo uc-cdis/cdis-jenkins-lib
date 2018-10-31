@@ -1,11 +1,14 @@
 #!/usr/bin/groovy
 package uchicago.cdis;
 class MicroservicePipeline implements Serializable {
-  @Delegate Kube kube
+  @Delegate
+  Kube kube
+
   MicroservicePipeline(pipelineDefinition) {
     // Create a globally accessible variable that makes
     // the YAML pipeline definition available to all scripts
     // pd = pipelineDefinition
+    kube = new Kube()
   }
 
   def setup() {
