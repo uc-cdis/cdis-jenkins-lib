@@ -4,6 +4,10 @@ package uchicago.cdis;
 class StdPipeline implements Serializable {
   def myVariable
 
+  stdPipeline(Map pipelineDefinition) {
+    myVariable = pipelineDefinition.myVariable
+  }
+
   def execute(Map pipelineDefinition) {
 
     node {
