@@ -22,7 +22,8 @@ class MicroservicePipeline implements Serializable {
 
       case 'nodejs':
         // Instantiate and execute a NodeJS pipeline
-        new nodeJSPipeline(pipelineDefinition).executePipeline()
+        // new nodeJSPipeline(pipelineDefinition).executePipeline()
+        kube.deploy()
     }
   }
 }
