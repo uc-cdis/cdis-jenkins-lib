@@ -6,8 +6,11 @@ class MicroservicePipeline implements Serializable {
     // Create a globally accessible variable that makes
     // the YAML pipeline definition available to all scripts
     // pd = pipelineDefinition
-    @Delegate
-    Kube kube = new Kube()
+    @Delegate Kube kube
+  }
+
+  def setup() {
+    kube = new Kube()
   }
 
   def execute() {
