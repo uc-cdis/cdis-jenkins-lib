@@ -6,10 +6,10 @@ def execute() {
   node {
 
     stage('Initialize') {
-      checkout scm
+      // checkout scm
       echo 'Loading pipeline definition'
-      Yaml parser = new Yaml()
-      Map pipelineDefinition = parser.load(new File(pwd() + '/pipeline.yml').text)
+      // Yaml parser = new Yaml()
+      // Map pipelineDefinition = parser.load(new File(pwd() + '/pipeline.yml').text)
     }
 
     switch(pipelineDefinition.myVariable) {
