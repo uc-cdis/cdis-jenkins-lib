@@ -3,7 +3,7 @@ package uchicago.cdis;
 class MicroservicePipeline implements Serializable {
   Kube kube
 
-  MicroservicePipeline(pipelineDefinition) {
+  MicroservicePipeline(Map pipelineDefinition) {
     // Create a globally accessible variable that makes
     // the YAML pipeline definition available to all scripts
     // pd = pipelineDefinition
