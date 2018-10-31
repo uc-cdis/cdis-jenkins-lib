@@ -19,6 +19,7 @@ def execute() {
       case 'nodejs':
         // Instantiate and execute a NodeJS pipeline
         // new nodeJSPipeline(pipelineDefinition).executePipeline()
+        echo "Hello world"
     }
 
   }
