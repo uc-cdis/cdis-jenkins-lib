@@ -1,8 +1,9 @@
 #!/bin/groovy
 package uchicago.cdis;
 
-Map pipelineDefinition
-String myVariable
+class StdPipeline implements Serializable {
+  def myVariable
+}
 
 def execute(Map pipelineDefinition) {
 
