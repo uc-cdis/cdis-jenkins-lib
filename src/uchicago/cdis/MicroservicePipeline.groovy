@@ -1,7 +1,6 @@
 #!/usr/bin/groovy
 package uchicago.cdis;
 class MicroservicePipeline implements Serializable {
-  @Delegate
   Kube kube
 
   MicroservicePipeline(pipelineDefinition) {
@@ -11,15 +10,11 @@ class MicroservicePipeline implements Serializable {
     kube = new Kube()
   }
 
-  def setup() {
-    kube = new Kube()
-  }
-
   def execute() {
     node {
       stage('Run Tests') {
         echo "RUNNING THE TEST"
-        deploy()
+        kube.deploy()
       }
 
       if (signalSlack) {
