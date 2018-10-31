@@ -1,6 +1,9 @@
 #!/bin/groovy
 package uchicago.cdis;
 
+Map pipelineDefinition
+String myVariable
+
 def execute(Map pipelineDefinition) {
 
   node {
