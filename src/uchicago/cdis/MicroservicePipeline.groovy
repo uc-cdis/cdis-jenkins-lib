@@ -2,26 +2,27 @@
 package uchicago.cdis;
 class MicroservicePipeline implements Serializable {
   Kube kube
+  Map pipelineDefinition
+  def steps
 
-  MicroservicePipeline(Map pipelineDefinition) {
+  MicroservicePipeline(steps, pipelineDefinition) {
     // Create a globally accessible variable that makes
     // the YAML pipeline definition available to all scripts
-    // pd = pipelineDefinition
-    kube = new Kube()
+    this.pipelineDefinition = pipelineDefinition
+    this.kube = new Kube()
+    this.steps = steps
   }
 
   def execute() {
-    node {
-      stage('Run Tests') {
-        echo "RUNNING THE TEST"
+    switch(pipelineDefinition.myVariable) {
+      case 'hello world':
+        // Instantiate and execute a Python pipeline
+        // new pythonPipeline(pipelineDefinition).executePipeline()
         kube.deploy()
-      }
 
-      if (signalSlack) {
-        stage('Deploy') {
-          sh "path/to/a/deploy/bash/script.sh ${pd.deploymentEnvironment}"
-        }
-      }
+      case 'nodejs':
+        // Instantiate and execute a NodeJS pipeline
+        new nodeJSPipeline(pipelineDefinition).executePipeline()
     }
   }
 }
