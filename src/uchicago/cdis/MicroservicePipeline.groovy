@@ -1,7 +1,6 @@
 #!/usr/bin/groovy
 package uchicago.cdis;
 class MicroservicePipeline implements Serializable {
-  Kube kube
 
   MicroservicePipeline(pipelineDefinition) {
     // Create a globally accessible variable that makes
@@ -15,7 +14,7 @@ class MicroservicePipeline implements Serializable {
     node {
       stage('Run Tests') {
         echo "RUNNING THE TEST"
-        kube.deploy()
+        deploy()
       }
 
       if (signalSlack) {
