@@ -12,7 +12,7 @@ def execute(Map pipelineDefinition) {
       // Map pipelineDefinition = parser.load(new File(pwd() + '/pipeline.yml').text)
     }
 
-    switch(pipelineDefinition.myVariable) {
+    switch('hello world') {
       case 'hello world':
         // Instantiate and execute a Python pipeline
         new MicroservicePipeline(pipelineDefinition).executePipeline()
