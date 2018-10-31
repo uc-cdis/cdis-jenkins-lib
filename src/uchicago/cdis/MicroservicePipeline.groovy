@@ -13,7 +13,7 @@ def execute() {
   node {
     stage('Run Tests') {
       echo "RUNNING THE TEST"
-      kube.deploy()
+      this.kube.deploy()
     }
 
     if (signalSlack) {
