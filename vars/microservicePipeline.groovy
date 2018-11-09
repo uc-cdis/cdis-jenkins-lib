@@ -1,5 +1,4 @@
 #!groovy
-import uchicago.cdis.*
 
 def call(Map config) {
   KubeHelper helper
