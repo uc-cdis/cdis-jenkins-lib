@@ -12,9 +12,9 @@ def call(Map config) {
       stage('FetchCode') {
         steps {
           script {
-            fetchCode()
             env.service = "$env.JOB_NAME".split('/')[1]
             env.quaySuffix = "$env.GIT_BRANCH".replaceAll("/", "_")
+            fetchCode(config)
           }
         }
       }
