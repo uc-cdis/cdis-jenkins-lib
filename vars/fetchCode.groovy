@@ -1,11 +1,19 @@
 #!groovy
 
-def call() {
+def call(Map config) {
   dir('gen3-qa') {
-    git(
-      url: 'https://github.com/uc-cdis/gen3-qa.git',
-      branch: 'master'
-    )
+    script {
+      if (config && config.JOB_NAME == "gen3-qa") {
+        // testing the gen3-qa repo - check out the test branch here
+        println "INFO: checkout gen3-qa/ from JOB repo branch ..."
+        checkout scm;
+      } else {
+        git(
+          url: 'https://github.com/uc-cdis/gen3-qa.git',
+          branch: 'master'
+        );
+      }
+    }
   }
   dir('data-simulator') {
     git(
