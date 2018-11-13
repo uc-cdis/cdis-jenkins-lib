@@ -159,7 +159,15 @@ def call(Map config) {
             echo "KUBECTL_NAMESPACE is $env.KUBECTL_NAMESPACE"
             echo "WORKSPACE is $env.WORKSPACE"
             sh "bash cloud-automation/gen3/bin/kube-roll-all.sh"
+            // wait for portal to startup ...
             sh "bash cloud-automation/gen3/bin/kube-wait4-pods.sh || true"
+          }
+        }
+      }
+      stage('VerifyClusterHealth') {
+        steps {
+          withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {
+            sh "bash cloud-automation/gen3/bin/kube-wait4-pods.sh"
             sh "bash ./gen3-qa/check-pod-health.sh"
           }
         }
