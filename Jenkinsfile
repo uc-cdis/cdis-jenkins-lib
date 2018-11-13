@@ -5,7 +5,8 @@
 // See 'Loading libraries dynamically' here: https://jenkins.io/doc/book/pipeline/shared-libraries/
 library identifier: "cdis-jenkins-lib@${env.BRANCH_NAME}"
 
-testPipeline { 
-  JOB_NAME = 'fence'
+testPipeline {
+  // overrides for testing the ModifyManifest stage ...
+  JOB_NAME = 'indexd'
   GIT_BRANCH = 'master'
 }
