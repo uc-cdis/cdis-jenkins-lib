@@ -117,7 +117,7 @@ def call(Map config) {
       stage('SelectNamespace') {
         steps {
           script {
-            String[] namespaces = ['jenkins-brain', 'jenkins-niaid']
+            String[] namespaces = ['jenkins-brain', 'jenkins-niaid', 'jenkins-dcp']
             int randNum = new Random().nextInt(namespaces.length);
             uid = env.service+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
             int lockStatus = 1;
@@ -159,8 +159,26 @@ def call(Map config) {
             echo "KUBECTL_NAMESPACE is $env.KUBECTL_NAMESPACE"
             echo "WORKSPACE is $env.WORKSPACE"
             sh "bash cloud-automation/gen3/bin/kube-roll-all.sh"
+            // wait for portal to startup ...
             sh "bash cloud-automation/gen3/bin/kube-wait4-pods.sh || true"
+          }
+        }
+      }
+      stage('VerifyClusterHealth') {
+        steps {
+          withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {
+            sh "bash cloud-automation/gen3/bin/kube-wait4-pods.sh"
             sh "bash ./gen3-qa/check-pod-health.sh"
+          }
+        }
+      }
+      stage('GenerateTestData') {
+        // Run the data simulator
+        steps {
+          dir('gen3-qa') {
+            withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=$env.WORKSPACE/testData/"]) {
+              sh "bash ./jenkins-simulate-data.sh $env.KUBECTL_NAMESPACE"
+            }
           }
         }
       }
@@ -168,8 +186,7 @@ def call(Map config) {
         steps {
           dir('gen3-qa') {
             withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=$env.WORKSPACE/testData/"]) {
-              sh "bash ./jenkins-simulate-data.sh $env.KUBECTL_NAMESPACE"
-              sh "bash ./run-tests.sh $env.KUBECTL_NAMESPACE"
+              sh "bash ./run-tests.sh $env.KUBECTL_NAMESPACE --service=$env.service"
             }
           }
         }
