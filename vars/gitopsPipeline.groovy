@@ -12,6 +12,13 @@ def call(Map config) {
         steps {
           script {
             fetchCode()
+            // checkout master branch of cdis-manifest - used for comparing files to determine if a manifest was edited
+            dir('cdis-manifest-master') {
+              git(
+                url: 'https://github.com/uc-cdis/cdis-manifest.git',
+                branch: 'master'
+              )
+            }
             env.service = "$env.JOB_NAME".split('/')[1]
           }
         }
@@ -19,40 +26,25 @@ def call(Map config) {
       stage('DetectChanges') {
         steps {
           script {
-            List<String> commonsList = config.namespaces
+            env.ABORT_SUCCESS = 'true'
+            env.KUBECTL_NAMESPACE = 'qa-bloodpac'
 
-            // search the change logs for a manifest edit
-            def changeLogSets = currentBuild.changeSets
-            def foundMatch=false;
-            for (int i = 0; !foundMatch && i < changeLogSets.size(); i++) {
-              def entries = changeLogSets[i].items
-              // for each entry, check it's affected paths to see if the manifest of a commons was edited
-              for (int j = 0; !foundMatch && j < entries.length; j++) {
-                def affectedPaths = entries[j].getAffectedPaths()
-                for (int k = 0; !foundMatch && k < commonsList.size(); k++) {
-                  def commonsManifest = commonsList.get(k)+'/manifest.json'
-                  if (affectedPaths.contains(commonsManifest) {
-                    env.AFFECTED_PATH = commonsManifest
-                    env.KUBECTL_NAMESPACE = commonsList.get(k)
-                    env.COPY_MANIFEST = 'true';
-                    foundMatch = true;
-                  }
+            // get all paths to commons manifests
+            def manifestFiles = findFiles(glob: 'cdis-manifest/*/manifest.json')
+            for (int i = 0; i < manifestFiles.length; i++) {
+              // check if master branch also has the manifest
+              def master_path = manifestFiles[i].path.replaceAll('cdis-manifest', 'cdis-manifest-master')
+              if (fileExists(master_path)) {
+                // check if the manifest files are the same
+                def cmpRes = sh( script: "cmp ${manifestFiles[i].path} ${master_path} || true", returnStdout: true )
+                // if the comparison result is not empty then the files are different, use this manifest for testing!
+                if (cmpRes != '') {
+                  env.ABORT_SUCCESS = 'false'
+                  env.AFFECTED_PATH = manifestFiles[i].path.replaceAll('cdis-manifest/', '')
+                  env.KUBECTL_NAMESPACE = 'default'
+                  break
                 }
-                if (!foundMatch) { println "ignoring git changes to: " + affectedPaths.join("\n") }
               }
-            }
-
-            if (!foundMatch) {
-              // nothing to test!
-              println "testable stuff was not affected, aborting"
-              env.ABORT_SUCCESS = 'true';
-              env.COPY_MANIFEST = 'false';
-              currentBuild.result = 'SUCCESS'
-              env.JENKINS_MANIFEST_CHANGED = 'false'
-            } else {
-              // there's something to test!
-              env.ABORT_SUCCESS = 'false';
-              env.JENKINS_MANIFEST_CHANGED = 'true'
             }
           }
         }
@@ -77,6 +69,7 @@ def call(Map config) {
           }
           dir('cdis-manifest') {
             withEnv(["fromPath=$env.AFFECTED_PATH", "toPath=$dirname/manifest.json"]) {
+              sh "mkdir -p $dirname"
               sh "cp $env.fromPath $env.toPath"
             }
           }
@@ -88,6 +81,9 @@ def call(Map config) {
         }
       }
       stage('RunTests') {
+        when {
+          environment name: 'ABORT_SUCCESS', value: 'false'
+        }
         script {
           runIntegrationTests()
         }
