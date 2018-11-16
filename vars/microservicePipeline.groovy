@@ -18,7 +18,7 @@ def call(Map config) {
         }
         steps {
           script {
-            waitForQuayBuild(getService())
+            waitForQuayBuild(getService(config))
           }
         }
       }
