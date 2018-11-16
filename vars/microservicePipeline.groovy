@@ -4,32 +4,11 @@ def call(Map config) {
   pipeline {
     agent any
   
-    environment {
-      QUAY_API = 'https://quay.io/api/v1/repository/cdis/'
-    }
-  
     stages {
       stage('FetchCode') {
         steps {
           script {
             fetchCode()
-            env.service = "$env.JOB_NAME".split('/')[1]
-            env.quaySuffix = "$env.GIT_BRANCH".replaceAll("/", "_")
-          }
-        }
-      }
-      stage('PrepForTesting') {
-        steps {
-          script {
-            // caller overrides of the service image to deploy
-            if (config) {
-              if (config.JOB_NAME) {
-                env.service = config.JOB_NAME
-              }
-              if (config.GIT_BRANCH) {
-                env.quaySuffix = config.GIT_BRANCH
-              }
-            }
           }
         }
       }
@@ -39,14 +18,14 @@ def call(Map config) {
         }
         steps {
           script {
-            waitForQuayBuild(config)
+            waitForQuayBuild(getService())
           }
         }
       }
       stage('SelectNamespace') {
         steps {
           script {
-            selectAndLockNamespace(config)
+            selectAndLockNamespace( namespaces: config.namespaces, uid: getUid() )
           }
         }
       }
@@ -56,7 +35,8 @@ def call(Map config) {
             dirname = sh(script: "kubectl -n $env.KUBECTL_NAMESPACE get configmap global -o jsonpath='{.data.hostname}'", returnStdout: true)
           }
           dir("cdis-manifest/$dirname") {
-            withEnv(["masterBranch=$env.service:[a-zA-Z0-9._-]*", "targetBranch=$env.service:$env.quaySuffix"]) {
+            quaySuffix = getQuaySuffix(config)
+            withEnv(["masterBranch=$env.service:[a-zA-Z0-9._-]*", "targetBranch=$env.service:$quaySuffix"]) {
               sh 'sed -i -e "s,'+"$env.masterBranch,$env.targetBranch"+',g" manifest.json'
             }
           }
@@ -92,12 +72,31 @@ def call(Map config) {
       }
       always {
         script {
-          uid = env.service+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
-          klockNamespace( method: 'unlock', uid: uid )
+          klockNamespace( method: 'unlock', uid: getUid() )
         }
         echo "done"
         junit "gen3-qa/output/*.xml"
       }
     }
   }
+}
+
+def getService(config) {
+  if (config.JOB_NAME) {
+    return config.JOB_NAME
+  }
+  return "$env.JOB_NAME".split('/')[1]
+}
+
+def getQuaySuffix(config) {
+  if (config) {
+    if (config.GIT_BRANCH) {
+      return config.GIT_BRANCH
+    }
+  }
+  return "$env.GIT_BRANCH".replaceAll("/", "_")
+}
+
+def getUid(config) {
+  return getService(config)+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
 }

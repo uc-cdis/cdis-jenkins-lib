@@ -1,16 +1,17 @@
 #!groovy
 
-def call(config) {
+def call(service) {
     script {
-        service = "$env.JOB_NAME".split('/')[1]
         if (service == 'cdis-jenkins-lib') {
           service = 'jenkins-lib'
         }
+
         def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 60)
         def timeout = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) + 3600)
-        timeUrl = "$env.QUAY_API"+service+"/build/?since="+timestamp
+        QUAY_API = 'https://quay.io/api/v1/repository/cdis/'
+        timeUrl = "$QUAY_API"+service+"/build/?since="+timestamp
         timeQuery = "curl -s "+timeUrl+/ | jq '.builds[] | "\(.tags[]),\(.display_name),\(.phase)"'/
-        limitUrl = "$env.QUAY_API"+service+"/build/?limit=25"
+        limitUrl = "$QUAY_API"+service+"/build/?limit=25"
         limitQuery = "curl -s "+limitUrl+/ | jq '.builds[] | "\(.tags[]),\(.display_name),\(.phase)"'/
         
         def quayImageReady = false

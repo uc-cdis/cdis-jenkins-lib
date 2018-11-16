@@ -3,9 +3,6 @@
 def call(Map config) {
   pipeline {
     agent any
-
-    environment {
-    }
   
     stages {
       stage('FetchCode') {
@@ -20,6 +17,7 @@ def call(Map config) {
               )
             }
             env.service = "$env.JOB_NAME".split('/')[1]
+            env.uid = env.service+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
           }
         }
       }
@@ -104,8 +102,7 @@ def call(Map config) {
       }
       always {
         script {
-          uid = env.service+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
-          klockNamespace( method: 'lock', uid: uid )
+          klockNamespace( method: 'lock', uid: env.uid )
         }
         echo "done"
         junit "gen3-qa/output/*.xml"
