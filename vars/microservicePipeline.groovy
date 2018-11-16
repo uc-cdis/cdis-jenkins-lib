@@ -25,7 +25,7 @@ def call(Map config) {
       stage('SelectNamespace') {
         steps {
           script {
-            selectAndLockNamespace( namespaces: config.namespaces, uid: getUid() )
+            selectAndLockNamespace( namespaces: config.namespaces, uid: getUid(config) )
           }
         }
       }
@@ -72,7 +72,7 @@ def call(Map config) {
       }
       always {
         script {
-          klockNamespace( method: 'unlock', uid: getUid() )
+          klockNamespace( method: 'unlock', uid: getUid(config) )
         }
         echo "done"
         junit "gen3-qa/output/*.xml"
@@ -82,17 +82,15 @@ def call(Map config) {
 }
 
 def getService(config) {
-  if (config.JOB_NAME) {
+  if (config && config.JOB_NAME) {
     return config.JOB_NAME
   }
   return "$env.JOB_NAME".split('/')[1]
 }
 
 def getQuaySuffix(config) {
-  if (config) {
-    if (config.GIT_BRANCH) {
-      return config.GIT_BRANCH
-    }
+  if (config && config.GIT_BRANCH) {
+    return config.GIT_BRANCH
   }
   return "$env.GIT_BRANCH".replaceAll("/", "_")
 }
