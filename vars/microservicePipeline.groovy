@@ -33,11 +33,11 @@ def call(Map config) {
         steps {
           script {
             dirname = sh(script: "kubectl -n $env.KUBECTL_NAMESPACE get configmap global -o jsonpath='{.data.hostname}'", returnStdout: true)
-          }
-          dir("cdis-manifest/$dirname") {
-            quaySuffix = getQuaySuffix(config)
-            withEnv(["masterBranch=$env.service:[a-zA-Z0-9._-]*", "targetBranch=$env.service:$quaySuffix"]) {
-              sh 'sed -i -e "s,'+"$env.masterBranch,$env.targetBranch"+',g" manifest.json'
+            dir("cdis-manifest/$dirname") {
+              quaySuffix = getQuaySuffix(config)
+              withEnv(["masterBranch=$env.service:[a-zA-Z0-9._-]*", "targetBranch=$env.service:$quaySuffix"]) {
+                sh 'sed -i -e "s,'+"$env.masterBranch,$env.targetBranch"+',g" manifest.json'
+              }
             }
           }
         }
