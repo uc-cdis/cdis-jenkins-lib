@@ -1,7 +1,6 @@
 #!groovy
 
 def call(Map config) {
-  KubeHelper helper
   pipeline {
     agent any
   
