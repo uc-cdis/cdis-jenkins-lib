@@ -1,5 +1,12 @@
-this.kubectlNamespace = ""
-this.cloudAutomationPath = ""
+def initDefault() {
+  if (env.KUBECTL_NAMESPACE) {
+    kubectlNamespace = env.KUBECTL_NAMESPACE
+  } else {
+    kubectlNamespace = ""
+  }
+
+  setCloudAutomationPath("${env.WORKSPACE}/cloud-automation")
+}
 
 /**
 * Sets path to the cloud automation directory, strips any trailing /'s

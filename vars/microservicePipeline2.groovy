@@ -7,6 +7,7 @@
 */
 def call(Map config) {
   node {
+    kubeHelper.initDefault()
     stage('FetchCode') {
       gitHelper.fetchAllRepos()
     }
