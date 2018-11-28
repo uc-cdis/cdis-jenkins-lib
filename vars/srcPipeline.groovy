@@ -3,7 +3,7 @@ def call() {
     stage('Fetch') {
       fetchCode()
     }
-    kubeHelper.kubectlNamespace = 'tsummer'
+    kubeHelper.kubectlNamespace = 'jenkins-brain'
     kubeHelper.setCloudAutomationPath("${env.WORKSPACE}/cloud-automation")
     stage('Deploy') {
       kubeHelper.deploy()
