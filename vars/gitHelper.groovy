@@ -1,4 +1,7 @@
-def fetchAll() {
+/**
+* Pulls common repositories used for testing
+*/
+def fetchAllRepos() {
   dir('gen3-qa') {
     git(
       url: 'https://github.com/uc-cdis/gen3-qa.git',
