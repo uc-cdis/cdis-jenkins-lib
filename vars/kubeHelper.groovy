@@ -1,5 +1,3 @@
-kubectlNamespace = ''
-cloudAutomationPath = ''
 
 def setCloudAutomationPath(String path) {
   cloudAutoDir = new File(path)
@@ -15,8 +13,8 @@ def setKubeNamespace(String name) {
 }
 
 def assertKubeReady() {
-  assert kubectlNamespace?.trim() : "Kubectl Namespace not set"
-  assert cloudAutomationPath?.trim() : "Path to cloud-automation directory not set"
+  assert this.metaClass.hasProperty(kubectlNamespace) : "Kubectl Namespace not set"
+  assert this.metaClass.hasProperty(cloudAutomationPath) : "Path to cloud-automation directory not set"
 }
 
 def kube(Closure body) {
