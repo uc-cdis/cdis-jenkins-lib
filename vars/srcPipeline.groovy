@@ -1,10 +1,8 @@
 
 def call() {
   node {
-    steps {
-      step('Deploy') {
-        deploy()
-      }
+    stage('Deploy') {
+      deploy()
     }
   }
 }
