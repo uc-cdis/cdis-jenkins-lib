@@ -47,10 +47,10 @@ def call(Map config) {
           }
         }
       }
-      // successful exit early if we don't find any manifest changes
-      if (env.JENKINS_MANIFEST_CHANGED == 'false') {
-        return
-      }
+      // // successful exit early if we don't find any manifest changes
+      // if (env.JENKINS_MANIFEST_CHANGED == 'false') {
+      //   return
+      // }
       stage('SubstituteManifest') {
         steps {
           // try to lock down KUBECTL_NAMESPACE
