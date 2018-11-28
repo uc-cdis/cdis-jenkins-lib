@@ -1,3 +1,5 @@
+kubectlNamespace = ''
+cloudAutomationPath = ''
 
 def setCloudAutomationPath(String path) {
   cloudAutoDir = new File(path)
