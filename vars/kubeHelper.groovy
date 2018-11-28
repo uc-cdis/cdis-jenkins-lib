@@ -13,8 +13,8 @@ def setKubeNamespace(String name) {
 }
 
 def assertKubeReady() {
-  assert this.metaClass.hasProperty(kubectlNamespace) : "Kubectl Namespace not set"
-  assert this.metaClass.hasProperty(cloudAutomationPath) : "Path to cloud-automation directory not set"
+  assert this.hasProperty(kubectlNamespace) : "Kubectl Namespace not set"
+  assert this.hasProperty(cloudAutomationPath) : "Path to cloud-automation directory not set"
 }
 
 def kube(Closure body) {
