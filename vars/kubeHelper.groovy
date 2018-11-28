@@ -19,7 +19,7 @@ def assertKubeReady() {
 
 def kube(Closure body) {
   assertKubeReady()
-  withEnv(['GEN3_NOPROXY=true', "vpc_name=${kubectlNamespace}", "GEN3_HOME=${cloudAutomationPath}"]) {
+  withEnv(['GEN3_NOPROXY=true', "vpc_name=${kubectlNamespace}", "GEN3_HOME=${cloudAutomationPath}", "KUBECTL_NAMESPACE=${kubectlNamespace}"]) {
     body()
   }
 }
@@ -33,11 +33,34 @@ def klock(Map params) {
 def deploy() {
   kube {
     echo "GEN3_HOME is $env.GEN3_HOME"
-    echo "GIT_BRANCH is $env.GIT_BRANCH"
-    echo "GIT_COMMIT is $env.GIT_COMMIT"
-    echo "KUBECTL_NAMESPACE is $env.KUBECTL_NAMESPACE"
+    echo "GIT_BRANCH is ${env.GIT_BRANCH}"
+    echo "GIT_COMMIT is ${env.GIT_COMMIT}"
+    echo "KUBECTL_NAMESPACE is ${kubectlNamespace}"
     echo "WORKSPACE is $env.WORKSPACE"
     sh "bash ${cloudAutomationPath}/gen3/bin/kube-roll-all.sh"
     sh "bash ${cloudAutomationPath}/gen3/bin/kube-wait4-pods.sh || true"
+  }
+}
+
+// if manifest directory not set, tries to use default
+def editServiceBranch(String serviceName, String branchName=env.GIT_BRANCH, String manifestPath="cdis-manifest") {
+  if (null == serviceName) {
+    throw new IllegalStateException("must specify service");    
+  }
+  if (null == branchName) {
+    throw new IllegalArgumentException("unable to determine branch name");
+  }
+  if (null == serviceName) {
+    throw new IllegalArgumentException("must specify serviceName");
+  }
+  kube {
+    namespaceDir = sh(script: "kubectl -n ${kubectlNamespace} get configmap global -o jsonpath='{.data.hostname}'", returnStdout: true)
+    dir("${manifestPath}/${namespaceDir}") {
+      quaySuffix = quayHelper.formatBranchToQuayName(branchName)
+      currentBranch = "${serviceName}:[a-zA-Z0-9._-]*"
+      targetBranch = "${serviceName}:${quaySuffix}"
+      // swap current branch for the target branch
+      sh 'sed -i -e "s,'+"${currentBranch},${targetBranch}"+',g" manifest.json'
+    }
   }
 }
