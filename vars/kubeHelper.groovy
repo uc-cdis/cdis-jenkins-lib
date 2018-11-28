@@ -24,14 +24,14 @@ def assertKubeReady() {
     if (env.KUBECTL_NAMESPACE) {
       kubectlNamespace = env.KUBECTL_NAMESPACE
     } else {
-      throw new IllegalStateException('unable to determine kubectlNamespace')
+      error('unable to determine kubectlNamespace')
     }
   }
   if (!cloudAutomationPath) {
     if (env.KUBECTL_NAMESPACE) {
       kubectlNamespace = env.KUBECTL_NAMESPACE
     } else {
-      throw new IllegalStateException('unable to determine kubectlNamespace')
+      error('unable to determine kubectlNamespace')
     }
   }
 }
@@ -86,15 +86,15 @@ def deploy() {
 * @param branchName - defaults to GIT_BRANCH env var
 * @param manifest - path to root directory of manifests; defaults to cdis-manifest
 */
-def editManifest(String serviceName, String branchName=env.GIT_BRANCH, String manifestPath="cdis-manifest") {
+def editManifest(String serviceName, String branchName="${env.GIT_BRANCH}", String manifestPath="cdis-manifest") {
   if (null == serviceName) {
-    throw new IllegalStateException("must specify service");    
+    error("must specify service");    
   }
   if (null == branchName) {
-    throw new IllegalArgumentException("unable to determine branch name");
+    error("unable to determine branch name");
   }
   if (null == serviceName) {
-    throw new IllegalArgumentException("must specify serviceName");
+    error("must specify serviceName");
   }
   kube {
     namespaceDir = sh(script: "kubectl -n ${kubectlNamespace} get configmap global -o jsonpath='{.data.hostname}'", returnStdout: true)
