@@ -8,13 +8,13 @@ def setCloudAutomationPath(String path) {
   cloudAutomationPath = path
 }
 
-def setKubeNamespace(String name) {
+def setKubectlNamespace(String name) {
   kubectlNamespace = name
 }
 
 def assertKubeReady() {
-  assert this.hasProperty('kubectlNamespace') : "Kubectl Namespace not set"
-  assert this.hasProperty('cloudAutomationPath') : "Path to cloud-automation directory not set"
+  assert this.hasProperty('kubectlNamespace') : "kubectlNamespace property for kubeHelper is not set."
+  assert this.hasProperty('cloudAutomationPath') : "cloudAutomationPath property for kubeHelper is not set."
 }
 
 def kube(Closure body) {
