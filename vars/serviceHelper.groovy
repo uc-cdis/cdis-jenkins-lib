@@ -19,7 +19,8 @@ def getService(Map config) {
 * @returns uid
 */
 def getUid(Map config) {
-  return "${getService(config)}-${formatBranchName(config)}-${env.BUILD_NUMBER}"
+  branch = getBranch(config)
+  return "${getService(config)}-${formatBranchName(branch)}-${env.BUILD_NUMBER}"
 }
 
 /**
@@ -29,8 +30,8 @@ def getUid(Map config) {
 * @param config - pipeline config
 * @returns uid
 */
-def formatBranchName(Map config) {
-  return "${getBranch(config)}".replaceAll("/", "_")
+def formatBranchName(String branchName) {
+  return "${branchName}".replaceAll("/", "_")
 }
 
 /**
