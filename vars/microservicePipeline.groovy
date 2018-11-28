@@ -18,7 +18,7 @@ def call(Map config) {
         }
         steps {
           script {
-            waitForQuayBuild(getService(config))
+            waitForQuayBuild(getServiceName(config))
           }
         }
       }
@@ -81,20 +81,20 @@ def call(Map config) {
   }
 }
 
-def getService(config) {
-  if (config && config.JOB_NAME) {
-    return config.JOB_NAME
-  }
-  return "$env.JOB_NAME".split('/')[1]
-}
+// def getService(config) {
+//   if (config && config.JOB_NAME) {
+//     return config.JOB_NAME
+//   }
+//   return "$env.JOB_NAME".split('/')[1]
+// }
 
-def getQuaySuffix(config) {
-  if (config && config.GIT_BRANCH) {
-    return config.GIT_BRANCH
-  }
-  return "$env.GIT_BRANCH".replaceAll("/", "_")
-}
+// def getQuaySuffix(config) {
+//   if (config && config.GIT_BRANCH) {
+//     return config.GIT_BRANCH
+//   }
+//   return "$env.GIT_BRANCH".replaceAll("/", "_")
+// }
 
-def getUid(config) {
-  return getService(config)+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
-}
+// def getUid(config) {
+//   return getService(config)+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
+// }
