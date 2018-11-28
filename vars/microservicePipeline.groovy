@@ -1,5 +1,10 @@
 #!groovy
 
+/**
+* Pipline for builing and testing microservices
+* 
+* @param config - pipeline configuration
+*/
 def call(Map config) {
   pipeline {
     agent any
@@ -80,21 +85,3 @@ def call(Map config) {
     }
   }
 }
-
-// def getService(config) {
-//   if (config && config.JOB_NAME) {
-//     return config.JOB_NAME
-//   }
-//   return "$env.JOB_NAME".split('/')[1]
-// }
-
-// def getQuaySuffix(config) {
-//   if (config && config.GIT_BRANCH) {
-//     return config.GIT_BRANCH
-//   }
-//   return "$env.GIT_BRANCH".replaceAll("/", "_")
-// }
-
-// def getUid(config) {
-//   return getService(config)+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
-// }
