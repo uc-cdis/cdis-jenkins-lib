@@ -1,7 +1,3 @@
-def formatBranchToQuayName(String branchName=env.GIT_BRANCH) {
-  return "${branchName}".replaceAll("/", "_")
-}
-
 def waitForBuild(String service) {
   if (service == 'cdis-jenkins-lib') {
     service = 'jenkins-lib'

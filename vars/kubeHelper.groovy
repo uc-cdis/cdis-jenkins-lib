@@ -32,11 +32,11 @@ def klock(Map params) {
 
 def deploy() {
   kube {
-    echo "GEN3_HOME is $env.GEN3_HOME"
+    echo "GEN3_HOME is ${env.GEN3_HOME}"
     echo "GIT_BRANCH is ${env.GIT_BRANCH}"
     echo "GIT_COMMIT is ${env.GIT_COMMIT}"
     echo "KUBECTL_NAMESPACE is ${env.KUBECTL_NAMESPACE}"
-    echo "WORKSPACE is $env.WORKSPACE"
+    echo "WORKSPACE is ${env.WORKSPACE}"
     sh "bash ${cloudAutomationPath}/gen3/bin/kube-roll-all.sh"
     sh "bash ${cloudAutomationPath}/gen3/bin/kube-wait4-pods.sh || true"
   }
@@ -56,7 +56,7 @@ def editServiceBranch(String serviceName, String branchName=env.GIT_BRANCH, Stri
   kube {
     namespaceDir = sh(script: "kubectl -n ${kubectlNamespace} get configmap global -o jsonpath='{.data.hostname}'", returnStdout: true)
     dir("${manifestPath}/${namespaceDir}") {
-      quaySuffix = quayHelper.formatBranchToQuayName(branchName)
+      quaySuffix = serviceHelper.formatBranchName(branchName)
       currentBranch = "${serviceName}:[a-zA-Z0-9._-]*"
       targetBranch = "${serviceName}:${quaySuffix}"
       // swap current branch for the target branch

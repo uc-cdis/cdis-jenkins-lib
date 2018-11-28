@@ -1,7 +1,7 @@
 def call() {
   node {
     stage('Fetch') {
-      fetchCode()
+      gitHelper.fetchAll()
     }
     kubeHelper.kubectlNamespace = 'jenkins-brain'
     kubeHelper.setCloudAutomationPath("${env.WORKSPACE}/cloud-automation")
