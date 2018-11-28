@@ -1,5 +1,5 @@
-kubectlNamespace = ''
-cloudAutomationPath = ''
+def kubectlNamespace = ""
+def cloudAutomationPath = ""
 
 /**
 * Sets path to the cloud automation directory, strips any trailing /'s
@@ -28,11 +28,7 @@ def assertKubeReady() {
     }
   }
   if (!cloudAutomationPath) {
-    if (env.KUBECTL_NAMESPACE) {
-      kubectlNamespace = env.KUBECTL_NAMESPACE
-    } else {
-      error('unable to determine kubectlNamespace')
-    }
+    setCloudAutomationPath("${env.WORKSPACE}/cloud-automation")
   }
 }
 

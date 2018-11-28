@@ -11,10 +11,10 @@ def call(Map config) {
       gitHelper.fetchAllRepos()
     }
     stage('WaitForQuayBuild') {
-      quayHelper.waitForBuild(serviceHelper.getService(config))
+      // quayHelper.waitForBuild(serviceHelper.getService(config))
     }
     stage('SelectNamespace') {
-      kubeHelper.selectAndLockNamespace( namespaces: config.namespaces, uid: serviceHelper.getUid(config) )
+      kubeHelper.selectAndLockNamespace(config.namespaces, serviceHelper.getUid(config))
     }
     stage('ModifyManifest') {
       kubeHelper.editManifest(serviceHelper.getService(config))
