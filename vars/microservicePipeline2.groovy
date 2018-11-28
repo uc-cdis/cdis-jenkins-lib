@@ -47,4 +47,5 @@ def call(Map config) {
       echo "done"
       junit "gen3-qa/output/*.xml"
     }
+  }
 }
