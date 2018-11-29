@@ -89,11 +89,12 @@ def deploy() {
 * @param branchName - defaults to GIT_BRANCH env var
 * @param manifest - path to root directory of manifests; defaults to cdis-manifest
 */
-def editManifest(String serviceName, String branchName="${env.GIT_BRANCH}", String manifestPath="cdis-manifest") {
+def editManifest(String serviceName, String branchName=null, String manifestPath="cdis-manifest") {
   if (null == serviceName) {
-    error("must specify service");    
+    error("must specify service");
   }
   if (null == branchName) {
+    branchName = serviceHelper.getBranch()
     error("unable to determine branch name");
   }
   if (null == serviceName) {
