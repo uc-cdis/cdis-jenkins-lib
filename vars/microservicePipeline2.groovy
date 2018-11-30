@@ -8,7 +8,7 @@
 def call(Map config) {
   node {
     echo "TESTING GIT_BRANCH from scripted pipeline: ${env.GIT_BRANCH}"
-    setupHelpers()
+    setupHelpers(config)
     stage('FetchCode') {
       gitHelper.fetchAllRepos()
     }
