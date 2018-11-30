@@ -1,15 +1,7 @@
-def setup() {
-  if (env.KUBECTL_NAMESPACE) {
-    kubectlNamespace = env.KUBECTL_NAMESPACE
-  } else {
-    kubectlNamespace = ""
-  }
-
-  setCloudAutomationPath("${env.WORKSPACE}/cloud-automation")
-}
-
 def create(Map config) {
   conf = config
+  cloudAutomationPath = "${env.WORKSPACE}/cloud-automation"
+  kubectlNamespace = "NO_PIPELINE_NAMESPACE_SELECTED"
   return this
 }
 
@@ -27,9 +19,9 @@ def setCloudAutomationPath(String path) {
   cloudAutomationPath = path
 }
 
-def setKubectlNamespace(String name) {
-  kubectlNamespace = name
-}
+// def setKubectlNamespace(String name) {
+//   kubectlNamespace = name
+// }
 
 def assertKubeReady() {
   if (!kubectlNamespace) {
@@ -52,7 +44,7 @@ def assertKubeReady() {
 * @returns bodyResult
 */
 def kube(Closure body) {
-  assertKubeReady()
+  // assertKubeReady()
   withEnv(['GEN3_NOPROXY=true', "vpc_name=${kubectlNamespace}", "GEN3_HOME=${cloudAutomationPath}", "KUBECTL_NAMESPACE=${kubectlNamespace}"]) {
     return body()
   }
@@ -62,12 +54,18 @@ def kube(Closure body) {
 * Attempts to lock kubectlNamespace
 *
 * @param method - lock or unlock
-* @param uid - used as owner of lock
+* 
 * @returns klockResult
 */
-def klock(String method, String uid) {
+def klock(String method, String owner) {
+  if (null == method) {
+    error("locking method must be provided - lock or unlock")
+  }
+  if (null == owner) {
+    owner = conf.UID
+  }
   kube {
-    return sh( script: "bash ${cloudAutomationPath}/gen3/bin/klock.sh ${method} jenkins ${uid} 3600 -w 60", returnStatus: true)
+    return sh( script: "bash ${cloudAutomationPath}/gen3/bin/klock.sh ${method} jenkins ${owner} 3600 -w 60", returnStatus: true)
   }
 }
 
@@ -91,20 +89,17 @@ def deploy() {
 * If no branch name provided, use GIT_BRANCH from environment
 *
 * @param serviceName
-* @param branchName - defaults to GIT_BRANCH env var
+* @param quayBranchName
 * @param manifest - path to root directory of manifests; defaults to cdis-manifest
 */
-def editManifest(String serviceName, String branchName=null, String manifestPath="cdis-manifest") {
+def editManifest(String serviceName, String quayBranchName=null, String manifestPath="cdis-manifest") {
   if (null == serviceName) {
     error("must specify service");
   }
   if (null == branchName) {
-    branchName = serviceHelper.getBranch()
-    error("unable to determine branch name");
+    branchName = conf.BRANCH_FORMATTED
   }
-  if (null == serviceName) {
-    error("must specify serviceName");
-  }
+
   kube {
     namespaceDir = sh(script: "kubectl -n ${kubectlNamespace} get configmap global -o jsonpath='{.data.hostname}'", returnStdout: true)
     dir("${manifestPath}/${namespaceDir}") {
@@ -117,15 +112,14 @@ def editManifest(String serviceName, String branchName=null, String manifestPath
   }
 }
 
-
 /**
 * Attempts to lock a namespace
 * If it fails to lock a namespace, it raises an error, terminating the pipeline
 *
 * @param namespaces - List of namespaces to select from randomly
-* @param uid - UID to lock with
 */
-def selectAndLockNamespace(List<String> namespaces, String uid) {
+def selectAndLockNamespace(List<String> namespaces, String owner) {
+  if (null == namespaces)
   int randNum = new Random().nextInt(namespaces.size());
   int lockStatus = 1;
 
@@ -135,7 +129,7 @@ def selectAndLockNamespace(List<String> namespaces, String uid) {
     kubectlNamespace = namespaces.get(randNum)
     println "selected namespace ${kubectlNamespace} on executor ${env.EXECUTOR_NUMBER}"
     println "attempting to lock namespace ${kubectlNamespace} with a wait time of 1 minutes"
-    lockStatus = klock('lock', uid)
+    lockStatus = klock('lock', owner)
   }
   if (lockStatus != 0) {
     error("aborting - no available workspace")
