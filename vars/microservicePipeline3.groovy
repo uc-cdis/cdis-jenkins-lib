@@ -30,7 +30,8 @@ def call(Map config) {
     }
     catch (e) {
       // something failed. do something about it?
-      echo "$e"
+      e.printStackTrace()
+
       throw e
     }
     finally {
