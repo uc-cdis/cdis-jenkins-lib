@@ -20,7 +20,7 @@ class PipelineHelper implements Serializable {
       this.config = config
     }
 
-    gitVars = checkout(scm)
+    gitVars = checkout(steps.scm)
     if (!this.config.containsKey('GIT_BRANCH')) {
       this.config.GIT_BRANCH = gitVars.GIT_BRANCH
       this.config.GIT_COMMIT = gitVars.GIT_COMMIT
