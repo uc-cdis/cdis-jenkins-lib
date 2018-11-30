@@ -58,10 +58,7 @@ def kube(Closure body) {
 * 
 * @returns klockResult
 */
-def klock(String method, String owner) {
-  if (null == method) {
-    error("locking method must be provided - lock or unlock")
-  }
+def klock(String method, String owner=null) {
   if (null == owner) {
     owner = conf.UID
   }
