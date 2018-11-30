@@ -19,7 +19,7 @@ def call(Map config) {
         pipe.kube.selectAndLockNamespace()
       }
       stage('ModifyManifest') {
-        pipe.kube.editManifest()
+        pipe.kube.editManifestService()
       }
       stage('K8sDeploy') {
         pipe.kube.deploy()
@@ -30,12 +30,12 @@ def call(Map config) {
     }
     catch (e) {
       // something failed. do something about it?
-      echo "$e"
+      echo "ERROR: $e"
       println(ex.toString());
       println(ex.getMessage());
       println(ex.getStackTrace());  
 
-      throw e
+      throw(e)
     }
     finally {
       def currentResult = currentBuild.result ?: 'SUCCESS'
