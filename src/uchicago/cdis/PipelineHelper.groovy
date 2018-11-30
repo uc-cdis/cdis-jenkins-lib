@@ -4,7 +4,8 @@ import uchicago.cdis.KubeT
 
 class PipelineHelper implements Serializable {
   def steps
-  def cloudAutomationPath
+  def config
+  def kube
   
   /**
    * Constructor
@@ -30,9 +31,7 @@ class PipelineHelper implements Serializable {
       this.config.JOB_NAME = "$env.JOB_NAME".split('/')[1]
     }
     this.config.UID = "${this.config.JOB_NAME}-${this.config.BRANCH_FORMATTED}-${env.BUILD_NUMBER}"
+
+    this.kube = new KubeT(null, this.config)
   }
-
-  this.kube = new KubeT(steps, config)
-
-  
 }
