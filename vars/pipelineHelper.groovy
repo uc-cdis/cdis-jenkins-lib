@@ -2,8 +2,8 @@
 def create(Map config) {
   init(config)
   conf = config
-  kube = kubeHelper.new(config)
-  git = gitHelper.new(config)
+  kube = kubeHelper.create(config)
+  git = gitHelper.create(config)
 
   return this
 }

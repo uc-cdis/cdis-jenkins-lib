@@ -8,6 +8,11 @@ def setup() {
   setCloudAutomationPath("${env.WORKSPACE}/cloud-automation")
 }
 
+def create(Map config) {
+  conf = config
+  return this
+}
+
 /**
 * Sets path to the cloud automation directory, strips any trailing /'s
 *
