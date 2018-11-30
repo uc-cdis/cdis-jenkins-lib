@@ -119,7 +119,9 @@ def editManifest(String serviceName, String quayBranchName=null, String manifest
 * @param namespaces - List of namespaces to select from randomly
 */
 def selectAndLockNamespace(List<String> namespaces, String owner) {
-  if (null == namespaces)
+  if (null == namespaces) {
+    namespaces = conf.namespaces
+  }
   int randNum = new Random().nextInt(namespaces.size());
   int lockStatus = 1;
 
