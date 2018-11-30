@@ -8,8 +8,8 @@ import uchicago.cdis.PipelineHelper
 * @param config - pipeline configuration
 */
 def call(Map config) {
+  pipe = new PipelineHelper(this, config)
   node {
-    pipe = new PipelineHelper(this, config)
     try {
       stage('PH Fetch') {
         pipe.git.fetchAllRepos()
