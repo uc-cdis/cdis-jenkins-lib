@@ -1,5 +1,5 @@
-def gg
-def vars
+String gg
+Map vars
 
 /**
 * Pulls common repositories used for testing
