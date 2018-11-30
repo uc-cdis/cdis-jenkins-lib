@@ -102,16 +102,15 @@ def editManifestService(String serviceName=null, String quayBranchName=null, Str
       error("unable to determine service name");
     }
   }
-  if (null == branchName) {
-    branchName = conf.BRANCH_FORMATTED
+  if (null == quayBranchName) {
+    quayBranchName = conf.BRANCH_FORMATTED
   }
 
   kube {
     namespaceDir = sh(script: "kubectl -n ${kubectlNamespace} get configmap global -o jsonpath='{.data.hostname}'", returnStdout: true)
     dir("${manifestPath}/${namespaceDir}") {
-      quaySuffix = serviceHelper.formatBranchName(branchName)
       currentBranch = "${serviceName}:[a-zA-Z0-9._-]*"
-      targetBranch = "${serviceName}:${quaySuffix}"
+      targetBranch = "${serviceName}:${quayBranchName}"
       // swap current branch for the target branch
       sh 'sed -i -e "s,'+"${currentBranch},${targetBranch}"+',g" manifest.json'
     }
