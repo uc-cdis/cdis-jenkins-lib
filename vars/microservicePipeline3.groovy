@@ -30,6 +30,7 @@ def call(Map config) {
     }
     catch (e) {
       // something failed. do something about it?
+      echo "$e"
       println(ex.toString());
       println(ex.getMessage());
       println(ex.getStackTrace());  
