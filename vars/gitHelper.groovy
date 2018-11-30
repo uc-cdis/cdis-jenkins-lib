@@ -2,7 +2,8 @@
 * Pulls common repositories used for testing
 */
 def fetchAllRepos() {
-  vars = checkout scm
+  gg = "HELLO GG"
+  vars = checkout(scm)
   dir('gen3-qa') {
     git(
       url: 'https://github.com/uc-cdis/gen3-qa.git',
