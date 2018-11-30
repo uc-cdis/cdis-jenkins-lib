@@ -94,9 +94,13 @@ def deploy() {
 * @param quayBranchName
 * @param manifest - path to root directory of manifests; defaults to cdis-manifest
 */
-def editManifest(String serviceName, String quayBranchName=null, String manifestPath="cdis-manifest") {
+def editManifestService(String serviceName=null, String quayBranchName=null, String manifestPath="cdis-manifest") {
   if (null == serviceName) {
-    error("must specify service");
+    if (conf.containsKey('SERVICE')) {
+      serviceName = conf.service
+    } else {
+      error("unable to determine service name");
+    }
   }
   if (null == branchName) {
     branchName = conf.BRANCH_FORMATTED
