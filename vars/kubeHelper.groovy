@@ -1,7 +1,8 @@
 def create(Map config) {
-  conf = config
-  cloudAutomationPath = "${env.WORKSPACE}/cloud-automation"
-  kubectlNamespace = "NO_PIPELINE_NAMESPACE_SELECTED"
+  this.conf = config
+  this.cloudAutomationPath = "${env.WORKSPACE}/cloud-automation"
+  this.kubectlNamespace = "NO_PIPELINE_NAMESPACE_SELECTED"
+  echo "Kube after setup: ${this}, conf: ${this.conf}"
   return this
 }
 
@@ -120,6 +121,7 @@ def editManifest(String serviceName, String quayBranchName=null, String manifest
 */
 def selectAndLockNamespace(List<String> namespaces, String owner) {
   if (null == namespaces) {
+    echo "Kube's conf ${this}, ${this.conf}, ${conf}"
     namespaces = conf.namespaces
   }
   int randNum = new Random().nextInt(namespaces.size());
