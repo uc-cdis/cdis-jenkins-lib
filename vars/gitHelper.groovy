@@ -13,6 +13,7 @@ def getBranch() {
 * Pulls common repositories used for testing
 */
 def fetchAllRepos() {
+  echo "fetch git this: ${this}"
   echo "my vars: ${this.vars}"
   dir('gen3-qa') {
     git(
