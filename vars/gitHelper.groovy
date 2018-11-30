@@ -2,6 +2,7 @@
 def setup() {
   this.vars = checkout(scm)
   echo "SETUP git: ${this.vars}"
+  echo "SETUP git this: ${this}"
 }
 
 def getBranch() {
