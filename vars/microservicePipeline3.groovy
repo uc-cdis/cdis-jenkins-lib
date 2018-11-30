@@ -49,7 +49,7 @@ def call(Map config) {
       }
 
       // always unlock the namespace
-      ph.kube.klock('unlock')
+      pipe.kube.klock('unlock')
       echo "done"
       junit "gen3-qa/output/*.xml"
     }
