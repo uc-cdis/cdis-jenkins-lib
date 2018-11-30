@@ -32,6 +32,6 @@ class PipelineHelper implements Serializable {
     }
     this.config.UID = "${this.config.JOB_NAME}-${this.config.BRANCH_FORMATTED}-${env.BUILD_NUMBER}"
 
-    this.kube = new KubeT(null, this.config)
+    this.kube = new KubeT(this.steps, this.config)
   }
 }

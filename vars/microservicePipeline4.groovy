@@ -9,7 +9,7 @@ import uchicago.cdis.PipelineHelper
 */
 def call(Map config) {
   node {
-    pipe = new PipelineHelper(null, config)
+    pipe = new PipelineHelper(this, config)
     try {
       stage('PH Fetch') {
         pipe.git.fetchAllRepos()
