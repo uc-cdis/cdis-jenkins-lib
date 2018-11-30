@@ -6,8 +6,9 @@ public Map vars
 * Pulls common repositories used for testing
 */
 def fetchAllRepos() {
-  this.gg = "HELLO GG"
-  this.vars = checkout(scm)
+  gg = "HELLO GG"
+  vars = checkout(scm)
+  echo "my vars: ${vars}"
   dir('gen3-qa') {
     git(
       url: 'https://github.com/uc-cdis/gen3-qa.git',
