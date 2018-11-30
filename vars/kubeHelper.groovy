@@ -129,7 +129,7 @@ def selectAndLockNamespace(List<String> namespaces, String owner) {
     kubectlNamespace = namespaces.get(randNum)
     println "selected namespace ${kubectlNamespace} on executor ${env.EXECUTOR_NUMBER}"
     println "attempting to lock namespace ${kubectlNamespace} with a wait time of 1 minutes"
-    lockStatus = klock('lock', owner)
+    lockStatus = this.klock('lock', owner)
   }
   if (lockStatus != 0) {
     error("aborting - no available workspace")
