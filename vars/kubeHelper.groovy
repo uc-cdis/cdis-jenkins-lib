@@ -62,8 +62,12 @@ def klock(String method, String owner=null) {
   if (null == owner) {
     owner = conf.UID
   }
+  conditionalLockParams = ""
+  if (method == "lock") {
+    conditionalLockParams = "3600 -w 60"
+  }
   kube {
-    return sh( script: "bash ${cloudAutomationPath}/gen3/bin/klock.sh ${method} jenkins ${owner} 3600 -w 60", returnStatus: true)
+    return sh( script: "bash ${cloudAutomationPath}/gen3/bin/klock.sh ${method} jenkins ${owner} ${conditionalLockParams}", returnStatus: true)
   }
 }
 
