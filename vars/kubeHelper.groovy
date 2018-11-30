@@ -96,7 +96,7 @@ def deploy() {
 */
 def editManifestService(String serviceName=null, String quayBranchName=null, String manifestPath="cdis-manifest") {
   if (null == serviceName) {
-    if (conf.containsKey('SERVICE')) {
+    if (conf.containsKey('service')) {
       serviceName = conf.service
     } else {
       error("unable to determine service name");
