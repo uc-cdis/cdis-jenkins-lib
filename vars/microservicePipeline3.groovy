@@ -7,7 +7,7 @@
 */
 def call(Map config) {
   node {
-    ph = pipelineHelper.new()
+    ph = pipelineHelper.create(config)
     stage('PH Fetch') {
       ph.git.fetchAllRepos()
     }

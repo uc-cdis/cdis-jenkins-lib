@@ -1,5 +1,5 @@
 
-def new(Map config) {
+def create(Map config) {
   init(config)
   conf = config
   kube = kubeHelper.new(config)
