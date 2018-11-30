@@ -1,3 +1,6 @@
+def gg
+def vars
+
 /**
 * Pulls common repositories used for testing
 */
