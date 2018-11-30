@@ -1,4 +1,4 @@
-def initDefault() {
+def setup() {
   if (env.KUBECTL_NAMESPACE) {
     kubectlNamespace = env.KUBECTL_NAMESPACE
   } else {

@@ -8,7 +8,7 @@
 def call(Map config) {
   node {
     echo "TESTING GIT_BRANCH from scripted pipeline: ${env.GIT_BRANCH}"
-    kubeHelper.initDefault()
+    setupHelpers()
     stage('FetchCode') {
       gitHelper.fetchAllRepos()
     }

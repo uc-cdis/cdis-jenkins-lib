@@ -1,13 +1,16 @@
 
-public String gg
-public Map vars
+def setup() {
+  vars = checkout(scm)
+}
+
+def getBranch() {
+  return vars.GIT_BRANCH
+}
 
 /**
 * Pulls common repositories used for testing
 */
 def fetchAllRepos() {
-  gg = "HELLO GG"
-  vars = checkout(scm)
   echo "my vars: ${vars}"
   dir('gen3-qa') {
     git(
