@@ -44,7 +44,7 @@ def getBranch(Map config) {
   if (config && config.GIT_BRANCH) {
     return config.GIT_BRANCH
   }
-  echo "getBranch: asdfg: ${gitHelper.getGg()}"
+  echo "getBranch: asdfg: ${gitHelper.gg}"
   echo "getBranch: NO CONFIG. gitHelper.vars.GIT_BRANCH: ${gitHelper.vars.GIT_BRANCH}"
   echo "getBranch: NO CONFIG. Returning ${env.GIT_BRANCH}."
   return env.GIT_BRANCH
