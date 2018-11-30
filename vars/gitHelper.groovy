@@ -1,17 +1,18 @@
 
 def setup() {
-  vars = checkout(scm)
+  this.vars = checkout(scm)
+  echo "SETUP git: ${this.vars}"
 }
 
 def getBranch() {
-  return vars.GIT_BRANCH
+  return this.vars.GIT_BRANCH
 }
 
 /**
 * Pulls common repositories used for testing
 */
 def fetchAllRepos() {
-  echo "my vars: ${vars}"
+  echo "my vars: ${this.vars}"
   dir('gen3-qa') {
     git(
       url: 'https://github.com/uc-cdis/gen3-qa.git',
