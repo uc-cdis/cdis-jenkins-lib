@@ -7,8 +7,8 @@
 */
 def call(Map config) {
   node {
+    pipe = pipelineHelper.create(config)
     try {
-      pipe = pipelineHelper.create(config)
       stage('PH Fetch') {
         pipe.git.fetchAllRepos()
       }
@@ -30,6 +30,7 @@ def call(Map config) {
     }
     catch (e) {
       // something failed. do something about it?
+      echo "$e"
       throw e
     }
     finally {
