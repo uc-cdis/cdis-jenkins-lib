@@ -56,6 +56,7 @@ def getAffectedManifests(String masterDir, String otherDir) {
       // check if the manifest files are the same
       def cmpRes = sh( script: "cmp ${manifestFiles[i].path} ${otherManifestFile} || true", returnStdout: true )
       // if the comparison result is not empty then the files are different
+      echo("CMPRES OUT: ${cmpRes}")
       if (cmpRes != '') {
         affectedFiles << manifestFiles[i].path.replaceAll('cdis-manifest/', '')
       }
