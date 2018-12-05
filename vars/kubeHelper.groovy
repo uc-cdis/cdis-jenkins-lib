@@ -1,3 +1,5 @@
+ import groovy.transform.Field
+
 @Field def config
 @Field def cloudUtomationPath
 @Field def kubectlNamespace
