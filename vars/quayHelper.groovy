@@ -7,12 +7,12 @@ import groovy.transform.Field
 */
 def create(Map config) {
   this.config = config
-  
+
   return this
 }
 
 def waitForBuild(String service=null) {
-  if (null == serviceName) {
+  if (null == service) {
     if (this.config.containsKey('service')) {
       service = this.config.service
     } else {
