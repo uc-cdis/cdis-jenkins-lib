@@ -24,6 +24,9 @@ def call(Map config) {
       stage('K8sDeploy') {
         // pipe.kube.deploy()
       }
+      staege('GenerateData') {
+        pipe.test.simulateData(pipe.kube.kubectlNamespace)
+      }
       stage('RunTests') {
         pipe.test.runIntegrationTests(pipe.kube.kubectlNamespace, pipe.conf.service)
       }
