@@ -12,6 +12,10 @@ def create(Map config) {
   return this
 }
 
+def getNamespace() {
+  return kubectlNamespace
+}
+
 /**
 * Sets path to the cloud automation directory, strips any trailing /'s
 *
