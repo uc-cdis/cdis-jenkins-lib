@@ -40,6 +40,8 @@ def setCloudAutomationPath(String path) {
 */
 def kube(Closure body) {
   withEnv(['GEN3_NOPROXY=true', "vpc_name=${this.kubectlNamespace}", "GEN3_HOME=${this.cloudAutomationPath}", "KUBECTL_NAMESPACE=${this.kubectlNamespace}"]) {
+    echo "GEN3_HOME is ${env.GEN3_HOME}"
+    echo "KUBECTL_NAMESPACE is ${env.KUBECTL_NAMESPACE}"
     return body()
   }
 }
@@ -69,8 +71,6 @@ def klock(String method, String owner=null) {
 */
 def deploy() {
   kube {
-    echo "GEN3_HOME is ${env.GEN3_HOME}"
-    echo "KUBECTL_NAMESPACE is ${env.KUBECTL_NAMESPACE}"
     sh "bash ${this.cloudAutomationPath}/gen3/bin/kube-roll-all.sh"
     sh "bash ${this.cloudAutomationPath}/gen3/bin/kube-wait4-pods.sh || true"
   }
