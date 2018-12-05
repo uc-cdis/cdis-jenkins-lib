@@ -33,6 +33,7 @@ def call(Map config) {
       }
     }
     catch (e) {
+      echo "GGEERRR"
       // something failed. do something about it?
       echo "ERROR: $e"
       echo e.toString()
