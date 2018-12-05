@@ -23,6 +23,7 @@ def getMissingProperties() {
 }
 
 def waitForBuild() {
+  echo this.config
   missingProps = getMissingProperties()
   if (missingProps.size() > 0) {
     error("Config is missing one or more properties required for checking Quay:\n  ${missingProps}")
