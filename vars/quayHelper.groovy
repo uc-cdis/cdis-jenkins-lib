@@ -23,7 +23,7 @@ def waitForBuild(String service=null) {
     service = 'jenkins-lib'
   }
 
-  echo("Waiting for ${service} to build...")
+  echo("Waiting for ${service} to build:\nbranch '${this.config.formattedBranch}'\ncommit ${this.config.GIT_COMMIT}")
 
   def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 60)
   def timeout = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) + 3600)
