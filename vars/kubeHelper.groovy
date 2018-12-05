@@ -40,8 +40,7 @@ def setCloudAutomationPath(String path) {
 */
 def kube(Closure body) {
   withEnv(['GEN3_NOPROXY=true', "vpc_name=${this.kubectlNamespace}", "GEN3_HOME=${this.cloudAutomationPath}", "KUBECTL_NAMESPACE=${this.kubectlNamespace}"]) {
-    echo "GEN3_HOME is ${env.GEN3_HOME}"
-    echo "KUBECTL_NAMESPACE is ${env.KUBECTL_NAMESPACE}"
+    echo "  GEN3_HOME is ${env.GEN3_HOME}\n  KUBECTL_NAMESPACE is ${env.KUBECTL_NAMESPACE}"
     return body()
   }
 }
