@@ -53,7 +53,7 @@ def kube(Closure body) {
 */
 def klock(String method, String owner=null) {
   if (null == owner) {
-    owner = conf.UID
+    owner = this.config.UID
   }
   conditionalLockParams = ""
   if (method == "lock") {
@@ -86,14 +86,14 @@ def deploy() {
 */
 def editManifestService(String serviceName=null, String quayBranchName=null, String manifestPath="cdis-manifest") {
   if (null == serviceName) {
-    if (conf.containsKey('service')) {
-      serviceName = conf.service
+    if (this.config.containsKey('service')) {
+      serviceName = this.config.service
     } else {
       error("unable to determine service name");
     }
   }
   if (null == quayBranchName) {
-    quayBranchName = conf.branchFormatted
+    quayBranchName = this.config.branchFormatted
   }
 
   kube {
@@ -116,8 +116,8 @@ def editManifestService(String serviceName=null, String quayBranchName=null, Str
 */
 def selectAndLockNamespace(List<String> namespaces=null, String owner=null) {
   if (null == namespaces) {
-    if (conf.containsKey('namespaces')) {
-      namespaces = conf.namespaces
+    if (this.config.containsKey('namespaces')) {
+      namespaces = this.config.namespaces
     } else {
       error("unable to determine namespaces list")
     }
