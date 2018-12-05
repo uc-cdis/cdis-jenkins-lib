@@ -33,7 +33,7 @@ def setupConfig(Map config) {
   if (null == config || !config.containsKey('JOB_NAME')) {
     config.JOB_NAME = "$env.JOB_NAME".split('/')[1]
   }
-  config.UID = "${config.JOB_NAME}-${config.BRANCH_FORMATTED}-${env.BUILD_NUMBER}"
+  config.UID = "${config.JOB_NAME}-${config.branchFormatted}-${env.BUILD_NUMBER}"
 
   return config
 }

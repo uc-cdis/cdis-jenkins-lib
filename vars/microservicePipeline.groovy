@@ -35,24 +35,26 @@ def call(Map config) {
     }
 
     // Post Pipeline steps
-    def currentResult = currentBuild.result
-    if ("UNSTABLE" == currentResult) {
-      echo "Unstable!"
-      // slack.sendUnstable()
-    }
-    else if ("FAILURE" == currentResult) {
-      echo "Failure!"
-      archiveArtifacts(artifacts: '**/output/*.png', fingerprint: true)
-      // slack.sendFailure()
-    }
-    else if ("SUCCESS" == currentResult) {
-      echo "Success!"
-      // slack.sendSuccess()
-    }
+    stage('Post') {
+      def currentResult = currentBuild.result
+      if ("UNSTABLE" == currentResult) {
+        echo "Unstable!"
+        // slack.sendUnstable()
+      }
+      else if ("FAILURE" == currentResult) {
+        echo "Failure!"
+        archiveArtifacts(artifacts: '**/output/*.png', fingerprint: true)
+        // slack.sendFailure()
+      }
+      else if ("SUCCESS" == currentResult) {
+        echo "Success!"
+        // slack.sendSuccess()
+      }
 
-    // unlock the namespace
-    pipe.kube.klock('unlock')
-    echo "done"
-    junit "gen3-qa/output/*.xml"
+      // unlock the namespace
+      pipe.kube.klock('unlock')
+      echo "done"
+      junit "gen3-qa/output/*.xml"
+    }
   }
 }
