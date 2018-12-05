@@ -18,9 +18,6 @@ def create(Map config) {
 */
 def getMissingProperties() {
   missingProps = []
-  // for (i=0; i<this.requiredProps.size(); i++) {
-  //   if (this.config.containsKey(requiredProps[i]))
-  // }
   for (String prop : this.requiredProps) {
     echo prop
     if (!this.config.containsKey(prop)) {
@@ -43,7 +40,7 @@ def waitForBuild() {
     service = 'jenkins-lib'
   }
 
-  echo("Waiting for ${service} to build:\n  branch '${this.config.branchFormatted}'\n  commit ${this.config.GIT_COMMIT}")
+  echo("Waiting for Quay to build:\n  service ${service}\n  branch '${this.config.branchFormatted}'\n  commit ${this.config.GIT_COMMIT}")
 
   def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 60)
   def timeout = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) + 3600)
