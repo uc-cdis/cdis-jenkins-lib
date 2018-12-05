@@ -21,17 +21,17 @@ def call(Map config) {
       stage('ModifyManifest') {
         pipe.kube.editManifestService()
       }
-      stage('K8sDeploy') {
-        // pipe.kube.deploy()
-      }
-      staege('GenerateData') {
-        echo "HELLO WORLD"
-        // pipe.test.simulateData(pipe.kube.kubectlNamespace)
-      }
-      stage('RunTests') {
-        echo "RUNNNGG"
-        // pipe.test.runIntegrationTests(pipe.kube.kubectlNamespace, pipe.conf.service)
-      }
+      // stage('K8sDeploy') {
+      //   // pipe.kube.deploy()
+      // }
+      // staege('GenerateData') {
+      //   echo "HELLO WORLD"
+      //   // pipe.test.simulateData(pipe.kube.kubectlNamespace)
+      // }
+      // stage('RunTests') {
+      //   echo "RUNNNGG"
+      //   // pipe.test.runIntegrationTests(pipe.kube.kubectlNamespace, pipe.conf.service)
+      // }
     }
     catch (e) {
       echo "GGEERRR"
