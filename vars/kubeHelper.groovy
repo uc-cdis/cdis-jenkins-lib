@@ -5,14 +5,10 @@
 * @param config - pipeline config
 */
 def create(Map config) {
-  conf = config
-  cloudAutomationPath = "${env.WORKSPACE}/cloud-automation"
-  kubectlNamespace = "NO_PIPELINE_NAMESPACE_SELECTED"
+  this.config = config
+  this.cloudAutomationPath = "${env.WORKSPACE}/cloud-automation"
+  this.kubectlNamespace = "NO_PIPELINE_NAMESPACE_SELECTED"
   return this
-}
-
-def getNamespace() {
-  return kubectlNamespace
 }
 
 /**
@@ -26,7 +22,7 @@ def setCloudAutomationPath(String path) {
   if (path.endsWith("/")) {
     path = path.substring(0, path.length() - 1);
   }
-  cloudAutomationPath = path
+  this.cloudAutomationPath = path
 }
 
 /**
@@ -37,7 +33,7 @@ def setCloudAutomationPath(String path) {
 * @returns bodyResult
 */
 def kube(Closure body) {
-  withEnv(['GEN3_NOPROXY=true', "vpc_name=${kubectlNamespace}", "GEN3_HOME=${cloudAutomationPath}", "KUBECTL_NAMESPACE=${kubectlNamespace}"]) {
+  withEnv(['GEN3_NOPROXY=true', "vpc_name=${this.kubectlNamespace}", "GEN3_HOME=${this.cloudAutomationPath}", "KUBECTL_NAMESPACE=${this.kubectlNamespace}"]) {
     return body()
   }
 }
@@ -58,7 +54,7 @@ def klock(String method, String owner=null) {
     conditionalLockParams = "3600 -w 60"
   }
   kube {
-    return sh( script: "bash ${cloudAutomationPath}/gen3/bin/klock.sh ${method} jenkins ${owner} ${conditionalLockParams}", returnStatus: true)
+    return sh( script: "bash ${this.cloudAutomationPath}/gen3/bin/klock.sh ${method} jenkins ${owner} ${conditionalLockParams}", returnStatus: true)
   }
 }
 
@@ -69,8 +65,8 @@ def deploy() {
   kube {
     echo "GEN3_HOME is ${env.GEN3_HOME}"
     echo "KUBECTL_NAMESPACE is ${env.KUBECTL_NAMESPACE}"
-    sh "bash ${cloudAutomationPath}/gen3/bin/kube-roll-all.sh"
-    sh "bash ${cloudAutomationPath}/gen3/bin/kube-wait4-pods.sh || true"
+    sh "bash ${this.cloudAutomationPath}/gen3/bin/kube-roll-all.sh"
+    sh "bash ${this.cloudAutomationPath}/gen3/bin/kube-wait4-pods.sh || true"
   }
 }
 
@@ -95,7 +91,7 @@ def editManifestService(String serviceName=null, String quayBranchName=null, Str
   }
 
   kube {
-    namespaceDir = sh(script: "kubectl -n ${kubectlNamespace} get configmap global -o jsonpath='{.data.hostname}'", returnStdout: true)
+    namespaceDir = sh(script: "kubectl -n ${this.kubectlNamespace} get configmap global -o jsonpath='{.data.hostname}'", returnStdout: true)
     dir("${manifestPath}/${namespaceDir}") {
       currentBranch = "${serviceName}:[a-zA-Z0-9._-]*"
       targetBranch = "${serviceName}:${quayBranchName}"
@@ -128,7 +124,7 @@ def selectAndLockNamespace(List<String> namespaces=null, String owner=null) {
   for (int i=0; i < namespaces.size() && lockStatus != 0; ++i) {
     randNum = (randNum + i) % namespaces.size();
     kubectlNamespace = namespaces.get(randNum)
-    println "attempting to lock namespace ${kubectlNamespace} with a wait time of 1 minutes"
+    println "attempting to lock namespace ${this.kubectlNamespace} with a wait time of 1 minutes"
     lockStatus = this.klock('lock', owner)
   }
   if (lockStatus != 0) {

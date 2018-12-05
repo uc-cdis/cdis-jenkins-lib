@@ -5,7 +5,7 @@
 * @param config - pipeline config
 */
 def create(Map config) {
-  conf = config
+  this.config = config
   return this
 }
 

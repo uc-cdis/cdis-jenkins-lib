@@ -28,7 +28,7 @@ def call(Map config) {
         pipe.test.simulateData(pipe.kube.kubectlNamespace)
       }
       stage('RunTests') {
-        pipe.test.runIntegrationTests(pipe.kube.kubectlNamespace, pipe.conf.service)
+        pipe.test.runIntegrationTests(pipe.kube.kubectlNamespace, pipe.config.service)
       }
     }
 
