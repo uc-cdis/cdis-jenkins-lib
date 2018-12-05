@@ -14,7 +14,7 @@ def init(Map config) {
     config.GIT_BRANCH = gitVars.GIT_BRANCH
     config.GIT_COMMIT = gitVars.GIT_COMMIT
   }
-  config.BRANCH_FORMATTED = "${config.GIT_BRANCH}".replaceAll("/", "_")
+  config.branchFormatted = "${config.GIT_BRANCH}".replaceAll("/", "_")
 
   if (null == config || !config.containsKey('JOB_NAME')) {
     config.JOB_NAME = "$env.JOB_NAME".split('/')[1]

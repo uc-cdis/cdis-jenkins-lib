@@ -31,14 +31,15 @@ def call(Map config) {
     catch (e) {
       // something failed. do something about it?
       echo "ERROR: $e"
-      println(ex.toString());
-      println(ex.getMessage());
-      println(ex.getStackTrace());  
+      println(e.toString());
+      println(e.getMessage());
+      println(e.getStackTrace());  
 
       throw(e)
     }
     finally {
       def currentResult = currentBuild.result ?: 'SUCCESS'
+      println("CURREENT RESULT: ${currentResult}")
       if ("UNSTABLE" == currentResult) {
         echo "Unstable!"
         //slack.sendUnstable()

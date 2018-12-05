@@ -1,3 +1,9 @@
+/**
+* Constructor for kubeHelper
+* Provides access to kubectl and gen3 commands
+*
+* @param config - pipeline config
+*/
 def create(Map config) {
   conf = config
   cloudAutomationPath = "${env.WORKSPACE}/cloud-automation"
@@ -20,32 +26,14 @@ def setCloudAutomationPath(String path) {
   cloudAutomationPath = path
 }
 
-// def setKubectlNamespace(String name) {
-//   kubectlNamespace = name
-// }
-
-def assertKubeReady() {
-  if (!kubectlNamespace) {
-    if (env.KUBECTL_NAMESPACE) {
-      kubectlNamespace = env.KUBECTL_NAMESPACE
-    } else {
-      error('unable to determine kubectlNamespace')
-    }
-  }
-  if (!cloudAutomationPath) {
-    setCloudAutomationPath("${env.WORKSPACE}/cloud-automation")
-  }
-}
-
 /**
-* Used to run kubectl commands
-* Verfies required properties are set and sets environment variables required for commons commands
+* Runs kubectl commands
+* Creates a context of environment variables required for commons commands
 *
 * @param body - instructions to execute
 * @returns bodyResult
 */
 def kube(Closure body) {
-  // assertKubeReady()
   withEnv(['GEN3_NOPROXY=true', "vpc_name=${kubectlNamespace}", "GEN3_HOME=${cloudAutomationPath}", "KUBECTL_NAMESPACE=${kubectlNamespace}"]) {
     return body()
   }
@@ -55,7 +43,7 @@ def kube(Closure body) {
 * Attempts to lock kubectlNamespace
 *
 * @param method - lock or unlock
-* 
+* @param owner - owner to lock as; defaults to conf.UID
 * @returns klockResult
 */
 def klock(String method, String owner=null) {
@@ -77,10 +65,7 @@ def klock(String method, String owner=null) {
 def deploy() {
   kube {
     echo "GEN3_HOME is ${env.GEN3_HOME}"
-    echo "GIT_BRANCH is ${env.GIT_BRANCH}"
-    echo "GIT_COMMIT is ${env.GIT_COMMIT}"
     echo "KUBECTL_NAMESPACE is ${env.KUBECTL_NAMESPACE}"
-    echo "WORKSPACE is ${env.WORKSPACE}"
     sh "bash ${cloudAutomationPath}/gen3/bin/kube-roll-all.sh"
     sh "bash ${cloudAutomationPath}/gen3/bin/kube-wait4-pods.sh || true"
   }
@@ -90,8 +75,8 @@ def deploy() {
 * Edits manifest of a service to provided branch
 * If no branch name provided, use GIT_BRANCH from environment
 *
-* @param serviceName
-* @param quayBranchName
+* @param serviceName - defaults to conf.service
+* @param quayBranchName - defaults to conf.branchFormatted
 * @param manifest - path to root directory of manifests; defaults to cdis-manifest
 */
 def editManifestService(String serviceName=null, String quayBranchName=null, String manifestPath="cdis-manifest") {
@@ -103,7 +88,7 @@ def editManifestService(String serviceName=null, String quayBranchName=null, Str
     }
   }
   if (null == quayBranchName) {
-    quayBranchName = conf.BRANCH_FORMATTED
+    quayBranchName = conf.branchFormatted
   }
 
   kube {
@@ -121,12 +106,17 @@ def editManifestService(String serviceName=null, String quayBranchName=null, Str
 * Attempts to lock a namespace
 * If it fails to lock a namespace, it raises an error, terminating the pipeline
 *
-* @param namespaces - List of namespaces to select from randomly
+* @param namespaces - List of namespaces to select from randomly; defaults to conf.namespaces
+* @param owner - lock owner; defaults to null, to be handled by klock()
 */
 def selectAndLockNamespace(List<String> namespaces=null, String owner=null) {
   if (null == namespaces) {
-    echo "Kube's conf ${this}, ${this.conf}, ${conf}"
-    namespaces = conf.namespaces
+    if (conf.containsKey('namespaces')) {
+      namespaces = conf.namespaces
+    } else {
+      error("unable to determine namespaces list")
+    }
+    
   }
   int randNum = new Random().nextInt(namespaces.size());
   int lockStatus = 1;
@@ -135,7 +125,6 @@ def selectAndLockNamespace(List<String> namespaces=null, String owner=null) {
   for (int i=0; i < namespaces.size() && lockStatus != 0; ++i) {
     randNum = (randNum + i) % namespaces.size();
     kubectlNamespace = namespaces.get(randNum)
-    println "selected namespace ${kubectlNamespace} on executor ${env.EXECUTOR_NUMBER}"
     println "attempting to lock namespace ${kubectlNamespace} with a wait time of 1 minutes"
     lockStatus = this.klock('lock', owner)
   }
