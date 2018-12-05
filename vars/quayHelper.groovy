@@ -15,11 +15,13 @@ def create(Map config) {
 
 def getMissingProperties() {
   missingProps = []
-  this.requiredProps.each {
-    try {
-      this.config[it]
-    } catch(e) {
-      missingProps << "${it}"
+  // for (i=0; i<this.requiredProps.size(); i++) {
+  //   if (this.config.containsKey(requiredProps[i]))
+  // }
+  for (String prop : this.requiredProps) {
+    echo prop
+    if (!this.config.containsKey(prop)) {
+      missingProps << prop
     }
   }
 }
