@@ -12,7 +12,7 @@ def create(Map config) {
 def gen3Qa(String namespace, Closure body) {
   dir('gen3-qa') {
     withEnv(['GEN3_NOPROXY=true', "vpc_name=${namespace}", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "KUBECTL_NAMESPACE=${namespace}", "NAMESPACE=${namespace}", "TEST_DATA_PATH=$env.WORKSPACE/testData/"]) {
-      body()
+      return body()
     }
   }
 }
