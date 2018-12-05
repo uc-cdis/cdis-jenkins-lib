@@ -33,35 +33,26 @@ def call(Map config) {
         pipe.test.runIntegrationTests(pipe.kube.kubectlNamespace, pipe.conf.service)
       }
     }
-    // catch (err) {
-    //   echo "CAUGHT ERROR: ${err}"
-    //   currentBuild.result = 'FAILURE'
-    //   // something failed. do something about it?
-    //   echo e.message()
 
-    //   throw(e)
-    // }
-    // finally {
-      def currentResult = currentBuild.result ?: 'SUCCESS'
-      println("CURREENT RESULT: ${currentResult}")
-      if ("UNSTABLE" == currentResult) {
-        echo "Unstable!"
-        //slack.sendUnstable()
-      }
-      else if ("FAILURE" == currentResult) {
-        echo "Failure!"
-        archiveArtifacts(artifacts: '**/output/*.png', fingerprint: true)
-        //slack.sendFailure()
-      }
-      else if ("SUCCESS" == currentResult) {
-        echo "Success!"
-        //slack.sendSuccess()
-      }
+    // Post Pipeline steps
+    def currentResult = currentBuild.result
+    if ("UNSTABLE" == currentResult) {
+      echo "Unstable!"
+      //slack.sendUnstable()
+    }
+    else if ("FAILURE" == currentResult) {
+      echo "Failure!"
+      archiveArtifacts(artifacts: '**/output/*.png', fingerprint: true)
+      //slack.sendFailure()
+    }
+    else if ("SUCCESS" == currentResult) {
+      echo "Success!"
+      //slack.sendSuccess()
+    }
 
-      // always unlock the namespace
-      pipe.kube.klock('unlock')
-      echo "done"
-      junit "gen3-qa/output/*.xml"
-    // }
+    // always unlock the namespace
+    pipe.kube.klock('unlock')
+    echo "done"
+    junit "gen3-qa/output/*.xml"
   }
 }
