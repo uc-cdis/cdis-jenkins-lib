@@ -23,7 +23,7 @@ def waitForBuild(String service=null) {
     service = 'jenkins-lib'
   }
 
-  echo("Waiting for ${service} to build:\nbranch '${this.config.formattedBranch}'\ncommit ${this.config.GIT_COMMIT}")
+  echo("Waiting for ${service} to build:\nbranch '${this.config.branchFormatted}'\ncommit ${this.config.GIT_COMMIT}")
 
   def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 60)
   def timeout = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) + 3600)
@@ -58,7 +58,7 @@ def waitForBuild(String service=null) {
       //
       if (fields.length > 2) {
         noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
-        if(fields[0].startsWith(this.config.formattedBranch)) {
+        if(fields[0].startsWith(this.config.branchFormatted)) {
           if(this.config.GIT_COMMIT.startsWith(fields[1])) {
             quayImageReady = fields[2].endsWith("complete")
             break
