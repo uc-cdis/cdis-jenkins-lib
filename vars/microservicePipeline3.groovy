@@ -26,11 +26,11 @@ def call(Map config) {
       }
       stage('GenerateData') {
         echo "HELLO WORLD"
-        // pipe.test.simulateData(pipe.kube.kubectlNamespace)
+        pipe.test.simulateData(pipe.kube.kubectlNamespace)
       }
       stage('RunTests') {
         echo "RUNNNGG"
-        // pipe.test.runIntegrationTests(pipe.kube.kubectlNamespace, pipe.conf.service)
+        pipe.test.runIntegrationTests(pipe.kube.kubectlNamespace, pipe.conf.service)
       }
     }
     catch (e) {
