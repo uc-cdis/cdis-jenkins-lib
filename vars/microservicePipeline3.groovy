@@ -37,9 +37,7 @@ def call(Map config) {
       echo "GGEERRR"
       // something failed. do something about it?
       echo "ERROR: $e"
-      echo e.toString()
-      echo e.getMessage()
-      echo e.getStackTrace()
+      echo e.message()
 
       throw(e)
     }
@@ -63,7 +61,7 @@ def call(Map config) {
       // always unlock the namespace
       pipe.kube.klock('unlock')
       echo "done"
-      // junit "gen3-qa/output/*.xml"
+      junit "gen3-qa/output/*.xml"
     }
   }
 }
