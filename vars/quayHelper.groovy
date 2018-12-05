@@ -1,3 +1,14 @@
+import groovy.transform.Field
+
+@Field def config // pipeline config shared between helpers
+
+/**
+* Constructor
+*/
+def create(Map config) {
+  this.config = config
+}
+
 def waitForBuild(String service) {
   if (service == 'cdis-jenkins-lib') {
     service = 'jenkins-lib'

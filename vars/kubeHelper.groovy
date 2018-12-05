@@ -1,8 +1,8 @@
- import groovy.transform.Field
+import groovy.transform.Field
 
-@Field def config
-@Field def cloudUtomationPath
-@Field def kubectlNamespace
+@Field def config // pipeline config shared between helpers
+@Field def cloudAutomationPath // path to directory of pulled cloud-automation
+@Field def kubectlNamespace // namespace to run kube commands in
 
 /**
 * Constructor for kubeHelper

@@ -1,3 +1,7 @@
+import groovy.transform.Field
+
+@Field def config
+
 /**
 * Constructor for tester
 * Runs tests

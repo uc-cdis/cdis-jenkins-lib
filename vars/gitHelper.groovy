@@ -1,5 +1,12 @@
+import groovy.transform.Field
+
+@Field def config // pipeline config shared between helpers
+
+/**
+* Constructor
+*/
 def create(Map config) {
-  conf = config
+  this.config = config
   return this
 }
 
