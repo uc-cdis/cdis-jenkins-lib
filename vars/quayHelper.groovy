@@ -9,7 +9,14 @@ def create(Map config) {
   this.config = config
 }
 
-def waitForBuild(String service) {
+def waitForBuild(String service=null) {
+  if (null == serviceName) {
+    if (this.config.containsKey('service')) {
+      service = this.config.service
+    } else {
+      error("unable to determine service name");
+    }
+  }
   if (service == 'cdis-jenkins-lib') {
     service = 'jenkins-lib'
   }

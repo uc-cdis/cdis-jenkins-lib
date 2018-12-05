@@ -13,7 +13,7 @@ def call(Map config) {
         pipe.git.fetchAllRepos()
       }
       stage('WaitForQuayBuild') {
-        // quayHelper.waitForBuild(serviceHelper.getService(config))
+        pipe.quay.waitForBuild()
       }
       stage('SelectNamespace') {
         pipe.kube.selectAndLockNamespace()
