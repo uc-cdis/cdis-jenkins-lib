@@ -18,7 +18,7 @@ def getMissingProperties() {
   this.requiredProps.each {
     try {
       this.config[it]
-    } catch() {
+    } catch(e) {
       missingProps << "${it}"
     }
   }
