@@ -16,14 +16,14 @@ def create(Map config) {
 def getMissingProperties() {
   missingProps = []
   this.requiredProps.each {
-    if (!this.config.containsKey("${it}")) {
+    if (!this.config.containsKey(it)) {
       missingProps << "${it}"
     }
   }
 }
 
 def waitForBuild() {
-  echo this.config
+  // echo this.config
   missingProps = getMissingProperties()
   if (missingProps.size() > 0) {
     error("Config is missing one or more properties required for checking Quay:\n  ${missingProps}")
