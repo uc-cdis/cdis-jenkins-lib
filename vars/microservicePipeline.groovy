@@ -12,8 +12,10 @@ def call(Map config) {
       stage('FetchCode') {
         pipe.git.fetchAllRepos()
       }
-      stage('WaitForQuayBuild') {
-        // pipe.quay.waitForBuild()
+      if (config.containsKey('') && config.waitForQuay) {
+        stage('WaitForQuayBuild') {
+          // pipe.quay.waitForBuild()
+        }
       }
       stage('SelectNamespace') {
         pipe.kube.selectAndLockNamespace()

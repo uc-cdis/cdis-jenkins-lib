@@ -28,8 +28,9 @@ def call(Map config) {
       }
       stage('SubstituteManifest') {
         // copy over the new manifest
-        thisManifestDir = pipe.kube.getHostname()
         source = affectedManifests[0]
+        echo("Selected Manifest: ${source}")
+        thisManifestDir = pipe.kube.getHostname()
         dest = "cdis-manifest/${thisManifestDir}/manifest.json"
         sh("mkdir -p ${thisManifestDir}")
         sh("cp ${source} ${dest}")
