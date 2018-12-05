@@ -4,6 +4,8 @@ import groovy.transform.Field
 @Field def kube // kubernetes/commons helper
 @Field def git // performs git tasks
 @Field def test // runs tests and creates test data
+@Field def quay // quay helper
+@Field def manifest // operations regarding the manifest
 
 def create(Map config) {
   this.config = setupConfig(config)
@@ -11,6 +13,7 @@ def create(Map config) {
   this.git = gitHelper.create(this.config)
   this.test = testRunner.create(this.config)
   this.quay = quayHelper.create(this.config)
+  this.manifest = manifestHelper.create(this.config)
 
   return this
 }
