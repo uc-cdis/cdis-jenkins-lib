@@ -13,6 +13,9 @@ def create(Map config) {
   return this
 }
 
+/**
+* Returns required properties that are missing in config
+*/
 def getMissingProperties() {
   missingProps = []
   // for (i=0; i<this.requiredProps.size(); i++) {
@@ -24,10 +27,13 @@ def getMissingProperties() {
       missingProps << prop
     }
   }
+  return missingProps
 }
 
+/**
+* Waits for Quay to finish building the branch in config
+*/
 def waitForBuild() {
-  // echo this.config
   missingProps = getMissingProperties()
   if (missingProps.size() > 0) {
     error("Config is missing one or more properties required for checking Quay:\n  ${missingProps}")
