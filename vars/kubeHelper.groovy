@@ -1,3 +1,7 @@
+config = [:]
+cloudUtomationPath = ""
+kubectlNamespace = ""
+
 /**
 * Constructor for kubeHelper
 * Provides access to kubectl and gen3 commands
