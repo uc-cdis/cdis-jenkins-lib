@@ -1,29 +1,38 @@
 import groovy.transform.Field
 
 @Field def config // pipeline config shared between helpers
+@Field def requiredProps // properties required for polling quay
 
 /**
 * Constructor
 */
 def create(Map config) {
   this.config = config
+  this.requiredProps = ['service', 'GIT_COMMIT', 'branchFormatted']
 
   return this
 }
 
-def waitForBuild(String service=null) {
-  if (null == service) {
-    if (this.config.containsKey('service')) {
-      service = this.config.service
-    } else {
-      error("unable to determine service name");
+def getMissingProperties() {
+  missingProps = []
+  this.requiredProps.each {
+    if (!this.config.containsKey("${it}")) {
+      missingProps << "${it}"
     }
   }
+}
+
+def waitForBuild() {
+  missingProps = getMissingProperties()
+  if (missingProps.size() > 0) {
+    error("Config is missing one or more properties required for checking Quay:\n  ${missingProps}")
+  }
+  service = this.config.service
   if (service == 'cdis-jenkins-lib') {
     service = 'jenkins-lib'
   }
 
-  echo("Waiting for ${service} to build:\nbranch '${this.config.branchFormatted}'\ncommit ${this.config.GIT_COMMIT}")
+  echo("Waiting for ${service} to build:\n  branch '${this.config.branchFormatted}'\n  commit ${this.config.GIT_COMMIT}")
 
   def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 60)
   def timeout = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) + 3600)
