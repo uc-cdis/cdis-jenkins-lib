@@ -25,11 +25,9 @@ def call(Map config) {
         // pipe.kube.deploy()
       }
       stage('GenerateData') {
-        echo "HELLO WORLD"
         pipe.test.simulateData(pipe.kube.kubectlNamespace)
       }
       stage('RunTests') {
-        echo "RUNNNGG"
         pipe.test.runIntegrationTests(pipe.kube.kubectlNamespace, pipe.conf.service)
       }
     }

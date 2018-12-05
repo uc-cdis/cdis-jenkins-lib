@@ -1,10 +1,10 @@
 
 def create(Map config) {
-  init(config)
-  conf = config
-  kube = kubeHelper.create(config)
-  git = gitHelper.create(config)
-  test = testRunner.create(config)
+  this.config = init(config)
+  // conf = config
+  this.kube = kubeHelper.create(this.config)
+  this.git = gitHelper.create(this.config)
+  this.test = testRunner.create(this.config)
 
   return this
 }
@@ -21,4 +21,6 @@ def init(Map config) {
     config.JOB_NAME = "$env.JOB_NAME".split('/')[1]
   }
   config.UID = "${config.JOB_NAME}-${config.BRANCH_FORMATTED}-${env.BUILD_NUMBER}"
+
+  return config
 }
