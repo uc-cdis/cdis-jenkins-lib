@@ -1,0 +1,66 @@
+import groovy.transform.Field
+
+@Field def config // pipeline config shared between helpers
+
+/**
+* Constructor
+*
+* @param config
+*/
+def create(Map config) {
+  this.config = config
+
+  return this
+}
+
+/**
+* Edits manifest of a service to provided branch
+* Makes the edit in the cdis-manifest directory
+*
+* @param commonsHostname - hostname of commons to edit (e.g. qa-bloodpac.planx-pla.net)
+* @param serviceName - defaults to conf.service
+* @param quayBranchName - defaults to conf.branchFormatted
+*/
+def editService(String commonsHostname, String serviceName=null, String quayBranchName=null) {
+  if (null == commonsHostname) {
+    error("must provide hostname of commons manifest to edit")
+  }
+  if (null == serviceName) {
+    if (this.config.containsKey('service')) {
+      serviceName = this.config.service
+    } else {
+      error("unable to determine service name");
+    }
+  }
+  if (null == quayBranchName) {
+    quayBranchName = this.config.branchFormatted
+  }
+
+  dir("cdis-manifest/${commonsHostname}") {
+    currentBranch = "${serviceName}:[a-zA-Z0-9._-]*"
+    targetBranch = "${serviceName}:${quayBranchName}"
+    // swap current branch for the target branch
+    sh 'sed -i -e "s,'+"${currentBranch},${targetBranch}"+',g" manifest.json'
+  }
+}
+
+def getAffectedManifests(String masterDir, String otherDir) {
+  affectedFiles = []
+
+  // get all paths to commons manifests
+  def manifestFiles = findFiles(glob: "${masterDir}/*/manifest.json")
+  for (int i = 0; i < manifestFiles.length; i++) {
+    // check if other branch also has the manifest
+    def otherManifestFile = manifestFiles[i].path.replaceAll(masterDir, otherDir)
+    if (fileExists(otherManifestFile)) {
+      // check if the manifest files are the same
+      def cmpRes = sh( script: "cmp ${manifestFiles[i].path} ${otherManifestFile} || true", returnStdout: true )
+      // if the comparison result is not empty then the files are different
+      if (cmpRes != '') {
+        affectedFiles << manifestFiles[i].path.replaceAll('cdis-manifest/', '')
+      }
+    }
+  }
+
+  return affectedFiles
+}

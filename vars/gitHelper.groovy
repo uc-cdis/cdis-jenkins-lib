@@ -15,10 +15,16 @@ def create(Map config) {
 */
 def fetchAllRepos() {
   dir('gen3-qa') {
-    git(
-      url: 'https://github.com/uc-cdis/gen3-qa.git',
-      branch: 'master'
-    )
+    if (this.config.JOB_NAME == "gen3-qa") {
+      // testing the gen3-qa repo - check out the test branch here
+      println("INFO: checkout gen3-qa/ from JOB repo branch ...")
+      checkout scm;
+    } else {
+      git(
+        url: 'https://github.com/uc-cdis/gen3-qa.git',
+        branch: 'master'
+      );
+    }
   }
   dir('data-simulator') {
     git(
@@ -27,15 +33,30 @@ def fetchAllRepos() {
     )
   }
   dir('cdis-manifest') {
-    git(
-      url: 'https://github.com/uc-cdis/gitops-qa.git',
-      branch: 'master'
-    )
+    if (this.config.JOB_NAME == "cdis-manifest") {
+      // testing a manifest - check out the test branch here
+      println("INFO: checkout manifests from JOB_NAME's repo branch ...")
+      checkout scm
+    } else {
+      git(
+        url: 'https://github.com/uc-cdis/gitops-qa.git',
+        branch: 'master'
+      )
+    }
   }
   dir('cloud-automation') {
     git(
       url: 'https://github.com/uc-cdis/cloud-automation.git',
       branch: 'master'
+    )
+  }
+}
+
+def checkoutBranch(String branchName, String directoryName) {
+  dir(directoryName) {
+    git(
+      url: this.config.GIT_URL,
+      branch: branchName
     )
   }
 }

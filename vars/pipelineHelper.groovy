@@ -23,6 +23,7 @@ def setupConfig(Map config) {
   if (null == config || !config.containsKey('GIT_BRANCH')) {
     config.GIT_BRANCH = gitVars.GIT_BRANCH
     config.GIT_COMMIT = gitVars.GIT_COMMIT
+    config.GIT_URL = gitVars.GIT_URL
   }
   config.branchFormatted = "${config.GIT_BRANCH}".replaceAll("/", "_")
 

@@ -13,13 +13,13 @@ def call(Map config) {
         pipe.git.fetchAllRepos()
       }
       stage('WaitForQuayBuild') {
-        pipe.quay.waitForBuild()
+        // pipe.quay.waitForBuild()
       }
       stage('SelectNamespace') {
         pipe.kube.selectAndLockNamespace()
       }
       stage('ModifyManifest') {
-        pipe.kube.editManifestService()
+        pipe.manifest.editService(pipe.kube.getHostname())
       }
       stage('K8sDeploy') {
         pipe.kube.deploy()

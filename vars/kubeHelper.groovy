@@ -77,37 +77,6 @@ def deploy() {
 }
 
 /**
-* Edits manifest of a service to provided branch
-* If no branch name provided, use GIT_BRANCH from environment
-*
-* @param serviceName - defaults to conf.service
-* @param quayBranchName - defaults to conf.branchFormatted
-* @param manifest - path to root directory of manifests; defaults to cdis-manifest
-*/
-def editManifestService(String serviceName=null, String quayBranchName=null, String manifestPath="cdis-manifest") {
-  if (null == serviceName) {
-    if (this.config.containsKey('service')) {
-      serviceName = this.config.service
-    } else {
-      error("unable to determine service name");
-    }
-  }
-  if (null == quayBranchName) {
-    quayBranchName = this.config.branchFormatted
-  }
-
-  kube {
-    namespaceDir = sh(script: "kubectl -n ${this.kubectlNamespace} get configmap global -o jsonpath='{.data.hostname}'", returnStdout: true)
-    dir("${manifestPath}/${namespaceDir}") {
-      currentBranch = "${serviceName}:[a-zA-Z0-9._-]*"
-      targetBranch = "${serviceName}:${quayBranchName}"
-      // swap current branch for the target branch
-      sh 'sed -i -e "s,'+"${currentBranch},${targetBranch}"+',g" manifest.json'
-    }
-  }
-}
-
-/**
 * Attempts to lock a namespace
 * If it fails to lock a namespace, it raises an error, terminating the pipeline
 *
@@ -135,5 +104,11 @@ def selectAndLockNamespace(List<String> namespaces=null, String owner=null) {
   }
   if (lockStatus != 0) {
     error("aborting - no available workspace")
+  }
+}
+
+def getHostname() {
+  kube {
+    return sh(script: "kubectl -n $env.KUBECTL_NAMESPACE get configmap global -o jsonpath='{.data.hostname}'", returnStdout: true)
   }
 }
