@@ -4,6 +4,7 @@ def create(Map config) {
   conf = config
   kube = kubeHelper.create(config)
   git = gitHelper.create(config)
+  test = testRunner.create(config)
 
   return this
 }

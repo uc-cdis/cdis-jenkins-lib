@@ -25,7 +25,7 @@ def call(Map config) {
         pipe.kube.deploy()
       }
       stage('RunTests') {
-        testHelper.runIntegrationTests()
+        pipe.test.runIntegrationTests(pipe.kube.kubectlNamespace)
       }
     }
     catch (e) {
@@ -33,7 +33,7 @@ def call(Map config) {
       echo "ERROR: $e"
       println(e.toString());
       println(e.getMessage());
-      println(e.getStackTrace());  
+      println(e.getStackTrace());
 
       throw(e)
     }
