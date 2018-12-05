@@ -1,6 +1,6 @@
-config = [:]
-cloudUtomationPath = ""
-kubectlNamespace = ""
+@Field def config
+@Field def cloudUtomationPath
+@Field def kubectlNamespace
 
 /**
 * Constructor for kubeHelper
