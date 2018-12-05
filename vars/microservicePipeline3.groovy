@@ -8,7 +8,7 @@
 def call(Map config) {
   node {
     pipe = pipelineHelper.create(config)
-    try {
+    catchError {
       stage('PH Fetch') {
         pipe.git.fetchAllRepos()
       }
@@ -28,20 +28,20 @@ def call(Map config) {
         echo "HELLO WORLD"
         pipe.test.simulateData(pipe.kube.kubectlNamespace)
       }
-      stagew('RunTests') {
+      stage('RunTests') {
         echo "RUNNNGG"
         pipe.test.runIntegrationTests(pipe.kube.kubectlNamespace, pipe.conf.service)
       }
     }
-    catch (e) {
-      echo "GGEERRR"
-      // something failed. do something about it?
-      echo "ERROR: $e"
-      echo e.message()
+    // catch (err) {
+    //   echo "CAUGHT ERROR: ${err}"
+    //   currentBuild.result = 'FAILURE'
+    //   // something failed. do something about it?
+    //   echo e.message()
 
-      throw(e)
-    }
-    finally {
+    //   throw(e)
+    // }
+    // finally {
       def currentResult = currentBuild.result ?: 'SUCCESS'
       println("CURREENT RESULT: ${currentResult}")
       if ("UNSTABLE" == currentResult) {
@@ -62,6 +62,6 @@ def call(Map config) {
       pipe.kube.klock('unlock')
       echo "done"
       junit "gen3-qa/output/*.xml"
-    }
+    // }
   }
 }
