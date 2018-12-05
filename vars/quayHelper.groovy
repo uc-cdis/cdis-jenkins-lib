@@ -7,6 +7,8 @@ import groovy.transform.Field
 */
 def create(Map config) {
   this.config = config
+  
+  return this
 }
 
 def waitForBuild(String service=null) {
