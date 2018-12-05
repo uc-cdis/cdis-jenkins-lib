@@ -16,6 +16,7 @@ def create(Map config) {
 def getMissingProperties() {
   missingProps = []
   this.requiredProps.each {
+    echo this.config[it]
     if (!this.config.containsKey(it)) {
       missingProps << "${it}"
     }
