@@ -13,12 +13,12 @@ def create(Map config) {
 * Runs gen3-qa integration tests
 */
 def runIntegrationTests(String namespace) {
-  echo "HELLO WORLD"
-  echo "InTest: ${namespace}"
+  // echo "HELLO WORLD"
+  // echo "InTest: ${namespace}"
   dir('gen3-qa') {
     withEnv(['GEN3_NOPROXY=true', "vpc_name=${namespace}", "GEN3_HOME=${env.WORKSPACE}/cloud-automation", "NAMESPACE=${namespace}", "TEST_DATA_PATH=$env.WORKSPACE/testData/"]) {
-      sh "bash ./jenkins-simulate-data.sh $env.KUBECTL_NAMESPACE"
-      sh "bash ./run-tests.sh $env.KUBECTL_NAMESPACE"
+      sh "bash ./jenkins-simulate-data.sh $env.NAMESPACE"
+      sh "bash ./run-tests.sh $env.NAMESPACE"
     }
   }
 }
