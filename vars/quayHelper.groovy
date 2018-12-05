@@ -23,6 +23,8 @@ def waitForBuild(String service=null) {
     service = 'jenkins-lib'
   }
 
+  echo("Waiting for ${service} to build...")
+
   def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 60)
   def timeout = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) + 3600)
   QUAY_API = 'https://quay.io/api/v1/repository/cdis/'
@@ -56,13 +58,13 @@ def waitForBuild(String service=null) {
       //
       if (fields.length > 2) {
         noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
-        if(fields[0].startsWith("$env.GIT_BRANCH".replaceAll("/", "_"))) {
-          if("$env.GIT_COMMIT".startsWith(fields[1])) {
+        if(fields[0].startsWith(this.config.formattedBranch)) {
+          if(this.config.GIT_COMMIT.startsWith(fields[1])) {
             quayImageReady = fields[2].endsWith("complete")
             break
           } else {
             currentBuild.result = 'ABORTED'
-            error("aborting build due to out of date git hash\npipeline: $env.GIT_COMMIT\nquay: "+fields[1])
+            error("aborting build due to out of date git hash\npipeline: ${this.config.GIT_COMMIT}\nquay: "+fields[1])
           }
         }
       }
