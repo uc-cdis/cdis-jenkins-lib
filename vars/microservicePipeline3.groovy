@@ -25,15 +25,15 @@ def call(Map config) {
         // pipe.kube.deploy()
       }
       stage('RunTests') {
-        pipe.test.runIntegrationTests(pipe.kube.getNamespace())
+        pipe.test.runIntegrationTests(pipe.kube.kubectlNamespace, pipe.conf.service)
       }
     }
     catch (e) {
       // something failed. do something about it?
       echo "ERROR: $e"
-      println(e.toString());
-      println(e.getMessage());
-      println(e.getStackTrace());
+      echo e.toString()
+      echo e.getMessage()
+      echo e.getStackTrace()
 
       throw(e)
     }

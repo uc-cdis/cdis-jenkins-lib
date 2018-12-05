@@ -12,11 +12,10 @@ def create(Map config) {
 /**
 * Runs gen3-qa integration tests
 */
-def runIntegrationTests(String namespace) {
+def runIntegrationTests(String namespace, String service) {
   dir('gen3-qa') {
-    withEnv(['GEN3_NOPROXY=true', "vpc_name=${namespace}", "GEN3_HOME=${env.WORKSPACE}/cloud-automation", "NAMESPACE=${namespace}", "TEST_DATA_PATH=$env.WORKSPACE/testData/"]) {
-      sh "bash ./jenkins-simulate-data.sh $env.NAMESPACE"
-      sh "bash ./run-tests.sh $env.NAMESPACE"
+    withEnv(['GEN3_NOPROXY=true', "vpc_name=${namespace}", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=${namespace}", "TEST_DATA_PATH=$env.WORKSPACE/testData/"]) {
+      sh "bash ./run-tests.sh $env.NAMESPACE --service=${service}"
     }
   }
 }
