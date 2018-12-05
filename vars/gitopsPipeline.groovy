@@ -32,7 +32,7 @@ def call(Map config) {
         source = affectedManifests[0]
         dest = "${thisManifestDir}/manifest.json"
         dir ('cdis-manifest') {
-          sh("mkdir -p ${dest}")
+          sh("mkdir -p ${thisManifestDir}")
           sh("cp ${source} ${dest}")
         }
       }

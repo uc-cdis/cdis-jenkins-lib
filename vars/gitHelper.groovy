@@ -35,7 +35,7 @@ def fetchAllRepos() {
   dir('cdis-manifest') {
     if (this.config.pipeline == "gitops") {
       // testing a manifest - check out the test branch here
-      println("INFO: checkout manifests from JOB_NAME's repo branch ...")
+      println("INFO: checkout manifests from JOB_NAME's repo branch ...\n  ${this.config.GIT_URL}\n  ${this.config.GIT_COMMIT}")
       checkout scm
     } else {
       git(
