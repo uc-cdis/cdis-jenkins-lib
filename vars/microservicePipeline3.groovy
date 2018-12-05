@@ -25,7 +25,7 @@ def call(Map config) {
         // pipe.kube.deploy()
       }
       stage('RunTests') {
-        pipe.test.runIntegrationTests(pipe.kube.kubectlNamespace)
+        pipe.test.runIntegrationTests(pipe.kube.getNamespace())
       }
     }
     catch (e) {
