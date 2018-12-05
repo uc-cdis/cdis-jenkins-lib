@@ -88,7 +88,7 @@ def selectAndLockNamespace(List<String> namespaces=null, String owner=null) {
     if (this.config.containsKey('namespaces')) {
       namespaces = this.config.namespaces
     } else {
-      error("unable to determine namespaces list")
+      namespaces = ['jenkins-dcf', 'jenkins-niaid', 'jenkins-brain']
     }
     
   }
