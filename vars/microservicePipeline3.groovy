@@ -22,7 +22,7 @@ def call(Map config) {
         pipe.kube.editManifestService()
       }
       stage('K8sDeploy') {
-        pipe.kube.deploy()
+        // pipe.kube.deploy()
       }
       stage('RunTests') {
         pipe.test.runIntegrationTests(pipe.kube.kubectlNamespace)
