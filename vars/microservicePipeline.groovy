@@ -6,82 +6,51 @@
 * @param config - pipeline configuration
 */
 def call(Map config) {
-  pipeline {
-    agent any
-  
-    stages {
+  node {
+    pipe = pipelineHelper.create(config)
+    catchError {
       stage('FetchCode') {
-        steps {
-          script {
-            fetchCode()
-          }
-        }
+        pipe.git.fetchAllRepos()
       }
       stage('WaitForQuayBuild') {
-        when {
-          branch 'dontrun'
-        }
-        steps {
-          script {
-            waitForQuayBuild(getServiceName(config))
-          }
-        }
+        pipe.quay.waitForBuild()
       }
       stage('SelectNamespace') {
-        steps {
-          script {
-            selectAndLockNamespace( namespaces: config.namespaces, uid: getUid(config) )
-          }
-        }
+        pipe.kube.selectAndLockNamespace()
       }
       stage('ModifyManifest') {
-        steps {
-          script {
-            dirname = sh(script: "kubectl -n $env.KUBECTL_NAMESPACE get configmap global -o jsonpath='{.data.hostname}'", returnStdout: true)
-            dir("cdis-manifest/$dirname") {
-              quaySuffix = getQuaySuffix(config)
-              withEnv(["masterBranch=$env.service:[a-zA-Z0-9._-]*", "targetBranch=$env.service:$quaySuffix"]) {
-                sh 'sed -i -e "s,'+"$env.masterBranch,$env.targetBranch"+',g" manifest.json'
-              }
-            }
-          }
-        }
+        pipe.kube.editManifestService()
       }
       stage('K8sDeploy') {
-        steps {
-          script {
-            kubeDeploy()
-          }
-        }
+        pipe.kube.deploy()
+      }
+      stage('GenerateData') {
+        pipe.test.simulateData(pipe.kube.kubectlNamespace)
       }
       stage('RunTests') {
-        steps {
-          script {
-            runIntegrationTests()
-          }
-        }
+        pipe.test.runIntegrationTests(pipe.kube.kubectlNamespace, pipe.config.service)
       }
     }
-    post {
-      success {
-        echo "https://jenkins.planx-pla.net/ $env.JOB_NAME pipeline succeeded"
-      }
-      failure {
-        echo "Failure!"
-        archiveArtifacts artifacts: '**/output/*.png', fingerprint: true
-        //slackSend color: 'bad', message: "https://jenkins.planx-pla.net $env.JOB_NAME pipeline failed"
-      }
-      unstable {
-        echo "Unstable!"
-        //slackSend color: 'bad', message: "https://jenkins.planx-pla.net $env.JOB_NAME pipeline unstable"
-      }
-      always {
-        script {
-          klockNamespace( method: 'unlock', uid: getUid(config) )
-        }
-        echo "done"
-        junit "gen3-qa/output/*.xml"
-      }
+
+    // Post Pipeline steps
+    def currentResult = currentBuild.result
+    if ("UNSTABLE" == currentResult) {
+      echo "Unstable!"
+      // slack.sendUnstable()
     }
+    else if ("FAILURE" == currentResult) {
+      echo "Failure!"
+      archiveArtifacts(artifacts: '**/output/*.png', fingerprint: true)
+      // slack.sendFailure()
+    }
+    else if ("SUCCESS" == currentResult) {
+      echo "Success!"
+      // slack.sendSuccess()
+    }
+
+    // unlock the namespace
+    pipe.kube.klock('unlock')
+    echo "done"
+    junit "gen3-qa/output/*.xml"
   }
 }

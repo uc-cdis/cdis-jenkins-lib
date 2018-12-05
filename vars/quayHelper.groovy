@@ -19,7 +19,6 @@ def create(Map config) {
 def getMissingProperties() {
   missingProps = []
   for (String prop : this.requiredProps) {
-    echo prop
     if (!this.config.containsKey(prop)) {
       missingProps << prop
     }
