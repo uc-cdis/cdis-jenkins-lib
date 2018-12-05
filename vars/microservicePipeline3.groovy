@@ -27,7 +27,7 @@ def call(Map config) {
       stage('RunTests') {
         x = pipe.kube.getNamespace()
         echo "ASDFG: $x"
-        // pipe.test.runIntegrationTests(pipe.kube.getNamespace())
+        pipe.test.runIntegrationTests(x)
       }
     }
     catch (e) {
