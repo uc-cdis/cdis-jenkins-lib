@@ -8,7 +8,6 @@ def create(Map config) {
   conf = config
   cloudAutomationPath = "${env.WORKSPACE}/cloud-automation"
   kubectlNamespace = "NO_PIPELINE_NAMESPACE_SELECTED"
-  echo "Kube after setup: ${this}, conf: ${this.conf}"
   return this
 }
 
