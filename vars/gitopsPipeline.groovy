@@ -17,6 +17,7 @@ def call(Map config) {
       }
       stage('DetectManifestChanges') {
         affectedManifests = pipe.manifest.getAffectedManifests('cdis-manifest-master', 'cdis-manifest')
+        echo("AFFECTED MANIFESTS: ${affectedManifests}")
         if (affectedManifests.size() == 0) {
           // nothing to test
           return
