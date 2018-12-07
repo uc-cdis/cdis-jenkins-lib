@@ -8,7 +8,7 @@
 def call(Map config) {
   node {
     pipe = pipelineHelper.create(config)
-    catchError {
+    try {
       stage('FetchCode') {
         pipe.git.fetchAllRepos()
       }
@@ -32,6 +32,14 @@ def call(Map config) {
       stage('RunTests') {
         pipe.test.runIntegrationTests(pipe.kube.kubectlNamespace, pipe.config.service)
       }
+    }
+    catch (e) {
+      echo "Test 1: ${e.message}"
+      e.printStackTrace()
+      def w = new StringWriter()
+      e.printStackTrace(new PrintWriter(w))
+      echo "failed with ${e.message}", to: 'admin@somewhere', body: "Failed: ${w}"
+      throw e
     }
 
     // Post Pipeline steps
