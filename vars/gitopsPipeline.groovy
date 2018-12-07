@@ -16,7 +16,6 @@ def call(Map config) {
         // pipe.git.checkoutBranch('master', 'cdis-manifest-master')
 
         // testing a manifest - check out the current branch here
-        // println("INFO: checkout manifests from ${this.config.currentRepoName}'s branch ...\n  ${this.config.gitVars.GIT_URL}\n  ${this.config.gitVars.GIT_COMMIT}")
         dir (pipe.config.currentRepoName) {
           checkout scm
         }
