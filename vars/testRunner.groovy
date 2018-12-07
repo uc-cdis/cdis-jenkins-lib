@@ -52,3 +52,9 @@ def simulateData(String namespace) {
     sh "bash ./jenkins-simulate-data.sh ${namespace}"
   })
 }
+
+def teardown() {
+  if (this.startedIntegrationTests) {
+    junit "gen3-qa/output/*.xml"
+  }
+}

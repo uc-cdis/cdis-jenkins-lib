@@ -20,6 +20,8 @@ def create(Map config) {
 
 /**
 * Updates config by adding some missing and new values to the map
+*
+* @param config - pipeline config
 */
 def setupConfig(Map config) {
   // get git info of repo/branch that triggered build
@@ -38,6 +40,11 @@ def setupConfig(Map config) {
   return config
 }
 
+/**
+* Generic error handler, prints error message and stacktrace
+*
+* @param e - Exception/Error to handle
+*/
 def handleError(e) {
   def st = new StringWriter()
   e.printStackTrace(new PrintWriter(st))
@@ -45,6 +52,11 @@ def handleError(e) {
   throw e
 }
 
+/**
+* Procedure to run after pipline succeeds or fails
+*
+* @param buildResult - the current build result (accessible by currentBuild.result)
+*/
 def teardown(String buildResult) {
   if ("UNSTABLE" == buildResult) {
     echo "Unstable!"
@@ -61,8 +73,6 @@ def teardown(String buildResult) {
   }
 
   // unlock the namespace
-  this.kube.klock('unlock')
-  if (this.test.startedIntegrationTests) {
-    junit "gen3-qa/output/*.xml"
-  }
+  this.kube.teardown()
+  this.test.teardown()
 }

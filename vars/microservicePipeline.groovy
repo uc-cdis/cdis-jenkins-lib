@@ -1,7 +1,7 @@
 #!groovy
 
 /**
-* Pipline for builing and testing microservices
+* Pipline for building and testing microservices
 * 
 * @param config - pipeline configuration
 */

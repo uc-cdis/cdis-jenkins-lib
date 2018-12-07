@@ -110,3 +110,9 @@ def getHostname() {
     return sh(script: "kubectl -n $env.KUBECTL_NAMESPACE get configmap global -o jsonpath='{.data.hostname}'", returnStdout: true)
   }
 }
+
+def teardown() {
+  if (this.notLocked) {
+    klock('unlock')
+  }
+}

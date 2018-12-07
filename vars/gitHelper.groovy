@@ -46,6 +46,13 @@ def fetchAllRepos() {
   }
 }
 
+/**
+* Clone branch of the current repository into the provided directory
+* Used to get different manifest branches for finding changes
+*
+* @param branchName
+* @param directoryName
+*/
 def checkoutBranch(String branchName, String directoryName) {
   dir(directoryName) {
     git(
