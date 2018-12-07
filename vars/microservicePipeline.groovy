@@ -120,7 +120,7 @@ def call(Map config) {
       stage('SelectNamespace') {
         steps {
           script {
-            String[] namespaces = ['jenkins-niaid']
+            String[] namespaces = ['jenkins-brain']
             int randNum = new Random().nextInt(namespaces.length);
             uid = env.service+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
             int lockStatus = 1;
