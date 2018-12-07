@@ -24,7 +24,7 @@ def call(Map config) {
         pipe.manifest.editService(
           pipe.kube.getHostname(),
           pipe.config.serviceTesting.name,
-          pipe.config.serviceTest.branch
+          pipe.config.serviceTesting.branch
         )
       }
       stage('K8sDeploy') {
