@@ -29,7 +29,7 @@ def editService(String commonsHostname, String serviceName=null, String quayBran
     if (this.config.containsKey('service')) {
       serviceName = this.config.service
     } else {
-      error("unable to determine service name");
+      throw new Exception("unable to determine service name")
     }
   }
   if (null == quayBranchName) {
