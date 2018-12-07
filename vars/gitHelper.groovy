@@ -33,16 +33,10 @@ def fetchAllRepos() {
     )
   }
   dir('cdis-manifest') {
-    if (this.config.pipeline == "gitops") {
-      // testing a manifest - check out the test branch here
-      println("INFO: checkout manifests from ${this.config.currentRepoName}'s branch ...\n  ${this.config.gitVars.GIT_URL}\n  ${this.config.gitVars.GIT_COMMIT}")
-      checkout scm
-    } else {
-      git(
-        url: 'https://github.com/uc-cdis/gitops-qa.git',
-        branch: 'master'
-      )
-    }
+    git(
+      url: 'https://github.com/uc-cdis/gitops-qa.git',
+      branch: 'master'
+    )
   }
   dir('cloud-automation') {
     git(
