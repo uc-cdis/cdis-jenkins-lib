@@ -10,6 +10,8 @@ import groovy.transform.Field
 */
 def create(Map config) {
   this.config = config
+  this.startedIntegrationTests = false
+
   return this
 }
 
@@ -34,6 +36,7 @@ def gen3Qa(String namespace, Closure body) {
 * @param service - name of service the test is being run for
 */
 def runIntegrationTests(String namespace, String service) {
+  this.startedIntegrationTests = true
   gen3Qa(namespace, {
     sh "bash ./run-tests.sh $env.NAMESPACE --service=${service}"
   })

@@ -56,8 +56,9 @@ def call(Map config) {
 
         // unlock the namespace
         pipe.kube.klock('unlock')
-        echo "done"
-        junit "gen3-qa/output/*.xml"
+        if (pipe.test.startedIntegrationTests) {
+          junit "gen3-qa/output/*.xml"
+        }
       }
     }
   }
