@@ -154,6 +154,9 @@ def call(Map config) {
         }
       }
       stage('K8sDeploy') {
+        when {
+          expression { return false }
+        }
         steps {
           withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {
             echo "GEN3_HOME is $env.GEN3_HOME"
