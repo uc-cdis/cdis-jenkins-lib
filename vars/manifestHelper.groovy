@@ -34,17 +34,17 @@ def getAffectedManifests(String masterDir, String otherDir) {
   affectedFiles = []
 
   // get all paths to commons manifests
-  def manifestFiles = findFiles(glob: "${masterDir}/*/manifest.json")
-  for (int i = 0; i < manifestFiles.length; i++) {
+  def masterManifestFiles = findFiles(glob: "${masterDir}/*/manifest.json")
+  for (int i = 0; i < masterManifestFiles.length; i++) {
     // check if other branch also has the manifest
-    def otherManifestFile = manifestFiles[i].path.replaceAll(masterDir, otherDir)
+    def otherManifestFile = masterManifestFiles[i].path.replaceAll(masterDir, otherDir)
     if (fileExists(otherManifestFile)) {
       // check if the manifest files are the same
-      def cmpRes = sh( script: "cmp ${manifestFiles[i].path} ${otherManifestFile} || true", returnStdout: true )
+      def cmpRes = sh( script: "cmp ${masterManifestFiles[i].path} ${otherManifestFile} || true", returnStdout: true )
       // if the comparison result is not empty then the files are different
       echo("CMPRES OUT: ${cmpRes}")
       if (cmpRes != '') {
-        affectedFiles << manifestFiles[i].path.replaceAll('cdis-manifest/', '')
+        affectedFiles << otherManifestFile
       }
     }
   }
