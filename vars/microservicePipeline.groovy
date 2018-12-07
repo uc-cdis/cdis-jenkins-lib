@@ -35,7 +35,7 @@ def call(Map config) {
     }
     catch (e) {
       def st = new StringWriter()
-      e.printStackTrace(new PrintWriter(w))
+      e.printStackTrace(new PrintWriter(st))
       echo "ERROR: ${e.message}\n\nStackTrace:\n${st}"
       throw e
     }
