@@ -3,6 +3,7 @@ import groovy.transform.Field
 @Field def config // pipeline config shared between helpers
 @Field def cloudAutomationPath // path to directory of pulled cloud-automation
 @Field def kubectlNamespace // namespace to run kube commands in
+@Field def obtainedLock // indicates if successfully locked a namespace
 
 /**
 * Constructor for kubeHelper
@@ -14,6 +15,7 @@ def create(Map config) {
   this.config = config
   this.cloudAutomationPath = "${env.WORKSPACE}/cloud-automation"
   this.kubectlNamespace = "NO_PIPELINE_NAMESPACE_SELECTED"
+  this.obtainedLock = 1 // no lock obtained yet
   return this
 }
 
@@ -91,20 +93,23 @@ def selectAndLockNamespace(List<String> namespaces=null, String owner=null) {
     }
   }
   int randNum = new Random().nextInt(namespaces.size());
-  int lockStatus = 1;
+  this.obtainedLock = 1;
 
   // try to find an unlocked namespace
-  for (int i=0; i < namespaces.size() && lockStatus != 0; ++i) {
+  for (int i=0; i < namespaces.size() && this.obtainedLock != 0; ++i) {
     randNum = (randNum + i) % namespaces.size();
     kubectlNamespace = namespaces.get(randNum)
     println "attempting to lock namespace ${this.kubectlNamespace} with a wait time of 1 minutes"
-    lockStatus = this.klock('lock', owner)
+    this.obtainedLock = this.klock('lock', owner)
   }
-  if (lockStatus != 0) {
+  if (this.obtainedLock != 0) {
     error("aborting - no available workspace")
   }
 }
 
+/**
+* Returns hostname of the current namespace
+*/
 def getHostname() {
   kube {
     return sh(script: "kubectl -n $env.KUBECTL_NAMESPACE get configmap global -o jsonpath='{.data.hostname}'", returnStdout: true)
@@ -112,7 +117,7 @@ def getHostname() {
 }
 
 def teardown() {
-  if (this.notLocked) {
+  if (this.obtainedLock == 0) {
     klock('unlock')
   }
 }

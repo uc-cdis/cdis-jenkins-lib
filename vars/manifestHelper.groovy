@@ -30,6 +30,13 @@ def editService(String commonsHostname, String serviceName, String quayBranchNam
   }
 }
 
+/**
+* Finds manifest files that have been changed
+* Used in gitops pipeline to determine which manifest to use when running tests
+*
+* @param masterDir - directory for comparing files to
+* @param otherDir - directory of potentially affected manifest files
+*/
 def getAffectedManifests(String masterDir, String otherDir) {
   affectedFiles = []
 
