@@ -89,7 +89,6 @@ def selectAndLockNamespace(List<String> namespaces=null, String owner=null) {
     } else {
       namespaces = ['jenkins-dcp', 'jenkins-niaid', 'jenkins-brain']
     }
-    
   }
   int randNum = new Random().nextInt(namespaces.size());
   int lockStatus = 1;

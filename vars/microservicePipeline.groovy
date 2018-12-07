@@ -12,9 +12,9 @@ def call(Map config) {
       stage('FetchCode') {
         pipe.git.fetchAllRepos()
       }
-      if (config.containsKey('') && config.waitForQuay) {
+      if (!pipe.config.skipQuay) {
         stage('WaitForQuayBuild') {
-          // pipe.quay.waitForBuild()
+          pipe.quay.waitForBuild()
         }
       }
       stage('SelectNamespace') {

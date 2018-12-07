@@ -22,16 +22,9 @@ def create(Map config) {
 * Updates config by adding some missing and new values to the map
 */
 def setupConfig(Map config) {
-  gitVars = checkout(scm)
-  // if (null == config || !config.containsKey('GIT_BRANCH')) {
-  //   config.GIT_BRANCH = gitVars.GIT_BRANCH
-  //   config.GIT_COMMIT = gitVars.GIT_COMMIT
-  //   config.GIT_URL = gitVars.GIT_URL
-  // }
+  // get git info of repo/branch that triggered build
   config.gitVars = checkout(scm)
   config.currentBranchFormatted = "${config.gitVars.GIT_BRANCH}".replaceAll("/", "_")
-
-  // get repository name from the JOB_NAME
   config.currentRepoName = "$env.JOB_NAME".split('/')[1]
 
   // update config with the service we are testing

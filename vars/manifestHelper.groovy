@@ -22,20 +22,6 @@ def create(Map config) {
 * @param quayBranchName - defaults to branch's name formatted
 */
 def editService(String commonsHostname, String serviceName, String quayBranchName) {
-  // if (null == commonsHostname) {
-  //   error("must provide hostname of commons manifest to edit")
-  // }
-  // if (null == serviceName) {
-  //   if (this.config.containsKey('serviceTesting')) {
-  //     serviceName = this.config.serviceTesting
-  //   } else {
-  //     error("unable to determine service name")
-  //   }
-  // }
-  // if (null == quayBranchName) {
-  //   error('unable to determine quayBranchName')
-  // }
-
   dir("cdis-manifest/${commonsHostname}") {
     currentBranch = "${serviceName}:[a-zA-Z0-9._-]*"
     targetBranch = "${serviceName}:${quayBranchName}"

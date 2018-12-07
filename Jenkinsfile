@@ -8,5 +8,5 @@ library identifier: "cdis-jenkins-lib@${env.BRANCH_NAME}"
 runPipeline {
   pipeline = 'microservice'
   serviceTesting = [name: 'fence', branch: 'master']
-  waitForQuay = false
+  skipQuay = true
 }
