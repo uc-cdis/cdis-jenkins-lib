@@ -21,7 +21,11 @@ def call(Map config) {
         pipe.kube.selectAndLockNamespace()
       }
       stage('ModifyManifest') {
-        pipe.manifest.editService(pipe.kube.getHostname())
+        pipe.manifest.editService(
+          pipe.kube.getHostname(),
+          pipe.config.serviceTesting.name,
+          pipe.config.serviceTest.branch
+        )
       }
       stage('K8sDeploy') {
         pipe.kube.deploy()
@@ -30,7 +34,7 @@ def call(Map config) {
         pipe.test.simulateData(pipe.kube.kubectlNamespace)
       }
       stage('RunTests') {
-        pipe.test.runIntegrationTests(pipe.kube.kubectlNamespace, pipe.config.service)
+        pipe.test.runIntegrationTests(pipe.kube.kubectlNamespace, pipe.config.serviceTesting)
       }
     }
     catch (e) {

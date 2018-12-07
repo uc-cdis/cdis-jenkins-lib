@@ -23,17 +23,24 @@ def create(Map config) {
 */
 def setupConfig(Map config) {
   gitVars = checkout(scm)
-  if (null == config || !config.containsKey('GIT_BRANCH')) {
-    config.GIT_BRANCH = gitVars.GIT_BRANCH
-    config.GIT_COMMIT = gitVars.GIT_COMMIT
-    config.GIT_URL = gitVars.GIT_URL
-  }
-  config.branchFormatted = "${config.GIT_BRANCH}".replaceAll("/", "_")
+  // if (null == config || !config.containsKey('GIT_BRANCH')) {
+  //   config.GIT_BRANCH = gitVars.GIT_BRANCH
+  //   config.GIT_COMMIT = gitVars.GIT_COMMIT
+  //   config.GIT_URL = gitVars.GIT_URL
+  // }
+  config.gitVars = checkout(scm)
+  config.currentBranchFormatted = "${config.gitVars.GIT_BRANCH}".replaceAll("/", "_")
 
-  if (null == config || !config.containsKey('JOB_NAME')) {
-    config.JOB_NAME = "$env.JOB_NAME".split('/')[1]
+  // get repository name from the JOB_NAME
+  config.currentRepoName = "$env.JOB_NAME".split('/')[1]
+
+  // update config with the service we are testing
+  // if no info is provided, we assume we are testing the current repository and branch
+  if (null == config || !config.containsKey('serviceTesting')) {
+    config.serviceTesting = [name: config.currentRepoName, branch: config.currentBranchFormatted]
   }
-  config.UID = "${config.JOB_NAME}-${config.branchFormatted}-${env.BUILD_NUMBER}"
+
+  config.UID = "${config.currentRepoName}-${config.currentBranchFormatted}-${env.BUILD_NUMBER}"
 
   return config
 }

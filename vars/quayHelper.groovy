@@ -8,7 +8,7 @@ import groovy.transform.Field
 */
 def create(Map config) {
   this.config = config
-  this.requiredProps = ['service', 'GIT_COMMIT', 'branchFormatted']
+  this.requiredProps = ['currentRepoName', 'gitVars', 'currentBranchFormatted']
 
   return this
 }
@@ -34,12 +34,15 @@ def waitForBuild() {
   if (missingProps.size() > 0) {
     error("Config is missing one or more properties required for checking Quay:\n  ${missingProps}")
   }
-  service = this.config.service
+  service = this.config.currentRepoName
+  branchName = this.config.currentBranchFormatted
+  commit = this.config.gitVars.GIT_COMMIT
+
   if (service == 'cdis-jenkins-lib') {
     service = 'jenkins-lib'
   }
 
-  echo("Waiting for Quay to build:\n  service ${service}\n  branch '${this.config.branchFormatted}'\n  commit ${this.config.GIT_COMMIT}")
+  echo("Waiting for Quay to build:\n  service ${service}\n  branch '${branchName}'\n  commit ${commit}")
 
   def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 60)
   def timeout = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) + 3600)
@@ -74,13 +77,13 @@ def waitForBuild() {
       //
       if (fields.length > 2) {
         noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
-        if(fields[0].startsWith(this.config.branchFormatted)) {
-          if(this.config.GIT_COMMIT.startsWith(fields[1])) {
+        if(fields[0].startsWith(branchName)) {
+          if(commit.startsWith(fields[1])) {
             quayImageReady = fields[2].endsWith("complete")
             break
           } else {
             currentBuild.result = 'ABORTED'
-            error("aborting build due to out of date git hash\npipeline: ${this.config.GIT_COMMIT}\nquay: "+fields[1])
+            error("aborting build due to out of date git hash\npipeline: ${commit}\nquay: "+fields[1])
           }
         }
       }
@@ -99,13 +102,13 @@ def waitForBuild() {
         if (fields.length > 2) {
           noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
           
-          if(fields[0].startsWith("$env.GIT_BRANCH".replaceAll("/", "_"))) {
-            if("$env.GIT_COMMIT".startsWith(fields[1])) {
+          if(fields[0].startsWith(branchName)) {
+            if(commit.startsWith(fields[1])) {
               quayImageReady = fields[2].endsWith("complete")
               break
             } else {
               currentBuild.result = 'ABORTED'
-              error("aborting build due to out of date git hash\npipeline: $env.GIT_COMMIT\nquay: "+fields[1])
+              error("aborting build due to out of date git hash\npipeline: ${commit}\nquay: "+fields[1])
             }
           }
         }

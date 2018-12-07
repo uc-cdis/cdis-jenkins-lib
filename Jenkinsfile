@@ -7,8 +7,6 @@ library identifier: "cdis-jenkins-lib@${env.BRANCH_NAME}"
 
 runPipeline {
   pipeline = 'microservice'
+  serviceTesting = [service: 'fence', branch: 'master']
   waitForQuay = false
-
-  JOB_NAME = 'fence'
-  GIT_BRANCH = 'master'
 }

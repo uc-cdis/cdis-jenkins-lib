@@ -19,22 +19,22 @@ def create(Map config) {
 *
 * @param commonsHostname - hostname of commons to edit (e.g. qa-bloodpac.planx-pla.net)
 * @param serviceName - defaults to conf.service
-* @param quayBranchName - defaults to conf.branchFormatted
+* @param quayBranchName - defaults to branch's name formatted
 */
-def editService(String commonsHostname, String serviceName=null, String quayBranchName=null) {
-  if (null == commonsHostname) {
-    error("must provide hostname of commons manifest to edit")
-  }
-  if (null == serviceName) {
-    if (this.config.containsKey('service')) {
-      serviceName = this.config.service
-    } else {
-      error("unable to determine service name")
-    }
-  }
-  if (null == quayBranchName) {
-    quayBranchName = this.config.branchFormatted
-  }
+def editService(String commonsHostname, String serviceName, String quayBranchName) {
+  // if (null == commonsHostname) {
+  //   error("must provide hostname of commons manifest to edit")
+  // }
+  // if (null == serviceName) {
+  //   if (this.config.containsKey('serviceTesting')) {
+  //     serviceName = this.config.serviceTesting
+  //   } else {
+  //     error("unable to determine service name")
+  //   }
+  // }
+  // if (null == quayBranchName) {
+  //   error('unable to determine quayBranchName')
+  // }
 
   dir("cdis-manifest/${commonsHostname}") {
     currentBranch = "${serviceName}:[a-zA-Z0-9._-]*"

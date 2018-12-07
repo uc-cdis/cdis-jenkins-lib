@@ -15,7 +15,7 @@ def create(Map config) {
 */
 def fetchAllRepos() {
   dir('gen3-qa') {
-    if (this.config.JOB_NAME == "gen3-qa") {
+    if (this.config.currentRepoName == "gen3-qa") {
       // testing the gen3-qa repo - check out the test branch here
       println("INFO: checkout gen3-qa/ from JOB repo branch ...")
       checkout scm;
@@ -35,7 +35,7 @@ def fetchAllRepos() {
   dir('cdis-manifest') {
     if (this.config.pipeline == "gitops") {
       // testing a manifest - check out the test branch here
-      println("INFO: checkout manifests from JOB_NAME's repo branch ...\n  ${this.config.GIT_URL}\n  ${this.config.GIT_COMMIT}")
+      println("INFO: checkout manifests from ${this.config.currentRepoName}'s branch ...\n  ${this.config.gitVars.GIT_URL}\n  ${this.config.gitVars.GIT_COMMIT}")
       checkout scm
     } else {
       git(
@@ -55,7 +55,7 @@ def fetchAllRepos() {
 def checkoutBranch(String branchName, String directoryName) {
   dir(directoryName) {
     git(
-      url: this.config.GIT_URL,
+      url: this.config.gitVars.GIT_URL,
       branch: branchName
     )
   }
