@@ -44,3 +44,25 @@ def handleError(e) {
   echo "ERROR: ${e.message}\n\nStackTrace:\n${st}"
   throw e
 }
+
+def teardown(String buildResult) {
+  if ("UNSTABLE" == buildResult) {
+    echo "Unstable!"
+    // slack.sendUnstable()
+  }
+  else if ("FAILURE" == buildResult) {
+    echo "Failure!"
+    archiveArtifacts(artifacts: '**/output/*.png', fingerprint: true)
+    // slack.sendFailure()
+  }
+  else if ("SUCCESS" == buildResult) {
+    echo "Success!"
+    // slack.sendSuccess()
+  }
+
+  // unlock the namespace
+  this.kube.klock('unlock')
+  if (this.test.startedIntegrationTests) {
+    junit "gen3-qa/output/*.xml"
+  }
+}
