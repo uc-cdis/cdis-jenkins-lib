@@ -37,3 +37,10 @@ def setupConfig(Map config) {
 
   return config
 }
+
+def handleError(e) {
+  def st = new StringWriter()
+  e.printStackTrace(new PrintWriter(st))
+  echo "ERROR: ${e.message}\n\nStackTrace:\n${st}"
+  throw e
+}

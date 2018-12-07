@@ -9,7 +9,7 @@ def call(Map config) {
   node {
     pipe = pipelineHelper.create(config)
     def affectedManifests
-    catchError {
+    try {
       stage('FetchCode') {
         pipe.git.fetchAllRepos()
         // fetch master branch of this repo to detect manifest edits later
@@ -45,28 +45,32 @@ def call(Map config) {
         pipe.test.runIntegrationTests(pipe.kube.kubectlNamespace, pipe.config.service)
       }
     }
+    catch (e) {
+      pipe.handleError(e)
+    }
+    finally {
+      // Post Pipeline steps
+      stage('Post') {
+        def currentResult = currentBuild.result
+        if ("UNSTABLE" == currentResult) {
+          echo "Unstable!"
+          // slack.sendUnstable()
+        }
+        else if ("FAILURE" == currentResult) {
+          echo "Failure!"
+          archiveArtifacts(artifacts: '**/output/*.png', fingerprint: true)
+          // slack.sendFailure()
+        }
+        else if ("SUCCESS" == currentResult) {
+          echo "Success!"
+          // slack.sendSuccess()
+        }
 
-    // Post Pipeline steps
-    stage('Post') {
-      def currentResult = currentBuild.result
-      if ("UNSTABLE" == currentResult) {
-        echo "Unstable!"
-        // slack.sendUnstable()
+        // unlock the namespace
+        pipe.kube.klock('unlock')
+        echo "done"
+        junit "gen3-qa/output/*.xml"
       }
-      else if ("FAILURE" == currentResult) {
-        echo "Failure!"
-        archiveArtifacts(artifacts: '**/output/*.png', fingerprint: true)
-        // slack.sendFailure()
-      }
-      else if ("SUCCESS" == currentResult) {
-        echo "Success!"
-        // slack.sendSuccess()
-      }
-
-      // unlock the namespace
-      pipe.kube.klock('unlock')
-      echo "done"
-      junit "gen3-qa/output/*.xml"
     }
   }
 }

@@ -34,10 +34,7 @@ def call(Map config) {
       }
     }
     catch (e) {
-      def st = new StringWriter()
-      e.printStackTrace(new PrintWriter(st))
-      echo "ERROR: ${e.message}\n\nStackTrace:\n${st}"
-      throw e
+      pipe.handleError(e)
     }
       finally {
       // Post Pipeline steps
