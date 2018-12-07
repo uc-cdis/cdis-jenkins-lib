@@ -36,8 +36,7 @@ def call(Map config) {
     catch (e) {
       pipe.handleError(e)
     }
-      finally {
-      // Post Pipeline steps
+    finally {
       stage('Post') {
         pipe.teardown(currentBuild.result)
       }
