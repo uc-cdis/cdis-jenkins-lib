@@ -38,7 +38,7 @@ def call(Map config) {
       e.printStackTrace()
       def w = new StringWriter()
       e.printStackTrace(new PrintWriter(w))
-      echo "failed with ${e.message}", to: 'admin@somewhere', body: "Failed: ${w}"
+      echo "failed with ${e.message} -- Failed: ${w}"
       throw e
     }
 
