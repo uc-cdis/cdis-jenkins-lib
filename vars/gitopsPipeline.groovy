@@ -30,9 +30,9 @@ def call(Map config) {
         // copy over the new manifest
         source = affectedManifests[0]
         echo("Selected Manifest: ${source}")
-        thisManifestDir = pipe.kube.getHostname()
-        dest = "cdis-manifest/${thisManifestDir}/manifest.json"
-        sh("mkdir -p ${thisManifestDir}")
+        thisNamespaceManifestDir = pipe.kube.getHostname()
+        dest = "cdis-manifest/${thisNamespaceManifestDir}/"
+        sh("mkdir -p ${thisNamespaceManifestDir}")
         sh("cp ${source} ${dest}")
       }
       stage('K8sDeploy') {
