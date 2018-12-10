@@ -17,7 +17,7 @@ def call(Map config) {
   }
   dir('data-simulator') {
     git(
-      url: 'https://github.com/occ-data/data-simulator.git',
+      url: 'https://github.com/uc-cdis/data-simulator.git',
       branch: 'master'
     )
   }
