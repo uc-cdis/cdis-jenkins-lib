@@ -35,9 +35,6 @@ def call(Map config) {
         }
       }
       stage('WaitForQuayBuild') {
-        when {
-          expression { return false }
-        }
         steps {
           script {
             service = "$env.JOB_NAME".split('/')[1]
@@ -120,7 +117,7 @@ def call(Map config) {
       stage('SelectNamespace') {
         steps {
           script {
-            String[] namespaces = ['jenkins-brain']
+            String[] namespaces = ['jenkins-brain', 'jenkins-niaid']
             int randNum = new Random().nextInt(namespaces.length);
             uid = env.service+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
             int lockStatus = 1;
@@ -154,9 +151,6 @@ def call(Map config) {
         }
       }
       stage('K8sDeploy') {
-        when {
-          expression { return false }
-        }
         steps {
           withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {
             echo "GEN3_HOME is $env.GEN3_HOME"
