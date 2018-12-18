@@ -152,7 +152,7 @@ def call(Map config) {
       }
       stage('DbResetK8sDeploy') {
         steps {
-          withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {
+          withEnv(['GEN3_NOPROXY=true', "vpc_name=qaplanetv1", "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {
             echo "GEN3_HOME is $env.GEN3_HOME"
             echo "GIT_BRANCH is $env.GIT_BRANCH"
             echo "GIT_COMMIT is $env.GIT_COMMIT"
@@ -164,7 +164,7 @@ def call(Map config) {
       }
       stage('VerifyClusterHealth') {
         steps {
-          withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {
+          withEnv(['GEN3_NOPROXY=true', "vpc_name=qaplanetv1", "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {
             sh "bash cloud-automation/gen3/bin/kube-wait4-pods.sh"
             sh "bash ./gen3-qa/check-pod-health.sh"
           }
@@ -174,7 +174,7 @@ def call(Map config) {
         // Run the data simulator
         steps {
           dir('gen3-qa') {
-            withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=$env.WORKSPACE/testData/"]) {
+            withEnv(['GEN3_NOPROXY=true', "vpc_name=qaplanetv1", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=$env.WORKSPACE/testData/"]) {
               sh "bash ./jenkins-simulate-data.sh $env.KUBECTL_NAMESPACE"
             }
           }
@@ -183,7 +183,7 @@ def call(Map config) {
       stage('RunTests') {
         steps {
           dir('gen3-qa') {
-            withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=$env.WORKSPACE/testData/"]) {
+            withEnv(['GEN3_NOPROXY=true', "vpc_name=qaplanetv1", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=$env.WORKSPACE/testData/"]) {
               sh "bash ./run-tests.sh $env.KUBECTL_NAMESPACE --service=$env.service"
             }
           }
