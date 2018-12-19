@@ -207,7 +207,8 @@ def call(Map config) {
         script {
           uid = env.service+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
           withEnv(['GEN3_NOPROXY=true', "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {         
-            sh("bash cloud-automation/gen3/bin/klock.sh unlock jenkins "+uid)
+            sh("bash cloud-automation/gen3/bin/klock.sh unlock jenkins " + uid + " || true")
+            sh("bash cloud-automation/gen3/bin/klock.sh unlock reset-lock gen3-reset || true")
           }
         }
         echo "done"
