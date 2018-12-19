@@ -47,7 +47,8 @@ def call(Map config) {
             timeQuery = "curl -s "+timeUrl+/ | jq '.builds[] | "\(.tags[]),\(.display_name),\(.phase)"'/
             limitUrl = "$env.QUAY_API"+service+"/build/?limit=25"
             limitQuery = "curl -s "+limitUrl+/ | jq '.builds[] | "\(.tags[]),\(.display_name),\(.phase)"'/
-            
+            error("aborting due to frickjack")
+                    
             def quayImageReady = false
             def noPendingQuayBuilds = false
             while(quayImageReady != true && noPendingQuayBuilds != true) {
@@ -209,6 +210,7 @@ def call(Map config) {
           withEnv(['GEN3_NOPROXY=true', "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {         
             sh("bash cloud-automation/gen3/bin/klock.sh unlock jenkins " + uid + " || true")
             sh("bash cloud-automation/gen3/bin/klock.sh unlock reset-lock gen3-reset || true")
+            sh("env")
           }
           if (env.CHANGE_ID) {
             // see https://github.com/jenkinsci/pipeline-github-plugin#pullrequest
