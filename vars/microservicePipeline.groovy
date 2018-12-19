@@ -212,6 +212,9 @@ def call(Map config) {
           }
         }
         echo "done"
+        if (env.CHANGE_ID) {
+          pullRequest.comment('Hello from frickjack')
+        }
         junit "gen3-qa/output/*.xml"
       }
     }
