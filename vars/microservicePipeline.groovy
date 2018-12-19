@@ -213,6 +213,7 @@ def call(Map config) {
             sh("env")
           }
           if (env.CHANGE_ID) {
+            // bla
             // see https://github.com/jenkinsci/pipeline-github-plugin#pullrequest
             pullRequest.comment('Hello from frickjack')
           } else {
