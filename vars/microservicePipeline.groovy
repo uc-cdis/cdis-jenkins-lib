@@ -46,9 +46,9 @@ def call(Map config) {
             def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 60)
             def timeout = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) + 3600)
             timeUrl = "$env.QUAY_API"+service+"/build/?since="+timestamp
-            timeQuery = "curl -s "+timeUrl+/ | jq -r '.builds[] | "\(.tags[]),\(.display_name),\(.phase)"'/
+            timeQuery = "curl -s "+timeUrl+/ | jq '.builds[] | "\(.tags[]),\(.display_name),\(.phase)"'/
             limitUrl = "$env.QUAY_API"+service+"/build/?limit=25"
-            limitQuery = "curl -s "+limitUrl+/ | jq -r '.builds[] | "\(.tags[]),\(.display_name),\(.phase)"'/
+            limitQuery = "curl -s "+limitUrl+/ | jq '.builds[] | "\(.tags[]),\(.display_name),\(.phase)"'/
             
             def quayImageReady = false
             def noPendingQuayBuilds = false
@@ -78,7 +78,9 @@ def call(Map config) {
                   if(fields[0].startsWith(quaySuffix)) {
                     if(env.GIT_COMMIT.startsWith(fields[1])) {
                       quayImageReady = fields[2].endsWith("complete")
-                      println "found quay build: "+res
+                      if (quayImageReady) {
+                        println "found quay build: "+res
+                      }
                       break
                     } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1])) {
                       // previous commit is the newest - sleep and try again
@@ -109,7 +111,9 @@ def call(Map config) {
                     if(fields[0].startsWith(quaySuffix)) {
                       if(env.GIT_COMMIT.startsWith(fields[1])) {
                         quayImageReady = fields[2].endsWith("complete")
-                        println "found quay build: "+res
+                        if (quayImageReady) {
+                          println "found quay build: "+res
+                        }
                         break
                       } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1])) {
                         // previous commit is the newest - sleep and try again
