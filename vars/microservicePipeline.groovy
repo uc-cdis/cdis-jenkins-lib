@@ -76,8 +76,12 @@ def call(Map config) {
                 if (fields.length > 2) {
                   noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
                   if(fields[0].startsWith(quaySuffix)) {
-                    if("$env.GIT_COMMIT".startsWith(fields[1])) {
+                    if(env.GIT_COMMIT.startsWith(fields[1])) {
                       quayImageReady = fields[2].endsWith("complete")
+                      break
+                    } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1]) {
+                      // previous commit is the newest - sleep and try again
+                      // things get annoying when quay gets slow
                       break
                     } else {
                       currentBuild.result = 'ABORTED'
@@ -93,6 +97,7 @@ def call(Map config) {
                 for (String res in resList) {
                   fields = res.replaceAll('"', "").split(',')
                   //
+                  // this loop assumes quay gives us back builds in reverse timestamp order.
                   // if all quay builds are complete, then assume there's nothing to wait
                   // for even if a build for our commit is not pending.
                   // that can happen if someone re-runs a Jenkins job interactively or whatever
@@ -101,12 +106,20 @@ def call(Map config) {
                     noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
                     
                     if(fields[0].startsWith(quaySuffix)) {
-                      if("$env.GIT_COMMIT".startsWith(fields[1])) {
+                      if(env.GIT_COMMIT.startsWith(fields[1])) {
                         quayImageReady = fields[2].endsWith("complete")
                         break
+                      } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1]) {
+                        // previous commit is the newest - sleep and try again
+                        // things get annoying when quay gets slow
+                        noPendingQuayBuilds = false
+                        break
                       } else {
-                        // some other commit is in the process of building
+                        // if previous commit is the newest one in quay, then maybe
+                        // the job's commit hasn't appeared yet. 
+                        // otherwise assume some other newer commit is in the process of building in quay
                         currentBuild.result = 'ABORTED'
+                        println("aborting build due to out of date git hash, tag: $quaySuffix, pipeline: $env.GIT_COMMIT, quay: "+fields[1])
                         error("aborting build due to out of date git hash\ntag: $quaySuffix\npipeline: $env.GIT_COMMIT\nquay: "+fields[1])
                       }
                     }
