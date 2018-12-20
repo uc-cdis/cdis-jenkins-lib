@@ -37,7 +37,9 @@ def call(Map config) {
       stage('WaitForQuayBuild') {
         steps {
           script {
+            // ignore config service/branch overrides in WaitForQuayBuild ...
             service = "$env.JOB_NAME".split('/')[1]
+            quaySuffix = "$env.CHANGE_BRANCH".replaceAll("/", "_")
             if (service == 'cdis-jenkins-lib') {
               service = 'jenkins-lib'
             }
@@ -73,7 +75,7 @@ def call(Map config) {
                 //
                 if (fields.length > 2) {
                   noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
-                  if(fields[0].startsWith(env.quaySuffix)) {
+                  if(fields[0].startsWith(quaySuffix)) {
                     if("$env.GIT_COMMIT".startsWith(fields[1])) {
                       quayImageReady = fields[2].endsWith("complete")
                       break
@@ -98,14 +100,14 @@ def call(Map config) {
                   if (fields.length > 2) {
                     noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
                     
-                    if(fields[0].startsWith(env.quaySuffix)) {
+                    if(fields[0].startsWith(quaySuffix)) {
                       if("$env.GIT_COMMIT".startsWith(fields[1])) {
                         quayImageReady = fields[2].endsWith("complete")
                         break
                       } else {
                         // some other commit is in the process of building
                         currentBuild.result = 'ABORTED'
-                        error("aborting build due to out of date git hash\ntag: $env.quaySuffix\npipeline: $env.GIT_COMMIT\nquay: "+fields[1])
+                        error("aborting build due to out of date git hash\ntag: $quaySuffix\npipeline: $env.GIT_COMMIT\nquay: "+fields[1])
                       }
                     }
                   }
