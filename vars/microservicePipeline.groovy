@@ -78,6 +78,7 @@ def call(Map config) {
                   if(fields[0].startsWith(quaySuffix)) {
                     if(env.GIT_COMMIT.startsWith(fields[1])) {
                       quayImageReady = fields[2].endsWith("complete")
+                      println "found quay build: "+res
                       break
                     } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1])) {
                       // previous commit is the newest - sleep and try again
@@ -108,6 +109,7 @@ def call(Map config) {
                     if(fields[0].startsWith(quaySuffix)) {
                       if(env.GIT_COMMIT.startsWith(fields[1])) {
                         quayImageReady = fields[2].endsWith("complete")
+                        println "found quay build: "+res
                         break
                       } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1])) {
                         // previous commit is the newest - sleep and try again
