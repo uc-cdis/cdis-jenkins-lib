@@ -13,7 +13,7 @@ def call(Map config) {
         steps {
           script {
             env.service = "$env.JOB_NAME".split('/')[1]
-            env.quaySuffix = "$env.GIT_BRANCH".replaceAll("/", "_")
+            env.quaySuffix = "$env.CHANGE_BRANCH".replaceAll("/", "_")
             fetchCode(config)
           }
         }
@@ -28,7 +28,7 @@ def call(Map config) {
                 env.service = config.JOB_NAME
               }
               if (config.GIT_BRANCH) {
-                env.quaySuffix = config.GIT_BRANCH
+                env.quaySuffix = config.GIT_BRANCH.replaceAll("/", "_")
               }
             }
           }
@@ -37,7 +37,9 @@ def call(Map config) {
       stage('WaitForQuayBuild') {
         steps {
           script {
+            // ignore config service/branch overrides in WaitForQuayBuild ...
             service = "$env.JOB_NAME".split('/')[1]
+            quaySuffix = "$env.CHANGE_BRANCH".replaceAll("/", "_")
             if (service == 'cdis-jenkins-lib') {
               service = 'jenkins-lib'
             }
@@ -73,9 +75,16 @@ def call(Map config) {
                 //
                 if (fields.length > 2) {
                   noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
-                  if(fields[0].startsWith("$env.GIT_BRANCH".replaceAll("/", "_"))) {
-                    if("$env.GIT_COMMIT".startsWith(fields[1])) {
+                  if(fields[0].startsWith(quaySuffix)) {
+                    if(env.GIT_COMMIT.startsWith(fields[1])) {
                       quayImageReady = fields[2].endsWith("complete")
+                      if (quayImageReady) {
+                        println "found quay build: "+res
+                      }
+                      break
+                    } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1])) {
+                      // previous commit is the newest - sleep and try again
+                      // things get annoying when quay gets slow
                       break
                     } else {
                       currentBuild.result = 'ABORTED'
@@ -91,6 +100,7 @@ def call(Map config) {
                 for (String res in resList) {
                   fields = res.replaceAll('"', "").split(',')
                   //
+                  // this loop assumes quay gives us back builds in reverse timestamp order.
                   // if all quay builds are complete, then assume there's nothing to wait
                   // for even if a build for our commit is not pending.
                   // that can happen if someone re-runs a Jenkins job interactively or whatever
@@ -98,13 +108,25 @@ def call(Map config) {
                   if (fields.length > 2) {
                     noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
                     
-                    if(fields[0].startsWith("$env.GIT_BRANCH".replaceAll("/", "_"))) {
-                      if("$env.GIT_COMMIT".startsWith(fields[1])) {
+                    if(fields[0].startsWith(quaySuffix)) {
+                      if(env.GIT_COMMIT.startsWith(fields[1])) {
                         quayImageReady = fields[2].endsWith("complete")
+                        if (quayImageReady) {
+                          println "found quay build: "+res
+                        }
+                        break
+                      } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1])) {
+                        // previous commit is the newest - sleep and try again
+                        // things get annoying when quay gets slow
+                        noPendingQuayBuilds = false
                         break
                       } else {
+                        // if previous commit is the newest one in quay, then maybe
+                        // the job's commit hasn't appeared yet. 
+                        // otherwise assume some other newer commit is in the process of building in quay
                         currentBuild.result = 'ABORTED'
-                        error("aborting build due to out of date git hash\npipeline: $env.GIT_COMMIT\nquay: "+fields[1])
+                        println("aborting build due to out of date git hash, tag: $quaySuffix, pipeline: $env.GIT_COMMIT, quay: "+fields[1])
+                        error("aborting build due to out of date git hash\ntag: $quaySuffix\npipeline: $env.GIT_COMMIT\nquay: "+fields[1])
                       }
                     }
                   }
@@ -119,7 +141,7 @@ def call(Map config) {
           script {
             String[] namespaces = ['jenkins-brain', 'jenkins-niaid', 'jenkins-dcp']
             int randNum = new Random().nextInt(namespaces.length);
-            uid = env.service+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
+            uid = env.service+"-"+env.quaySuffix+"-"+env.BUILD_NUMBER
             int lockStatus = 1;
 
             // try to find an unlocked namespace
@@ -145,7 +167,7 @@ def call(Map config) {
           }
           dir("cdis-manifest/$dirname") {
             withEnv(["masterBranch=$env.service:[a-zA-Z0-9._-]*", "targetBranch=$env.service:$env.quaySuffix"]) {
-              sh 'sed -i -e "s,'+"$env.masterBranch,$env.targetBranch"+',g" manifest.json'
+              sh 'sed -i -e "s,'+"$env.masterBranch,$env.targetBranch"+',g" manifest.json && cat manifest.json'
             }
           }
         }
@@ -154,7 +176,7 @@ def call(Map config) {
         steps {
           withEnv(['GEN3_NOPROXY=true', "vpc_name=qaplanetv1", "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {
             echo "GEN3_HOME is $env.GEN3_HOME"
-            echo "GIT_BRANCH is $env.GIT_BRANCH"
+            echo "CHANGE_BRANCH is $env.CHANGE_BRANCH"
             echo "GIT_COMMIT is $env.GIT_COMMIT"
             echo "KUBECTL_NAMESPACE is $env.KUBECTL_NAMESPACE"
             echo "WORKSPACE is $env.WORKSPACE"
@@ -205,7 +227,7 @@ def call(Map config) {
       }
       always {
         script {
-          uid = env.service+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
+          uid = env.service+"-"+env.quaySuffix+"-"+env.BUILD_NUMBER
           withEnv(['GEN3_NOPROXY=true', "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {         
             sh("bash cloud-automation/gen3/bin/klock.sh unlock jenkins " + uid + " || true")
             sh("bash cloud-automation/gen3/bin/klock.sh unlock reset-lock gen3-reset || true")
