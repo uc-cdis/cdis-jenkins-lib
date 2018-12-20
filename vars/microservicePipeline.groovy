@@ -13,7 +13,7 @@ def call(Map config) {
         steps {
           script {
             env.service = "$env.JOB_NAME".split('/')[1]
-            env.quaySuffix = "$env.GIT_BRANCH".replaceAll("/", "_")
+            env.quaySuffix = "$env.CHANGE_BRANCH".replaceAll("/", "_")
             fetchCode(config)
           }
         }
@@ -28,7 +28,7 @@ def call(Map config) {
                 env.service = config.JOB_NAME
               }
               if (config.GIT_BRANCH) {
-                env.quaySuffix = config.GIT_BRANCH
+                env.quaySuffix = config.GIT_BRANCH.replaceAll("/", "_")
               }
             }
           }
@@ -73,7 +73,7 @@ def call(Map config) {
                 //
                 if (fields.length > 2) {
                   noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
-                  if(fields[0].startsWith("$env.GIT_BRANCH".replaceAll("/", "_"))) {
+                  if(fields[0].startsWith(env.quaySuffix)) {
                     if("$env.GIT_COMMIT".startsWith(fields[1])) {
                       quayImageReady = fields[2].endsWith("complete")
                       break
@@ -98,7 +98,7 @@ def call(Map config) {
                   if (fields.length > 2) {
                     noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
                     
-                    if(fields[0].startsWith("$env.GIT_BRANCH".replaceAll("/", "_"))) {
+                    if(fields[0].startsWith(env.quaySuffix)) {
                       if("$env.GIT_COMMIT".startsWith(fields[1])) {
                         quayImageReady = fields[2].endsWith("complete")
                         break
@@ -119,7 +119,7 @@ def call(Map config) {
           script {
             String[] namespaces = ['jenkins-brain', 'jenkins-niaid', 'jenkins-dcp']
             int randNum = new Random().nextInt(namespaces.length);
-            uid = env.service+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
+            uid = env.service+"-"+env.quaySuffix+"-"+env.BUILD_NUMBER
             int lockStatus = 1;
 
             // try to find an unlocked namespace
@@ -145,7 +145,7 @@ def call(Map config) {
           }
           dir("cdis-manifest/$dirname") {
             withEnv(["masterBranch=$env.service:[a-zA-Z0-9._-]*", "targetBranch=$env.service:$env.quaySuffix"]) {
-              sh 'sed -i -e "s,'+"$env.masterBranch,$env.targetBranch"+',g" manifest.json'
+              sh 'sed -i -e "s,'+"$env.masterBranch,$env.targetBranch"+',g" manifest.json && cat manifest.json'
             }
           }
         }
@@ -154,7 +154,7 @@ def call(Map config) {
         steps {
           withEnv(['GEN3_NOPROXY=true', "vpc_name=qaplanetv1", "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {
             echo "GEN3_HOME is $env.GEN3_HOME"
-            echo "GIT_BRANCH is $env.GIT_BRANCH"
+            echo "CHANGE_BRANCH is $env.CHANGE_BRANCH"
             echo "GIT_COMMIT is $env.GIT_COMMIT"
             echo "KUBECTL_NAMESPACE is $env.KUBECTL_NAMESPACE"
             echo "WORKSPACE is $env.WORKSPACE"
@@ -205,7 +205,7 @@ def call(Map config) {
       }
       always {
         script {
-          uid = env.service+"-"+"$env.GIT_BRANCH".replaceAll("/", "_")+"-"+env.BUILD_NUMBER
+          uid = env.service+"-"+env.quaySuffix+"-"+env.BUILD_NUMBER
           withEnv(['GEN3_NOPROXY=true', "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {         
             sh("bash cloud-automation/gen3/bin/klock.sh unlock jenkins " + uid + " || true")
             sh("bash cloud-automation/gen3/bin/klock.sh unlock reset-lock gen3-reset || true")
