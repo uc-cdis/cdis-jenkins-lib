@@ -79,7 +79,7 @@ def call(Map config) {
                     if(env.GIT_COMMIT.startsWith(fields[1])) {
                       quayImageReady = fields[2].endsWith("complete")
                       break
-                    } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1]) {
+                    } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1])) {
                       // previous commit is the newest - sleep and try again
                       // things get annoying when quay gets slow
                       break
@@ -109,7 +109,7 @@ def call(Map config) {
                       if(env.GIT_COMMIT.startsWith(fields[1])) {
                         quayImageReady = fields[2].endsWith("complete")
                         break
-                      } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1]) {
+                      } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1])) {
                         // previous commit is the newest - sleep and try again
                         // things get annoying when quay gets slow
                         noPendingQuayBuilds = false
