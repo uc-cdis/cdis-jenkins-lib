@@ -139,7 +139,7 @@ def call(Map config) {
       stage('SelectNamespace') {
         steps {
           script {
-            String[] namespaces = ['jenkins-brain', 'jenkins-niaid', 'jenkins-dcp']
+            String[] namespaces = ['jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
             int randNum = new Random().nextInt(namespaces.length);
             uid = env.service+"-"+env.quaySuffix+"-"+env.BUILD_NUMBER
             int lockStatus = 1;
