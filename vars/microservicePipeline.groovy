@@ -139,7 +139,7 @@ def call(Map config) {
       stage('SelectNamespace') {
         steps {
           script {
-            String[] namespaces = ['jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
+            String[] namespaces = ['jenkins-niaid']; //['jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
             int nsIndex = 1; // test jenkins-niaid ... new Random().nextInt(namespaces.length);
             uid = env.service+"-"+env.quaySuffix+"-"+env.BUILD_NUMBER
             int lockStatus = 1;
@@ -181,6 +181,7 @@ def call(Map config) {
             echo "KUBECTL_NAMESPACE is $env.KUBECTL_NAMESPACE"
             echo "WORKSPACE is $env.WORKSPACE"
             sh "yes | bash cloud-automation/gen3/bin/reset.sh"
+            sh "bash cloud-automation/gen3/bin/kube-setup-spark.sh"
           }
         }
       }
