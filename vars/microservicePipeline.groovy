@@ -140,7 +140,7 @@ def call(Map config) {
         steps {
           script {
             String[] namespaces = ['jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
-            int nsIndex = 3; // force genomel to test it ... new Random().nextInt(namespaces.length);
+            int nsIndex = new Random().nextInt(namespaces.length);
             uid = env.service+"-"+env.quaySuffix+"-"+env.BUILD_NUMBER
             int lockStatus = 1;
 
