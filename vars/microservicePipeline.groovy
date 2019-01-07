@@ -233,6 +233,11 @@ def call(Map config) {
             sh("bash cloud-automation/gen3/bin/klock.sh unlock jenkins " + uid + " || true")
             sh("bash cloud-automation/gen3/bin/klock.sh unlock reset-lock gen3-reset || true")
           }
+          if (env.CHANGE_ID) {
+            // bla
+            // see https://github.com/jenkinsci/pipeline-github-plugin#pullrequest
+            pullRequest.comment('Hello from Atharva')
+          }
         }
         echo "done"
         junit "gen3-qa/output/*.xml"
