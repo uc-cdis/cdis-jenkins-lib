@@ -1,6 +1,6 @@
 #!groovy
 
-def call(Map config) {
+def call() {
     String[] namespaces = ['jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
     int randNum = new Random().nextInt(namespaces.length);
     uid = env.service+"-"+env.quaySuffix+"-"+env.BUILD_NUMBER

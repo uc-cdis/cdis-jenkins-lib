@@ -34,42 +34,66 @@ def call(Map config) {
           }
         }
       }
-      stage('WaitForQuayBuild') {
+      stage('NormalBuild') {
         when {
-          expression { env.JOB_NAME != 'cdis-manifest' }
+          expression { config.MANIFEST == null || config.MANIFEST != "True" }
         }
-        steps {
-          script {
-            waitForQuay(config)
+        stages {
+          stage('WaitForQuayBuild') {
+            steps {
+              script {
+                waitForQuay()
+              }
+            }
+          }
+          stage('SelectNamespace') {
+            steps {
+              script {
+                selectNamespace()
+              }
+            }
+          }
+          stage('ModifyManifest') {
+            steps {
+              script {
+                dirname = sh(script: "kubectl -n $env.KUBECTL_NAMESPACE get configmap global -o jsonpath='{.data.hostname}'", returnStdout: true)
+              }
+              dir("cdis-manifest/$dirname") {
+                withEnv(["masterBranch=$env.service:[a-zA-Z0-9._-]*", "targetBranch=$env.service:$env.quaySuffix"]) {
+                  sh 'sed -i -e "s,'+"$env.masterBranch,$env.targetBranch"+',g" manifest.json && cat manifest.json'
+                }
+              }
+            }
           }
         }
       }
-      stage('SelectNamespace') {
+      stage('ManifestBuild') {
         when {
-          expression { env.JOB_NAME != 'cdis-manifest' }
+          expression { config.MANIFEST != null && config.MANIFEST == "True" }
         }
-        steps {
-          script {
-            selectNamespace(config))
+        stages {
+          stage('SelectNamespace') {
+            steps {
+              script {
+                selectNamespace()
+              }
+            }
           }
-        }
-      }
-      stage('ModifyManifest') {
-        when {
-          expression { env.JOB_NAME != 'cdis-manifest' }
-        }
-        steps {
-          script {
-            dirname = sh(script: "kubectl -n $env.KUBECTL_NAMESPACE get configmap global -o jsonpath='{.data.hostname}'", returnStdout: true)
-          }
-          dir("cdis-manifest/$dirname") {
-            withEnv(["masterBranch=$env.service:[a-zA-Z0-9._-]*", "targetBranch=$env.service:$env.quaySuffix"]) {
-              sh 'sed -i -e "s,'+"$env.masterBranch,$env.targetBranch"+',g" manifest.json && cat manifest.json'
+          // This steps will merge the cdis-manifest repository with the cdis-manifest folder (where script is checked out from gitops-qa) in jenkins pod.
+          stage('ModifyManifest') {
+            steps {
+              script {
+                echo "WORKSPACE is $env.WORKSPACE"
+                manifestDiff()
+              }
             }
           }
         }
       }
       stage('DbResetK8sDeploy') {
+        when {
+          expression { env.KUBECTL_NAMESPACE != null && env.KUBECTL_NAMESPACE != 'default'}
+        }
         steps {
           withEnv(['GEN3_NOPROXY=true', "vpc_name=qaplanetv1", "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {
             echo "GEN3_HOME is $env.GEN3_HOME"
