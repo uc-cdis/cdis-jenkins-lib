@@ -236,7 +236,7 @@ def call(Map config) {
           if (env.CHANGE_ID) {
             // bla
             // see https://github.com/jenkinsci/pipeline-github-plugin#pullrequest
-            pullRequest.comment('Hello from Atharva')
+            pullRequest.comment("The time taken ${currentBuild.durationString}")
           }
         }
         echo "done"
