@@ -181,6 +181,7 @@ def call(Map config) {
             echo "KUBECTL_NAMESPACE is $env.KUBECTL_NAMESPACE"
             echo "WORKSPACE is $env.WORKSPACE"
             sh "yes | bash cloud-automation/gen3/bin/reset.sh"
+            sh "bash cloud-automation/gen3/bin/kube-setup-spark.sh"
           }
         }
       }
