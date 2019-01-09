@@ -41,7 +41,7 @@ def call(Map config) {
               // we get the data client from master, unless the service being
               // tested is the data client itself, in which case we get the
               // executable for the current branch
-              // Note: the data client does not use Jenkins yet
+              // Note: the data client does not use Jenkins yet (see PXP-2211)
               branch = "master"
               if (env.service == "cdis-data-client") {
                 branch = env.CHANGE_BRANCH
@@ -53,7 +53,7 @@ def call(Map config) {
 
               // download the gen3 data client executable from S3
               download_location = "dataclient-linux.zip"
-              sh "aws s3 cp s3://cdis-dc-builds/$branch/dataclient_$os.zip $download_location"
+              sh String.format("aws s3 cp s3://cdis-dc-builds/%s/dataclient_%s.zip %s", branch, os, download_location)
               assert fileExists(download_location)
               unzip(download_location)
 
