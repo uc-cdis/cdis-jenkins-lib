@@ -203,7 +203,7 @@ def call(Map config) {
           }
         }
       }
-      stage('FetchDataClient') { // TODO: move step to later in the pipeline
+      stage('FetchDataClient') {
         steps {
           dir('dataclient') {
             script {
@@ -229,10 +229,11 @@ def call(Map config) {
               // make sure we can execute it
               executable_name = "gen3-client"
               assert fileExists(executable_name)
-              sh "chmod u+x $executable_name"
-              sh "./$executable_name --version"
+              sh "mv $executable_name $env.WORKSPACE/$executable_name"
+              sh "chmod u+x $env.WORKSPACE/$executable_name"
+              sh "$env.WORKSPACE/$executable_name --version"
 
-              println "Data client successfully set up at: $executable_name"
+              println "Data client successfully set up at: $env.WORKSPACE/$executable_name"
             }
           }
         }
@@ -240,7 +241,8 @@ def call(Map config) {
       stage('RunTests') {
         steps {
           dir('gen3-qa') {
-            withEnv(['GEN3_NOPROXY=true', "vpc_name=qaplanetv1", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=$env.WORKSPACE/testData/"]) {
+            withEnv(['GEN3_NOPROXY=true', "vpc_name=qaplanetv1", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=$env.WORKSPACE/testData/",
+            "DATA_CLIENT_PATH=$env.WORKSPACE"]) {
               sh "bash ./run-tests.sh $env.KUBECTL_NAMESPACE --service=$env.service"
             }
           }
