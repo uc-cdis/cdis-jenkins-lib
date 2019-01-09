@@ -38,13 +38,22 @@ def call(Map config) {
         steps {
           dir('dataclient') {
             script {
-            //   if repo is data-client then $env.CHANGE_BRANCH else master
-            //   println "CHANGE_BRANCH is: $env.CHANGE_BRANCH"
-            //   println System.properties['os.name']
+              // we get the data client from master, unless the service being
+              // tested is the data client itself, in which case we get the
+              // executable for the current branch
+              // Note: the data client does not use Jenkins yet
+              branch = "master"
+              if (env.service == "cdis-data-client") {
+                branch = env.CHANGE_BRANCH
+                println "Testing cdis-data-client on branch " + branch
+              }
+
+              // Note: at this time, tests are always run on linux
+              os = "linux"
 
               // download the gen3 data client executable from S3
               download_location = "dataclient-linux.zip"
-              sh "aws s3 cp s3://cdis-dc-builds/master/dataclient_linux.zip $download_location"
+              sh "aws s3 cp s3://cdis-dc-builds/$branch/dataclient_$os.zip $download_location"
               assert fileExists(download_location)
               unzip(download_location)
 
@@ -53,6 +62,8 @@ def call(Map config) {
               assert fileExists(executable_name)
               sh "chmod u+x $executable_name"
               sh "./$executable_name --version"
+
+              println "Data client successfully set up at: $executable_name"
             }
           }
         }
