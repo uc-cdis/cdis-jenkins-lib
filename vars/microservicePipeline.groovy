@@ -221,7 +221,7 @@ def call(Map config) {
               os = "linux"
 
               // download the gen3 data client executable from S3
-              download_location = "dataclient-linux.zip"
+              download_location = "dataclient.zip"
               sh String.format("aws s3 cp s3://cdis-dc-builds/%s/dataclient_%s.zip %s", branch, os, download_location)
               assert fileExists(download_location)
               unzip(download_location)
