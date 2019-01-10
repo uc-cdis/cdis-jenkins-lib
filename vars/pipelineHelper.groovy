@@ -26,7 +26,7 @@ def create(Map config) {
 def setupConfig(Map config) {
   // get git info of repo/branch that triggered build
   config.gitVars = checkout(scm)
-  config.currentBranchFormatted = "${config.gitVars.GIT_BRANCH}".replaceAll("/", "_")
+  config.currentBranchFormatted = "${config.gitVars.CHANGE_BRANCH}".replaceAll("/", "_")
   config.currentRepoName = "$env.JOB_NAME".split('/')[1]
 
   // update config with the service we are testing
