@@ -27,6 +27,8 @@ def setupConfig(Map config) {
   // get git info of repo/branch that triggered build
   config.gitVars = checkout(scm)
   print config.gitVars
+  println "HELLO WORLD"
+  println env.CHANGE_BRANCH
   config.currentBranchFormatted = "${config.gitVars.CHANGE_BRANCH}".replaceAll("/", "_")
   config.currentRepoName = "$env.JOB_NAME".split('/')[1]
 
