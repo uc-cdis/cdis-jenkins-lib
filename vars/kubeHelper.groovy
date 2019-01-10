@@ -3,6 +3,7 @@ import groovy.transform.Field
 @Field def config // pipeline config shared between helpers
 @Field def cloudAutomationPath // path to directory of pulled cloud-automation
 @Field def kubectlNamespace // namespace to run kube commands in
+@Field def vpcName
 @Field def obtainedLock // indicates if successfully locked a namespace
 
 /**
@@ -15,6 +16,7 @@ def create(Map config) {
   this.config = config
   this.cloudAutomationPath = "${env.WORKSPACE}/cloud-automation"
   this.kubectlNamespace = "NO_PIPELINE_NAMESPACE_SELECTED"
+  this.vpcName = "qaplanet_v1"
   this.obtainedLock = 1 // no lock obtained yet
   return this
 }
@@ -41,7 +43,7 @@ def setCloudAutomationPath(String path) {
 * @returns bodyResult
 */
 def kube(Closure body) {
-  withEnv(['GEN3_NOPROXY=true', "vpc_name=${this.kubectlNamespace}", "GEN3_HOME=${this.cloudAutomationPath}", "KUBECTL_NAMESPACE=${this.kubectlNamespace}"]) {
+  withEnv(['GEN3_NOPROXY=true', "vpc_name=${this.vpcName}", "GEN3_HOME=${this.cloudAutomationPath}", "KUBECTL_NAMESPACE=${this.kubectlNamespace}"]) {
     echo "  GEN3_HOME is ${env.GEN3_HOME}\n  KUBECTL_NAMESPACE is ${env.KUBECTL_NAMESPACE}"
     return body()
   }
@@ -54,7 +56,7 @@ def kube(Closure body) {
 * @param owner - owner to lock as; defaults to conf.UID
 * @returns klockResult
 */
-def klock(String method, String owner=null) {
+def klock(String method, String owner=null, String lockName="jenkins") {
   if (null == owner) {
     owner = this.config.UID
   }
@@ -63,7 +65,7 @@ def klock(String method, String owner=null) {
     conditionalLockParams = "3600 -w 60"
   }
   kube {
-    return sh( script: "bash ${this.cloudAutomationPath}/gen3/bin/klock.sh ${method} jenkins ${owner} ${conditionalLockParams}", returnStatus: true)
+    return sh( script: "bash ${this.cloudAutomationPath}/gen3/bin/klock.sh ${method} ${lockName} ${owner} ${conditionalLockParams}", returnStatus: true)
   }
 }
 
@@ -74,6 +76,16 @@ def deploy() {
   kube {
     sh "bash ${this.cloudAutomationPath}/gen3/bin/kube-roll-all.sh"
     sh "bash ${this.cloudAutomationPath}/gen3/bin/kube-wait4-pods.sh || true"
+  }
+}
+
+/**
+* Reset kubernetes namespace gen3 objects/services
+*/
+def reset() {
+  kube {
+    sh "yes | bash ${this.cloudAutomationPath}/gen3/bin/reset.sh"
+    sh "bash ${this.cloudAutomationPath}/gen3/bin/kube-setup-spark.sh"
   }
 }
 
@@ -89,7 +101,7 @@ def selectAndLockNamespace(List<String> namespaces=null, String owner=null) {
     if (this.config.containsKey('namespaces')) {
       namespaces = this.config.namespaces
     } else {
-      namespaces = ['jenkins-dcp', 'jenkins-niaid', 'jenkins-brain']
+      namespaces = ['jenkins-dcp', 'jenkins-niaid', 'jenkins-brain', 'jenkins-genomel']
     }
   }
   int randNum = new Random().nextInt(namespaces.size());
@@ -120,4 +132,6 @@ def teardown() {
   if (this.obtainedLock == 0) {
     klock('unlock')
   }
+  // unlock the reset lock
+  klock('unlock', 'gen3-reset', 'reset-lock')
 }

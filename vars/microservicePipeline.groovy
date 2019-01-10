@@ -28,7 +28,8 @@ def call(Map config) {
         )
       }
       stage('K8sDeploy') {
-        pipe.kube.deploy()
+        // pipe.kube.deploy()
+        pipe.kube.reset()
       }
       stage('GenerateData') {
         pipe.test.simulateData(pipe.kube.kubectlNamespace)

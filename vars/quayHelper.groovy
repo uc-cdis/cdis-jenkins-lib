@@ -80,10 +80,17 @@ def waitForBuild() {
         if(fields[0].startsWith(branchName)) {
           if(commit.startsWith(fields[1])) {
             quayImageReady = fields[2].endsWith("complete")
+            if (quayImageReady) {
+              println "found quay build: "+res
+            }
+            break
+          } else if(this.config.gitVars.GIT_PREVIOUS_COMMIT && this.config.gitVars.GIT_PREVIOUS_COMMIT.startsWith(fields[1])) {
+            // previous commit is the newest - sleep and try again
+            // things get annoying when quay gets slow
             break
           } else {
             currentBuild.result = 'ABORTED'
-            error("aborting build due to out of date git hash\npipeline: ${commit}\nquay: "+fields[1])
+            error("aborting build due to out of date git hash\ntag: ${this.config.currentBranchFormatted}\npipeline: ${commit}\nquay: "+fields[1])
           }
         }
       }
@@ -95,6 +102,7 @@ def waitForBuild() {
       for (String res in resList) {
         fields = res.replaceAll('"', "").split(',')
         //
+        // this loop assumes quay gives us back builds in reverse timestamp order.
         // if all quay builds are complete, then assume there's nothing to wait
         // for even if a build for our commit is not pending.
         // that can happen if someone re-runs a Jenkins job interactively or whatever
@@ -105,10 +113,20 @@ def waitForBuild() {
           if(fields[0].startsWith(branchName)) {
             if(commit.startsWith(fields[1])) {
               quayImageReady = fields[2].endsWith("complete")
+              if (quayImageReady) {
+                println "found quay build: "+res
+              }
+              break
+            } else if(this.config.gitVars.GIT_PREVIOUS_COMMIT && this.config.gitVars.GIT_PREVIOUS_COMMIT.startsWith(fields[1])) {
+              // previous commit is the newest - sleep and try again
+              // things get annoying when quay gets slow
               break
             } else {
+              // if previous commit is the newest one in quay, then maybe
+              // the job's commit hasn't appeared yet. 
+              // otherwise assume some other newer commit is in the process of building in quay
               currentBuild.result = 'ABORTED'
-              error("aborting build due to out of date git hash\npipeline: ${commit}\nquay: "+fields[1])
+              error("aborting build due to out of date git hash\ntag: ${this.config.currentBranchFormatted}\npipeline: ${commit}\nquay: "+fields[1])
             }
           }
         }
