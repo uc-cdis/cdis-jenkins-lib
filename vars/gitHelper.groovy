@@ -28,7 +28,7 @@ def fetchAllRepos() {
   }
   dir('data-simulator') {
     git(
-      url: 'https://github.com/occ-data/data-simulator.git',
+      url: 'https://github.com/uc-cdis/data-simulator.git',
       branch: 'master'
     )
   }

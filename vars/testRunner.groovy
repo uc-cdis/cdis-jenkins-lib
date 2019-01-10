@@ -22,10 +22,8 @@ def create(Map config) {
 * @param body - command(s) to run
 */
 def gen3Qa(String namespace, Closure body) {
-  dir('gen3-qa') {
-    withEnv(['GEN3_NOPROXY=true', "vpc_name=${namespace}", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "KUBECTL_NAMESPACE=${namespace}", "NAMESPACE=${namespace}", "TEST_DATA_PATH=$env.WORKSPACE/testData/"]) {
-      return body()
-    }
+  withEnv(['GEN3_NOPROXY=true', "vpc_name=${namespace}", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "KUBECTL_NAMESPACE=${namespace}", "NAMESPACE=${namespace}", "TEST_DATA_PATH=$env.WORKSPACE/testData/"]) {
+    return body()
   }
 }
 
@@ -37,9 +35,11 @@ def gen3Qa(String namespace, Closure body) {
 */
 def runIntegrationTests(String namespace, String service) {
   this.startedIntegrationTests = true
-  gen3Qa(namespace, {
-    sh "bash ./run-tests.sh $env.NAMESPACE --service=${service}"
-  })
+  dir('gen3-qa') {
+    gen3Qa(namespace, {
+      sh "bash ./run-tests.sh $env.NAMESPACE --service=${service}"
+    })
+  }
 }
 
 /**
@@ -48,9 +48,11 @@ def runIntegrationTests(String namespace, String service) {
 * @param namespace - namespace to simulate data for
 */
 def simulateData(String namespace) {
-  gen3Qa(namespace, {
-    sh "bash ./jenkins-simulate-data.sh ${namespace}"
-  })
+  dir('data-simulator') {
+    gen3Qa(namespace, {
+      sh "bash ./jenkins-simulate-data.sh ${namespace}"
+    })
+  }
 }
 
 def teardown() {
