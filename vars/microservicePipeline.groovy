@@ -27,10 +27,10 @@ def call(Map config) {
           pipe.config.serviceTesting.branch
         )
       }
-      stage('K8sDeploy') {
-        // pipe.kube.deploy()
-        pipe.kube.reset()
-      }
+      // stage('K8sDeploy') {
+      //   // pipe.kube.deploy()
+      //   pipe.kube.reset()
+      // }
       stage('GenerateData') {
         pipe.test.simulateData(pipe.kube.kubectlNamespace)
       }
