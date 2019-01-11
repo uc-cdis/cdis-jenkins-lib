@@ -34,6 +34,9 @@ def call(Map config) {
       stage('GenerateData') {
         pipe.test.simulateData(pipe.kube.kubectlNamespace)
       }
+      stage('FetchDataClient') {
+        pipe.test.fetchDataClient()
+      }
       stage('RunTests') {
         pipe.test.runIntegrationTests(
           pipe.kube.kubectlNamespace,
