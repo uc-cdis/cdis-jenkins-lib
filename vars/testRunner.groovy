@@ -22,7 +22,7 @@ def create(Map config) {
 * @param body - command(s) to run
 */
 def gen3Qa(String namespace, Closure body) {
-  withEnv(['GEN3_NOPROXY=true', "vpc_name=${namespace}", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "KUBECTL_NAMESPACE=${namespace}", "NAMESPACE=${namespace}", "TEST_DATA_PATH=$env.WORKSPACE/testData/"]) {
+  withEnv(['GEN3_NOPROXY=true', "vpc_name=qaplanetv1", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "KUBECTL_NAMESPACE=${namespace}", "NAMESPACE=${namespace}", "TEST_DATA_PATH=$env.WORKSPACE/testData/"]) {
     return body()
   }
 }
@@ -48,11 +48,10 @@ def runIntegrationTests(String namespace, String service) {
 * @param namespace - namespace to simulate data for
 */
 def simulateData(String namespace) {
-  dir('data-simulator') {
+  dir('gen3-qa') {
     gen3Qa(namespace, {
       sh "echo WORKSPACE: $WORKSPACE"
-      sh "pwd"
-      sh "ls"
+      sh "ls $WORKSPACE/data-simulator/"
       sh "bash ./jenkins-simulate-data.sh ${namespace}"
     })
   }
