@@ -251,13 +251,29 @@ def call(Map config) {
       stage('CleanS3') {
         steps {
           script {
-            directory = '~/s3-cleanup'
-            sh "mkdir -p $directory" // create the dir if it does not exist
-            files = sh "ls $directory"
-            println files
-            files2 = findFiles(glob: directory)
-            println files2
-            sh script: "ls $directory"
+            cleanUpDir = "~/s3-cleanup"
+            sh "mkdir -p $cleanUpDir" // create the dir if it does not exist
+
+            filesList = sh(
+              script: "ls -d $cleanUpDir/*",
+              returnStdout: true
+            )
+
+            // each file contains a list of GUIDs to delete in s3
+            for (filePath in filesList.readLines()) {
+              // move the file to the current workspace so that other jenkins
+              // sessions will not try to use it to clean up
+              sh "mv $filePath $env.WORKSPACE/file-copy.txt" // TODO: do nothing if mv fails
+
+              fileContents = new File("$env.WORKSPACE/file-copy.txt").text
+              // println fileContents
+
+              for (guid in fileContents.readLines()) {
+                println guid
+              }
+
+              break
+            }
           }
         }
       }
