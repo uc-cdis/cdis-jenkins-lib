@@ -50,6 +50,9 @@ def runIntegrationTests(String namespace, String service) {
 def simulateData(String namespace) {
   dir('data-simulator') {
     gen3Qa(namespace, {
+      sh "echo WORKSPACE: $WORKSPACE"
+      sh "pwd"
+      sh "ls"
       sh "bash ./jenkins-simulate-data.sh ${namespace}"
     })
   }
