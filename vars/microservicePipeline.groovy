@@ -34,108 +34,108 @@ def call(Map config) {
           }
         }
       }
-      stage('WaitForQuayBuild') {
-        steps {
-          script {
-            // ignore config service/branch overrides in WaitForQuayBuild ...
-            service = "$env.JOB_NAME".split('/')[1]
-            quaySuffix = "$env.CHANGE_BRANCH".replaceAll("/", "_")
-            if (service == 'cdis-jenkins-lib') {
-              service = 'jenkins-lib'
-            }
-            def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 60)
-            def timeout = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) + 3600)
-            timeUrl = "$env.QUAY_API"+service+"/build/?since="+timestamp
-            timeQuery = "curl -s "+timeUrl+/ | jq '.builds[] | "\(.tags[]),\(.display_name),\(.phase)"'/
-            limitUrl = "$env.QUAY_API"+service+"/build/?limit=25"
-            limitQuery = "curl -s "+limitUrl+/ | jq '.builds[] | "\(.tags[]),\(.display_name),\(.phase)"'/
+      // stage('WaitForQuayBuild') {
+      //   steps {
+      //     script {
+      //       // ignore config service/branch overrides in WaitForQuayBuild ...
+      //       service = "$env.JOB_NAME".split('/')[1]
+      //       quaySuffix = "$env.CHANGE_BRANCH".replaceAll("/", "_")
+      //       if (service == 'cdis-jenkins-lib') {
+      //         service = 'jenkins-lib'
+      //       }
+      //       def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 60)
+      //       def timeout = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) + 3600)
+      //       timeUrl = "$env.QUAY_API"+service+"/build/?since="+timestamp
+      //       timeQuery = "curl -s "+timeUrl+/ | jq '.builds[] | "\(.tags[]),\(.display_name),\(.phase)"'/
+      //       limitUrl = "$env.QUAY_API"+service+"/build/?limit=25"
+      //       limitQuery = "curl -s "+limitUrl+/ | jq '.builds[] | "\(.tags[]),\(.display_name),\(.phase)"'/
             
-            def quayImageReady = false
-            def noPendingQuayBuilds = false
-            while(quayImageReady != true && noPendingQuayBuilds != true) {
-              noPendingQuayBuilds = true
-              currentTime = new Date().getTime()/1000 as Integer
-              println "currentTime is: "+currentTime
+      //       def quayImageReady = false
+      //       def noPendingQuayBuilds = false
+      //       while(quayImageReady != true && noPendingQuayBuilds != true) {
+      //         noPendingQuayBuilds = true
+      //         currentTime = new Date().getTime()/1000 as Integer
+      //         println "currentTime is: "+currentTime
   
-              if(currentTime > timeout) {
-                currentBuild.result = 'ABORTED'
-                error("aborting build due to timeout")
-              }
+      //         if(currentTime > timeout) {
+      //           currentBuild.result = 'ABORTED'
+      //           error("aborting build due to timeout")
+      //         }
   
-              sleep(30)
-              println "running time query"
-              resList = sh(script: timeQuery, returnStdout: true).trim().split('"\n"')
-              for (String res in resList) {
-                fields = res.replaceAll('"', "").split(',')
+      //         sleep(30)
+      //         println "running time query"
+      //         resList = sh(script: timeQuery, returnStdout: true).trim().split('"\n"')
+      //         for (String res in resList) {
+      //           fields = res.replaceAll('"', "").split(',')
   
-                //
-                // if all quay builds are complete, then assume there's nothing to wait
-                // for even if a build for our commit is not pending.
-                // that can happen if someone re-runs a Jenkins job interactively or whatever
-                //
-                if (fields.length > 2) {
-                  noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
-                  if(fields[0].startsWith(quaySuffix)) {
-                    if(env.GIT_COMMIT.startsWith(fields[1])) {
-                      quayImageReady = fields[2].endsWith("complete")
-                      if (quayImageReady) {
-                        println "found quay build: "+res
-                      }
-                      break
-                    } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1])) {
-                      // previous commit is the newest - sleep and try again
-                      // things get annoying when quay gets slow
-                      break
-                    } else {
-                      currentBuild.result = 'ABORTED'
-                      error("aborting build due to out of date git hash\npipeline: $env.GIT_COMMIT\nquay: "+fields[1])
-                    }
-                  }
-                }
-              }
+      //           //
+      //           // if all quay builds are complete, then assume there's nothing to wait
+      //           // for even if a build for our commit is not pending.
+      //           // that can happen if someone re-runs a Jenkins job interactively or whatever
+      //           //
+      //           if (fields.length > 2) {
+      //             noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
+      //             if(fields[0].startsWith(quaySuffix)) {
+      //               if(env.GIT_COMMIT.startsWith(fields[1])) {
+      //                 quayImageReady = fields[2].endsWith("complete")
+      //                 if (quayImageReady) {
+      //                   println "found quay build: "+res
+      //                 }
+      //                 break
+      //               } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1])) {
+      //                 // previous commit is the newest - sleep and try again
+      //                 // things get annoying when quay gets slow
+      //                 break
+      //               } else {
+      //                 currentBuild.result = 'ABORTED'
+      //                 error("aborting build due to out of date git hash\npipeline: $env.GIT_COMMIT\nquay: "+fields[1])
+      //               }
+      //             }
+      //           }
+      //         }
 
-              if (!quayImageReady) {
-                println "time query failed, running limit query"
-                resList = sh(script: limitQuery, returnStdout: true).trim().split('"\n"')
-                for (String res in resList) {
-                  fields = res.replaceAll('"', "").split(',')
-                  //
-                  // this loop assumes quay gives us back builds in reverse timestamp order.
-                  // if all quay builds are complete, then assume there's nothing to wait
-                  // for even if a build for our commit is not pending.
-                  // that can happen if someone re-runs a Jenkins job interactively or whatever
-                  //
-                  if (fields.length > 2) {
-                    noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
+      //         if (!quayImageReady) {
+      //           println "time query failed, running limit query"
+      //           resList = sh(script: limitQuery, returnStdout: true).trim().split('"\n"')
+      //           for (String res in resList) {
+      //             fields = res.replaceAll('"', "").split(',')
+      //             //
+      //             // this loop assumes quay gives us back builds in reverse timestamp order.
+      //             // if all quay builds are complete, then assume there's nothing to wait
+      //             // for even if a build for our commit is not pending.
+      //             // that can happen if someone re-runs a Jenkins job interactively or whatever
+      //             //
+      //             if (fields.length > 2) {
+      //               noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
                     
-                    if(fields[0].startsWith(quaySuffix)) {
-                      if(env.GIT_COMMIT.startsWith(fields[1])) {
-                        quayImageReady = fields[2].endsWith("complete")
-                        if (quayImageReady) {
-                          println "found quay build: "+res
-                        }
-                        break
-                      } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1])) {
-                        // previous commit is the newest - sleep and try again
-                        // things get annoying when quay gets slow
-                        noPendingQuayBuilds = false
-                        break
-                      } else {
-                        // if previous commit is the newest one in quay, then maybe
-                        // the job's commit hasn't appeared yet. 
-                        // otherwise assume some other newer commit is in the process of building in quay
-                        currentBuild.result = 'ABORTED'
-                        println("aborting build due to out of date git hash, tag: $quaySuffix, pipeline: $env.GIT_COMMIT, quay: "+fields[1])
-                        error("aborting build due to out of date git hash\ntag: $quaySuffix\npipeline: $env.GIT_COMMIT\nquay: "+fields[1])
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+      //               if(fields[0].startsWith(quaySuffix)) {
+      //                 if(env.GIT_COMMIT.startsWith(fields[1])) {
+      //                   quayImageReady = fields[2].endsWith("complete")
+      //                   if (quayImageReady) {
+      //                     println "found quay build: "+res
+      //                   }
+      //                   break
+      //                 } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1])) {
+      //                   // previous commit is the newest - sleep and try again
+      //                   // things get annoying when quay gets slow
+      //                   noPendingQuayBuilds = false
+      //                   break
+      //                 } else {
+      //                   // if previous commit is the newest one in quay, then maybe
+      //                   // the job's commit hasn't appeared yet. 
+      //                   // otherwise assume some other newer commit is in the process of building in quay
+      //                   currentBuild.result = 'ABORTED'
+      //                   println("aborting build due to out of date git hash, tag: $quaySuffix, pipeline: $env.GIT_COMMIT, quay: "+fields[1])
+      //                   error("aborting build due to out of date git hash\ntag: $quaySuffix\npipeline: $env.GIT_COMMIT\nquay: "+fields[1])
+      //                 }
+      //               }
+      //             }
+      //           }
+      //         }
+      //       }
+      //     }
+      //   }
+      // }
       stage('SelectNamespace') {
         steps {
           script {
@@ -160,39 +160,39 @@ def call(Map config) {
           }
         }
       }
-      stage('ModifyManifest') {
-        steps {
-          script {
-            dirname = sh(script: "kubectl -n $env.KUBECTL_NAMESPACE get configmap global -o jsonpath='{.data.hostname}'", returnStdout: true)
-          }
-          dir("cdis-manifest/$dirname") {
-            withEnv(["masterBranch=$env.service:[a-zA-Z0-9._-]*", "targetBranch=$env.service:$env.quaySuffix"]) {
-              sh 'sed -i -e "s,'+"$env.masterBranch,$env.targetBranch"+',g" manifest.json && cat manifest.json'
-            }
-          }
-        }
-      }
-      stage('DbResetK8sDeploy') {
-        steps {
-          withEnv(['GEN3_NOPROXY=true', "vpc_name=qaplanetv1", "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {
-            echo "GEN3_HOME is $env.GEN3_HOME"
-            echo "CHANGE_BRANCH is $env.CHANGE_BRANCH"
-            echo "GIT_COMMIT is $env.GIT_COMMIT"
-            echo "KUBECTL_NAMESPACE is $env.KUBECTL_NAMESPACE"
-            echo "WORKSPACE is $env.WORKSPACE"
-            sh "yes | bash cloud-automation/gen3/bin/reset.sh"
-            sh "bash cloud-automation/gen3/bin/kube-setup-spark.sh"
-          }
-        }
-      }
-      stage('VerifyClusterHealth') {
-        steps {
-          withEnv(['GEN3_NOPROXY=true', "vpc_name=qaplanetv1", "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {
-            sh "bash cloud-automation/gen3/bin/kube-wait4-pods.sh"
-            sh "bash ./gen3-qa/check-pod-health.sh"
-          }
-        }
-      }
+      // stage('ModifyManifest') {
+      //   steps {
+      //     script {
+      //       dirname = sh(script: "kubectl -n $env.KUBECTL_NAMESPACE get configmap global -o jsonpath='{.data.hostname}'", returnStdout: true)
+      //     }
+      //     dir("cdis-manifest/$dirname") {
+      //       withEnv(["masterBranch=$env.service:[a-zA-Z0-9._-]*", "targetBranch=$env.service:$env.quaySuffix"]) {
+      //         sh 'sed -i -e "s,'+"$env.masterBranch,$env.targetBranch"+',g" manifest.json && cat manifest.json'
+      //       }
+      //     }
+      //   }
+      // }
+      // stage('DbResetK8sDeploy') {
+      //   steps {
+      //     withEnv(['GEN3_NOPROXY=true', "vpc_name=qaplanetv1", "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {
+      //       echo "GEN3_HOME is $env.GEN3_HOME"
+      //       echo "CHANGE_BRANCH is $env.CHANGE_BRANCH"
+      //       echo "GIT_COMMIT is $env.GIT_COMMIT"
+      //       echo "KUBECTL_NAMESPACE is $env.KUBECTL_NAMESPACE"
+      //       echo "WORKSPACE is $env.WORKSPACE"
+      //       sh "yes | bash cloud-automation/gen3/bin/reset.sh"
+      //       sh "bash cloud-automation/gen3/bin/kube-setup-spark.sh"
+      //     }
+      //   }
+      // }
+      // stage('VerifyClusterHealth') {
+      //   steps {
+      //     withEnv(['GEN3_NOPROXY=true', "vpc_name=qaplanetv1", "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {
+      //       sh "bash cloud-automation/gen3/bin/kube-wait4-pods.sh"
+      //       sh "bash ./gen3-qa/check-pod-health.sh"
+      //     }
+      //   }
+      // }
       stage('GenerateTestData') {
         // Run the data simulator
         steps {
@@ -203,41 +203,41 @@ def call(Map config) {
           }
         }
       }
-      stage('FetchDataClient') {
-        steps {
-          dir('dataclient') {
-            script {
-              // we get the data client from master, unless the service being
-              // tested is the data client itself, in which case we get the
-              // executable for the current branch
-              // Note: the data client does not use Jenkins yet (see PXP-2211)
-              branch = "master"
-              if (env.service == "cdis-data-client") {
-                branch = env.CHANGE_BRANCH
-                println "Testing cdis-data-client on branch " + branch
-              }
+      // stage('FetchDataClient') {
+      //   steps {
+      //     dir('dataclient') {
+      //       script {
+      //         // we get the data client from master, unless the service being
+      //         // tested is the data client itself, in which case we get the
+      //         // executable for the current branch
+      //         // Note: the data client does not use Jenkins yet (see PXP-2211)
+      //         branch = "master"
+      //         if (env.service == "cdis-data-client") {
+      //           branch = env.CHANGE_BRANCH
+      //           println "Testing cdis-data-client on branch " + branch
+      //         }
 
-              // Note: at this time, tests are always run on linux
-              os = "linux"
+      //         // Note: at this time, tests are always run on linux
+      //         os = "linux"
 
-              // download the gen3 data client executable from S3
-              download_location = "dataclient.zip"
-              sh String.format("aws s3 cp s3://cdis-dc-builds/%s/dataclient_%s.zip %s", branch, os, download_location)
-              assert fileExists(download_location)
-              unzip(download_location)
+      //         // download the gen3 data client executable from S3
+      //         download_location = "dataclient.zip"
+      //         sh String.format("aws s3 cp s3://cdis-dc-builds/%s/dataclient_%s.zip %s", branch, os, download_location)
+      //         assert fileExists(download_location)
+      //         unzip(download_location)
 
-              // make sure we can execute it
-              executable_name = "gen3-client"
-              assert fileExists(executable_name)
-              sh "mv $executable_name $env.WORKSPACE/$executable_name"
-              sh "chmod u+x $env.WORKSPACE/$executable_name"
-              sh "$env.WORKSPACE/$executable_name --version"
+      //         // make sure we can execute it
+      //         executable_name = "gen3-client"
+      //         assert fileExists(executable_name)
+      //         sh "mv $executable_name $env.WORKSPACE/$executable_name"
+      //         sh "chmod u+x $env.WORKSPACE/$executable_name"
+      //         sh "$env.WORKSPACE/$executable_name --version"
 
-              println "Data client successfully set up at: $env.WORKSPACE/$executable_name"
-            }
-          }
-        }
-      }
+      //         println "Data client successfully set up at: $env.WORKSPACE/$executable_name"
+      //       }
+      //     }
+      //   }
+      // }
       stage('RunTests') {
         steps {
           dir('gen3-qa') {
@@ -245,6 +245,19 @@ def call(Map config) {
             "DATA_CLIENT_PATH=$env.WORKSPACE"]) {
               sh "bash ./run-tests.sh $env.KUBECTL_NAMESPACE --service=$env.service"
             }
+          }
+        }
+      }
+      stage('CleanS3') {
+        steps {
+          script {
+            directory = '~/s3-cleanup'
+            sh "mkdir -p $directory" // create the dir if it does not exist
+            files = sh "ls $directory"
+            println files
+            files2 = findFiles(glob: directory)
+            println files2
+            sh script: "ls $directory"
           }
         }
       }
