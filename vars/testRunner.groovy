@@ -95,6 +95,6 @@ def teardown() {
     sh "echo DEBUGGING:"
     sh "ls $WORKSPACE/gen3-qa/"
     sh "ls $WORKSPACE/gen3-qa/output"
-    junit "$WORKSPACE/gen3-qa/output/*.xml"
+    junit "gen3-qa/output/*.xml"
   }
 }
