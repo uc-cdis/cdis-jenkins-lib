@@ -22,7 +22,7 @@ def create(Map config) {
 * @param body - command(s) to run
 */
 def gen3Qa(String namespace, Closure body) {
-  withEnv(['GEN3_NOPROXY=true', "vpc_name=qaplanetv1", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "KUBECTL_NAMESPACE=${namespace}", "NAMESPACE=${namespace}", "TEST_DATA_PATH=$env.WORKSPACE/testData/", "DATA_CLIENT_PATH=$env.WORKSPACE"]]) {
+  withEnv(['GEN3_NOPROXY=true', "vpc_name=qaplanetv1", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "KUBECTL_NAMESPACE=${namespace}", "NAMESPACE=${namespace}", "TEST_DATA_PATH=$env.WORKSPACE/testData/", "DATA_CLIENT_PATH=$env.WORKSPACE"]) {
     return body()
   }
 }
