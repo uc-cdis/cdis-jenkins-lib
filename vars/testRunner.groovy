@@ -35,11 +35,11 @@ def gen3Qa(String namespace, Closure body) {
 */
 def runIntegrationTests(String namespace, String service) {
   this.startedIntegrationTests = true
-  dir('gen3-qa') {
-    gen3Qa(namespace, {
-      sh "bash ./run-tests.sh $env.NAMESPACE --service=${service}"
-    })
-  }
+  // dir('gen3-qa') {
+  //   gen3Qa(namespace, {
+  //     sh "bash ./run-tests.sh $env.NAMESPACE --service=${service}"
+  //   })
+  // }
 }
 
 /**
