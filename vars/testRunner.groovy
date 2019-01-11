@@ -92,6 +92,9 @@ def fetchDataClient() {
 
 def teardown() {
   if (this.startedIntegrationTests) {
+    sh "echo DEBUGGING:"
+    sh "ls $WORKSPACE/gen3-qa/"
+    sh "ls $WORKSPACE/gen3-qa/output"
     junit "$WORKSPACE/gen3-qa/output/*.xml"
   }
 }
