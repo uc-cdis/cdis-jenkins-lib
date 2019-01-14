@@ -25,8 +25,10 @@ def editService(String commonsHostname, String serviceName, String quayBranchNam
   dir("cdis-manifest/${commonsHostname}") {
     currentBranch = "${serviceName}:[a-zA-Z0-9._-]*"
     targetBranch = "${serviceName}:${quayBranchName}"
+    echo "Editing cdis-manifest/${commonsHostname} service ${serviceName} to branch ${quayBranchName}"
     // swap current branch for the target branch
     sh 'sed -i -e "s,'+"${currentBranch},${targetBranch}"+',g" manifest.json'
+    sh 'cat manifest.json'
   }
 }
 
