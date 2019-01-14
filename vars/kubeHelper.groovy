@@ -16,7 +16,7 @@ def create(Map config) {
   this.config = config
   this.cloudAutomationPath = "${env.WORKSPACE}/cloud-automation"
   this.kubectlNamespace = "NO_PIPELINE_NAMESPACE_SELECTED"
-  this.vpcName = "qaplanet_v1"
+  this.vpcName = "qaplanetv1"
   this.obtainedLock = 1 // no lock obtained yet
   return this
 }
