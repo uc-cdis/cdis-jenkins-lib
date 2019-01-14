@@ -90,6 +90,15 @@ def reset() {
 }
 
 /**
+* Wait for all pods to roll and check health
+*/
+def waitForPods() {
+  kube {
+    sh "bash ${this.cloudAutomationPath}/gen3/bin/kube-wait4-pods.sh"
+  }
+}
+
+/**
 * Attempts to lock a namespace
 * If it fails to lock a namespace, it raises an error, terminating the pipeline
 *

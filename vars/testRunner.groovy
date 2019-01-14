@@ -90,6 +90,17 @@ def fetchDataClient() {
   }
 }
 
+/**
+* Verify pods are health
+*/
+def checkPodHealth(String namespace) {
+  dir('gen3-qa' {
+    gen3Qa(namespace, {
+      sh "bash ./check-pod-health.sh"
+    })
+  })
+}
+
 def teardown() {
   if (this.startedIntegrationTests) {
     junit "gen3-qa/output/*.xml"

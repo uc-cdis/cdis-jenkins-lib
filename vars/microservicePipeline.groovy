@@ -30,6 +30,10 @@ def call(Map config) {
       stage('K8sReset') {
         pipe.kube.reset()
       }
+      stage('VerifyClusterHealth') {
+        pipe.kube.waitForPods()
+        pipe.test.checkPodHealth()
+      }
       stage('GenerateData') {
         pipe.test.simulateData(pipe.kube.kubectlNamespace)
       }
