@@ -236,7 +236,7 @@ def call(Map config) {
             }
           }
           if (env.CHANGE_ID) {
-            pullRequest.comment("Jenkins Build ${env.BUILD_NUMBER} : time taken ${currentBuild.durationString.replace(' and counting', '')} ms.")
+            pullRequest.comment("Jenkins Build ${env.BUILD_NUMBER} : time taken ${currentBuild.durationString.replace(' and counting', '')}")
           }
         }
         echo "done"
