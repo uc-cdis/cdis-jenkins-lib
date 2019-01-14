@@ -44,10 +44,13 @@ def call(Map config) {
       }
       stage('VerifyClusterHealth') {
         pipe.kube.waitForPods()
-        pipe.test.checkPodHealth()
+        pipe.test.checkPodHealth(pipe.kube.kubectlNamespace)
       }
       stage('GenerateData') {
         pipe.test.simulateData(pipe.kube.kubectlNamespace)
+      }
+      stage('FetchDataClient') {
+        pipe.test.fetchDataClient()
       }
       stage('RunTests') {
         pipe.test.runIntegrationTests(pipe.kube.kubectlNamespace, pipe.config.serviceTesting)
