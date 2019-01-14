@@ -30,7 +30,6 @@ def call(Map config) {
               if (config.GIT_BRANCH) {
                 env.quaySuffix = config.GIT_BRANCH.replaceAll("/", "_")
               }
-              error("aborting - Athar va!")
             }
           }
         }
@@ -237,7 +236,7 @@ def call(Map config) {
             }
           }
           if (env.CHANGE_ID) {
-            pullRequest.comment("The time taken for Jenkins Build ${env.BUILD_NUMBER} : ${currentBuild.duration} ms.")
+            pullRequest.comment("Jenkins Build ${env.BUILD_NUMBER} : time taken ${currentBuild.durationString.replace(' and counting', '')} ms.")
           }
         }
         echo "done"
@@ -246,3 +245,4 @@ def call(Map config) {
     }
   }
 }
+
