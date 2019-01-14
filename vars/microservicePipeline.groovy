@@ -251,6 +251,7 @@ def call(Map config) {
       stage('CleanS3') {
         steps {
           script {
+            qaBucket = "qaplanetv1-data-bucket"
             cleanUpDir = "~/s3-cleanup"
             sh "mkdir -p $cleanUpDir" // create the dir if it does not exist
 
@@ -263,13 +264,14 @@ def call(Map config) {
             for (filePath in filesList.readLines()) {
               // move the file to the current workspace so that other jenkins
               // sessions will not try to use it to clean up
-              sh "mv $filePath $env.WORKSPACE/file-copy.txt" // TODO: do nothing if mv fails
+              sh "mv $filePath $env.WORKSPACE/file-copy.txt" // TODO: do nothing if it fails
 
               fileContents = new File("$env.WORKSPACE/file-copy.txt").text
               // println fileContents
 
               for (guid in fileContents.readLines()) {
-                println guid
+                println "deleting: $guid"
+                sh "aws s3 rm --recursive s3://$qaBucket/$guid" // TODO: do nothing if it fails
               }
 
               break
