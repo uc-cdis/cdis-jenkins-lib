@@ -185,10 +185,15 @@ def call(Map config) {
       }
       always {
         script {
-          uid = env.service+"-"+env.quaySuffix+"-"+env.BUILD_NUMBER
-          withEnv(['GEN3_NOPROXY=true', "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {         
-            sh("bash cloud-automation/gen3/bin/klock.sh unlock jenkins " + uid + " || true")
-            sh("bash cloud-automation/gen3/bin/klock.sh unlock reset-lock gen3-reset || true")
+          if (env.KUBECTL_NAMESPACE) {
+            uid = env.service+"-"+env.quaySuffix+"-"+env.BUILD_NUMBER
+            withEnv(['GEN3_NOPROXY=true', "GEN3_HOME=$env.WORKSPACE/cloud-automation"]) {         
+              sh("bash cloud-automation/gen3/bin/klock.sh unlock jenkins " + uid + " || true")
+              sh("bash cloud-automation/gen3/bin/klock.sh unlock reset-lock gen3-reset || true")
+            }
+          }
+          if (env.CHANGE_ID) {
+            pullRequest.comment("Jenkins Build ${env.BUILD_NUMBER} : time taken ${currentBuild.durationString.replace(' and counting', '')}")
           }
         }
         echo "done"
@@ -197,3 +202,4 @@ def call(Map config) {
     }
   }
 }
+
