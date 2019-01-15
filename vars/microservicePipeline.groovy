@@ -263,21 +263,22 @@ def call(Map config) {
 
             // each file contains a list of GUIDs to delete in s3
             for (filePath in filesList.readLines()) {
-              filePath = "/var/jenkins_home/s3-cleanup/arandomname.txt"
               // move the file to the current workspace so that other jenkins
               // sessions will not try to use it to clean up
-              sh "mv $filePath $localCopy" // TODO: do nothing if it fails
+              try {
+                sh "mv $filePath $localCopy || true"
+                fileContents = new File(localCopy).text
 
-              fileContents = new File(localCopy).text
+                for (guid in fileContents.readLines()) {
+                  // if the file does not exist, no error is thrown
+                  sh "aws s3 rm --recursive s3://$qaBucket/$guid"
+                }
 
-              for (guid in fileContents.readLines()) {
-                // if the file does not exist, no error is thrown
-                sh "aws s3 rm --recursive s3://$qaBucket/$guid"
+                sh "rm $localCopy"
               }
-
-              sh "rm $localCopy"
-
-              break
+              catch (FileNotFoundException e) {
+                // if we can't move it, another session is using it: do nothing
+              }
             }
           }
         }
