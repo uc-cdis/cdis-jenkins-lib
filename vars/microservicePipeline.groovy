@@ -253,6 +253,7 @@ def call(Map config) {
           script {
             qaBucket = "qaplanetv1-data-bucket"
             cleanUpDir = "~/s3-cleanup"
+            localCopy = "$env.WORKSPACE/cleanup-copy.txt"
             sh "mkdir -p $cleanUpDir" // create the dir if it does not exist
 
             filesList = sh(
@@ -262,17 +263,19 @@ def call(Map config) {
 
             // each file contains a list of GUIDs to delete in s3
             for (filePath in filesList.readLines()) {
+              filePath = "/var/jenkins_home/s3-cleanup/arandomname.txt"
               // move the file to the current workspace so that other jenkins
               // sessions will not try to use it to clean up
-              sh "mv $filePath $env.WORKSPACE/file-copy.txt" // TODO: do nothing if it fails
+              sh "mv $filePath $localCopy" // TODO: do nothing if it fails
 
-              fileContents = new File("$env.WORKSPACE/file-copy.txt").text
-              // println fileContents
+              fileContents = new File(localCopy).text
 
               for (guid in fileContents.readLines()) {
-                println "deleting: $guid"
-                sh "aws s3 rm --recursive s3://$qaBucket/$guid" // TODO: do nothing if it fails
+                // if the file does not exist, no error is thrown
+                sh "aws s3 rm --recursive s3://$qaBucket/$guid"
               }
+
+              sh "rm $localCopy"
 
               break
             }
