@@ -81,7 +81,7 @@ def checkPodHealth(String namespace) {
     gen3Qa(namespace, {
       sh "bash ./check-pod-health.sh"
     })
-  })
+  }
 }
 
 def teardown() {
