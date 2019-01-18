@@ -14,8 +14,9 @@ def call(Map config) {
       stage('FetchCode') {
         gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
       }
-
+      println("hello: ${env.GIT_COMMIT}")
       if (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST != "True") {
+        println("Hello 2: ${env.GIT_COMMIT}")
         // Setup stages for NON manifest builds
         stage('WaitForQuayBuild') {
           quayHelper.waitForBuild(
