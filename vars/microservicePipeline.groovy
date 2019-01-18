@@ -45,7 +45,14 @@ def call(Map config) {
         testHelper.simulateData(kubectlNamespace)
       }
       stage('FetchDataClient') {
-        testHelper.fetchDataClient()
+        // we get the data client from master, unless the service being
+        // tested is the data client itself, in which case we get the
+        // executable for the current branch
+        dataCliBranch = "master"
+        if (pipeConfig.currentRepoName == "cdis-data-client") {
+          dataCliBranch = env.CHANGE_BRANCH
+        }
+        testHelper.fetchDataClient(dataCliBranch)
       }
       stage('RunTests') {
         testHelper.runIntegrationTests(

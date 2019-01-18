@@ -17,7 +17,6 @@ def gen3Qa(String namespace, Closure body) {
 * @param service - name of service the test is being run for
 */
 def runIntegrationTests(String namespace, String service) {
-  this.startedIntegrationTests = true
   dir('gen3-qa') {
     gen3Qa(namespace, {
       sh "bash ./run-tests.sh ${namespace} --service=${service}"
@@ -41,17 +40,10 @@ def simulateData(String namespace) {
 /**
 * Fetches data client
 */
-def fetchDataClient() {
+def fetchDataClient(String dataClientBranch="master") {
   dir('dataclient') {
-    // we get the data client from master, unless the service being
-    // tested is the data client itself, in which case we get the
-    // executable for the current branch
     // Note: the data client does not use Jenkins yet (see PXP-2211)
-    branch = "master"
-    if (this.config.currentRepoName == "cdis-data-client") {
-      branch = env.CHANGE_BRANCH
-      println "Testing cdis-data-client on branch " + branch
-    }
+    branch = dataClientBranch
 
     // Note: at this time, tests are always run on linux
     os = "linux"
