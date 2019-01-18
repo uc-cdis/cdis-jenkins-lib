@@ -14,7 +14,9 @@ def call(Map config) {
       stage('FetchCode') {
         gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
       }
-      if (!pipeConfig.skipQuay) {
+
+      if (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST != "True") {
+        // Setup stages for NON manifest builds
         stage('WaitForQuayBuild') {
           quayHelper.waitForBuild(
             pipeConfig['currentRepoName'],
@@ -22,22 +24,34 @@ def call(Map config) {
             env.GIT_COMMIT
           )
         }
+        stage('SelectNamespace') {
+          (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'])
+          kubeLocks << lock
+        }
+        stage('ModifyManifest') {
+          manifestHelper.editService(
+            kubeHelper.getHostname(kubectlNamespace),
+            pipeConfig.serviceTesting.name,
+            pipeConfig.serviceTesting.branch
+          )
+        }
       }
-      stage('SelectNamespace') {
-        (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'])
-        kubeLocks << lock
+
+      if (pipeConfig.MANIFEST != null && pipeConfig.MANIFEST == "True") {
+        // Setup stages for MANIFEST builds
+        stage('SelectNamespace') {
+          (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'])
+          kubeLocks << lock
+        }
+        stage('ModifyManifest') {
+          manifestHelper.manifestDiff(kubectlNamespace)
+        }
       }
-      stage('ModifyManifest') {
-        manifestHelper.editService(
-          kubeHelper.getHostname(kubectlNamespace),
-          pipeConfig.serviceTesting.name,
-          pipeConfig.serviceTesting.branch
-        )
-      }
+
       stage('K8sReset') {
         // adding the reset-lock lock in case reset fails before unlocking
         kubeLocks << kubeHelper.newKubeLock(kubectlNamespace, "gen3-reset", "reset-lock")
-        // kubeHelper.reset(kubectlNamespace)
+        kubeHelper.reset(kubectlNamespace)
       }
       stage('VerifyClusterHealth') {
         kubeHelper.waitForPods(kubectlNamespace)
@@ -57,10 +71,10 @@ def call(Map config) {
         testHelper.fetchDataClient(dataCliBranch)
       }
       stage('RunTests') {
-        // testHelper.runIntegrationTests(
-        //   kubectlNamespace,
-        //   pipeConfig.serviceTesting.name
-        // )
+        testHelper.runIntegrationTests(
+          kubectlNamespace,
+          pipeConfig.serviceTesting.name
+        )
       }
     }
     catch (e) {

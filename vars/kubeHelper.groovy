@@ -120,11 +120,6 @@ def getHostname(String kubectlNamespace) {
 
 def teardown(List kubeLocks) {
   kubeLocks.each {
-    try {
-      klock('unlock', it.lockOwner, it.lockName, it.kubectlNamespace)
-    }
-    catch (e) {
-      println("WARNING: failed to unlock ${it.lockName} as ${it.lockOwner} in ${it.kubectlNamespace}")
-    }
+    klock('unlock', it.lockOwner, it.lockName, it.kubectlNamespace)
   }
 }

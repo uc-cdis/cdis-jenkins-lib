@@ -9,10 +9,5 @@ def call(body) {
   body()
 
   // call the pipeline indicated in config
-  if (config.pipeline == 'microservice') {
-    microservicePipeline(config)
-  }
-  else if (config.pipeline == 'gitops') {
-    gitopsPipeline(config)
-  }
+  microservicePipeline(config)
 }
