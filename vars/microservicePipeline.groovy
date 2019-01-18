@@ -27,13 +27,13 @@ def call(Map config) {
         (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'])
         kubeLocks << lock
       }
-      // stage('ModifyManifest') {
-      //   pipe.manifest.editService(
-      //     kubeHelper.getHostname(kubectlNamespace),
-      //     pipeConfig.serviceTesting.name,
-      //     pipeConfig.serviceTesting.branch
-      //   )
-      // }
+      stage('ModifyManifest') {
+        manifestHelper.editService(
+          kubeHelper.getHostname(kubectlNamespace),
+          pipeConfig.serviceTesting.name,
+          pipeConfig.serviceTesting.branch
+        )
+      }
       // stage('K8sReset') {
       //   kubeHelper.reset(kubectlNamespace)
       // }

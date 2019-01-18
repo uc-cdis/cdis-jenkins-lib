@@ -49,3 +49,27 @@ def checkoutBranch(String branchName, String directoryName) {
     )
   }
 }
+
+/**
+* Returns a map of recent changes
+*/
+def getLatestChangeOfBranch(String branchName=env.CHANGE_BRANCH) {
+  if (null == branchName) {
+    error("unable to determine branch");    
+  }
+  sh("git config --add remote.origin.fetch +refs/heads/master:refs/remotes/origin/master")
+  sh("git fetch --no-tags")
+  List<String> changes = sh(returnStdout: true, script: "git diff --name-only origin/master...$branchName").split()
+  HashMap fileChanges = [:]
+  def size = changes.size()
+  for (int i = 0; i < size; i++) {
+      def dirs = changes[i].split('/')
+      def k = '.'
+      if (dirs.size() > 1)
+          k = dirs[0]
+      if (!fileChanges.containsKey(dirs[0]))
+          fileChanges[k] = []
+      fileChanges[k].add(changes[i])
+  }
+  return fileChanges
+}
