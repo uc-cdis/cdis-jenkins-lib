@@ -119,6 +119,6 @@ def getHostname(String kubectlNamespace) {
 
 def teardown(List kubeLocks) {
   kubeLocks.each {
-    klock('unlock', it.owner, it.lockName, it.kubectlNamespace)
+    klock('unlock', it.lockOwner, it.lockName, it.kubectlNamespace)
   }
 }
