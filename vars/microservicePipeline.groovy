@@ -10,8 +10,6 @@ def call(Map config) {
     kubectlNamespace = null
     kubeLocks = []
     pipeConfig = pipelineHelper.setupConfig(config)
-    print(pipeConfig)
-    print("HELLO WORLD")
     try {
       // stage('FetchCode') {
       //   pipe.git.fetchAllRepos()
@@ -22,10 +20,7 @@ def call(Map config) {
       //   }
       // }
       stage('SelectNamespace') {
-        print("TESTING123")
-        print(pipeConfig)
-        print("end")
-        (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(lockOwner=pipeConfig['UID'])
+        (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'])
         kubeLocks << lock
       }
       // stage('ModifyManifest') {

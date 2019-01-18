@@ -16,8 +16,6 @@ def setupConfig(Map config) {
   }
 
   config.UID = "${config.currentRepoName}-${config.currentBranchFormatted}-${env.BUILD_NUMBER}"
-  print("config inside")
-  print(config)
 
   return config
 }
