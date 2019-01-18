@@ -22,6 +22,9 @@ def call(Map config) {
       //   }
       // }
       stage('SelectNamespace') {
+        print("TESTING123")
+        print(pipeConfig)
+        print("end")
         (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(lockOwner=pipeConfig.UID)
         kubeLocks << lock
       }
