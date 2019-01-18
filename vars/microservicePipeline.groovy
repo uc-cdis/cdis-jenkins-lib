@@ -11,9 +11,9 @@ def call(Map config) {
     kubeLocks = []
     pipeConfig = pipelineHelper.setupConfig(config)
     try {
-      // stage('FetchCode') {
-      //   pipe.git.fetchAllRepos()
-      // }
+      stage('FetchCode') {
+        gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
+      }
       // if (!pipe.config.skipQuay) {
       //   stage('WaitForQuayBuild') {
       //     pipe.quay.waitForBuild()
