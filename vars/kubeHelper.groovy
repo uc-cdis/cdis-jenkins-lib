@@ -81,7 +81,7 @@ def waitForPods(String kubectlNamespace) {
 * Struct for storing locks
 * see http://pleac.sourceforge.net/pleac_groovy/classesetc.html "Using Classes as Structs"
 */
-class KubeLock { String kubectlNamespace; String owner; String lockName }
+class KubeLock { String kubectlNamespace; String lockOwner; String lockName }
 
 /**
 * Attempts to lock a namespace
@@ -101,7 +101,7 @@ def selectAndLockNamespace(String lockOwner) {
     println("attempting to lock namespace ${kubectlNamespace} with a wait time of 1 minutes")
     if (klock('lock', lockOwner, lockName, kubectlNamespace)) {
       // return successful lock
-      return [kubectlNamespace, new KubeLock('kubectlNamespace', lockOwner, lockName)]
+      return [kubectlNamespace, new KubeLock(kubectlNamespace: kubectlNamespace, lockOwner: lockOwner, lockName: lockName)]
     }
   }
   // unable to lock a namespace
