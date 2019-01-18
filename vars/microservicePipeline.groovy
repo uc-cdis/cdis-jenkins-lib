@@ -175,10 +175,10 @@ def call(Map config) {
             qaBucket = "qaplanetv1-data-bucket"
             cleanUpDir = "~/s3-cleanup"
             localCopy = "$env.WORKSPACE/cleanup-copy.txt"
-            sh "mkdir -p $cleanUpDir" // create the dir if it does not exist
 
             filesList = sh(
-              script: "ls -d $cleanUpDir/*",
+              // no error if the dir does not exist or is empty
+              script: "ls -d $cleanUpDir/* || true",
               returnStdout: true
             )
 
