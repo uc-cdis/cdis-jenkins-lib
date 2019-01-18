@@ -78,10 +78,11 @@ def waitForPods(String kubectlNamespace) {
 }
 
 /**
-* Struct for storing locks
-* see http://pleac.sourceforge.net/pleac_groovy/classesetc.html "Using Classes as Structs"
+* Map for storing locks
 */
-class KubeLock { String kubectlNamespace; String lockOwner; String lockName }
+def newKubeLock(String kubectlNamespace, String lockOwner, String lockName) {
+  return [kubectlNamespace: kubectlNamespace, lockOwner: lockOwner, lockName: lockName]
+}
 
 /**
 * Attempts to lock a namespace
@@ -101,7 +102,7 @@ def selectAndLockNamespace(String lockOwner) {
     println("attempting to lock namespace ${kubectlNamespace} with a wait time of 1 minutes")
     if (klock('lock', lockOwner, lockName, kubectlNamespace)) {
       // return successful lock
-      return [kubectlNamespace, new KubeLock(kubectlNamespace: kubectlNamespace, lockOwner: lockOwner, lockName: lockName)]
+      return [kubectlNamespace, newKubeLock(kubectlNamespace, lockOwner, lockName)]
     }
   }
   // unable to lock a namespace
@@ -119,6 +120,11 @@ def getHostname(String kubectlNamespace) {
 
 def teardown(List kubeLocks) {
   kubeLocks.each {
-    klock('unlock', it.lockOwner, it.lockName, it.kubectlNamespace)
+    try {
+      klock('unlock', it.lockOwner, it.lockName, it.kubectlNamespace)
+    }
+    catch (e) {
+      println("WARNING: failed to unlock ${it.lockName} as ${it.lockOwner} in ${it.kubectlNamespace}")
+    }
   }
 }

@@ -35,8 +35,8 @@ def call(Map config) {
         )
       }
       stage('K8sReset') {
-        // adding the gen3-reset lock in case reset fails before unlocking
-        kubeLocks << new kubeHelper.KubeLock(lockName: "reset-lock", lockOwner: "gen3-reset", kubectlNamespace: kubectlNamespace)
+        // adding the reset-lock lock in case reset fails before unlocking
+        kubeLocks << kubeHelper.newKubeLock(kubectlNamespace, "gen3-reset", "reset-lock")
         // kubeHelper.reset(kubectlNamespace)
       }
       stage('VerifyClusterHealth') {
