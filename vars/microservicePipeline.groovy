@@ -39,32 +39,26 @@ def call(Map config) {
       // }
       stage('VerifyClusterHealth') {
         kubeHelper.waitForPods(kubectlNamespace)
-        // pipe.test.checkPodHealth(kubectlNamespace)
+        testHelper.checkPodHealth(kubectlNamespace)
       }
-      // stage('GenerateData') {
-      //   pipe.test.simulateData(kubectlNamespace)
-      // }
-      // stage('FetchDataClient') {
-      //   pipe.test.fetchDataClient()
-      // }
-      // stage('RunTests') {
-      //   // pipe.test.runIntegrationTests(
-      //   //   pipe.kube.kubectlNamespace,
-      //   //   pipe.config.serviceTesting.name
-      //   // )
-      //   pipe.test.runIntegrationTests(
-      //     kubectlNamespace,
-      //     pipeConfig.serviceTesting.name
-      //   )
-      // }
+      stage('GenerateData') {
+        testHelper.simulateData(kubectlNamespace)
+      }
+      stage('FetchDataClient') {
+        testHelper.fetchDataClient()
+      }
+      stage('RunTests') {
+        testHelper.runIntegrationTests(
+          kubectlNamespace,
+          pipeConfig.serviceTesting.name
+        )
+      }
     }
     catch (e) {
-      // pipe.handleError(e)
       pipelineHelper.handleError(e)
     }
     finally {
       stage('Post') {
-        // pipe.teardown(currentBuild.result)
         kubeHelper.teardown(kubeLocks)
         pipelineHelper.teardown(currentBuild.result)
       }
