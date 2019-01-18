@@ -39,7 +39,7 @@ def klock(String method, String owner, String lockName, String kubectlNamespace)
   }
   kube(kubectlNamespace, {
     klockResult = sh( script: "bash ${cloudAutomationPath()}/gen3/bin/klock.sh ${method} ${lockName} ${owner} ${conditionalLockParams}", returnStatus: true)
-    if (klockSuccess == 0) {
+    if (klockResult == 0) {
       return True
     } else {
       return False
