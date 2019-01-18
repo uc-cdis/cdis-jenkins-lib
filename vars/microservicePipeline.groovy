@@ -56,13 +56,13 @@ def call(Map config) {
     }
     catch (e) {
       // pipe.handleError(e)
-      pipeHelper.handleError(e)
+      pipelineHelper.handleError(e)
     }
     finally {
       stage('Post') {
         // pipe.teardown(currentBuild.result)
         kubeHelper.teardown(kubeLocks)
-        pipeHelper.teardown(currentBuild.result)
+        pipelineHelper.teardown(currentBuild.result)
       }
     }
   }
