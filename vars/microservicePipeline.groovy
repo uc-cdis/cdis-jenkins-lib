@@ -10,6 +10,7 @@ def call(Map config) {
     def kubectlNamespace = null
     def kubeLocks = []
     def pipeConfig = pipelineHelper.setupConfig(config)
+    println(pipeConfig)
     try {
       // stage('FetchCode') {
       //   pipe.git.fetchAllRepos()
