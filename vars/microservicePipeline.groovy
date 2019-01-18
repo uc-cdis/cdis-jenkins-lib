@@ -7,10 +7,11 @@
 */
 def call(Map config) {
   node {
-    def kubectlNamespace = null
-    def kubeLocks = []
-    def pipeConfig = pipelineHelper.setupConfig(config)
+    kubectlNamespace = null
+    kubeLocks = []
+    pipeConfig = pipelineHelper.setupConfig(config)
     println(pipeConfig)
+    println("HELLO WORLD")
     try {
       // stage('FetchCode') {
       //   pipe.git.fetchAllRepos()
