@@ -14,11 +14,15 @@ def call(Map config) {
       stage('FetchCode') {
         gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
       }
-      // if (!pipe.config.skipQuay) {
-      //   stage('WaitForQuayBuild') {
-      //     pipe.quay.waitForBuild()
-      //   }
-      // }
+      if (!pipeConfig.skipQuay) {
+        stage('WaitForQuayBuild') {
+          quayHelper.waitForBuild(
+            pipeConfig['currentRepoName'],
+            pipeConfig['currentBranchFormatted'],
+            env.GIT_COMMIT
+          )
+        }
+      }
       stage('SelectNamespace') {
         (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'])
         kubeLocks << lock
