@@ -9,7 +9,7 @@ def cloudAutomationPath = "${env.WORKSPACE}/cloud-automation"
 */
 def kube(String kubectlNamespace, Closure body) {
   vpc_name = "qaplanetv1"
-  withEnv(['GEN3_NOPROXY=true', "vpc_name=${vpcName}", "GEN3_HOME=${cloudAutomationPath}", "KUBECTL_NAMESPACE=${kubectlNamespace}"]) {
+  withEnv(['GEN3_NOPROXY=true', "vpc_name=${vpc_name}", "GEN3_HOME=${cloudAutomationPath}", "KUBECTL_NAMESPACE=${kubectlNamespace}"]) {
     echo "GEN3_HOME is $env.GEN3_HOME"
     echo "CHANGE_BRANCH is $env.CHANGE_BRANCH"
     echo "GIT_COMMIT is $env.GIT_COMMIT"
