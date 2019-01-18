@@ -1,10 +1,10 @@
-import groovy.transform.Field
+// import groovy.transform.Field
 
-@Field def config // pipeline config shared between helpers
-@Field def cloudAutomationPath // path to directory of pulled cloud-automation
-@Field def kubectlNamespace // namespace to run kube commands in
-@Field def vpcName
-@Field def obtainedLock // indicates if successfully locked a namespace
+// @Field def config // pipeline config shared between helpers
+// @Field def cloudAutomationPath // path to directory of pulled cloud-automation
+// @Field def kubectlNamespace // namespace to run kube commands in
+// @Field def vpcName
+// @Field def obtainedLock // indicates if successfully locked a namespace
 
 /**
 * Constructor for kubeHelper
@@ -12,28 +12,16 @@ import groovy.transform.Field
 *
 * @param config - pipeline config
 */
-def create(Map config) {
-  this.config = config
-  this.cloudAutomationPath = "${env.WORKSPACE}/cloud-automation"
-  this.kubectlNamespace = "NO_PIPELINE_NAMESPACE_SELECTED"
-  this.vpcName = "qaplanetv1"
-  this.obtainedLock = 1 // no lock obtained yet
-  return this
-}
+// def create(Map config) {
+//   this.config = config
+//   this.cloudAutomationPath = "${env.WORKSPACE}/cloud-automation"
+//   this.kubectlNamespace = "NO_PIPELINE_NAMESPACE_SELECTED"
+//   this.vpcName = "qaplanetv1"
+//   this.obtainedLock = 1 // no lock obtained yet
+//   return this
+// }
 
-/**
-* Sets path to the cloud automation directory, strips any trailing /'s
-*
-* @param path
-*/
-def setCloudAutomationPath(String path) {
-  cloudAutoDir = new File(path)
-  assert cloudAutoDir.exists() : "Provided path for cloud-automation does not exist: "+cloudAutomationPath
-  if (path.endsWith("/")) {
-    path = path.substring(0, path.length() - 1);
-  }
-  this.cloudAutomationPath = path
-}
+def cloudAutomationPath = "${env.WORKSPACE}/cloud-automation"
 
 /**
 * Runs kubectl commands
@@ -42,8 +30,9 @@ def setCloudAutomationPath(String path) {
 * @param body - instructions to execute
 * @returns bodyResult
 */
-def kube(Closure body) {
-  withEnv(['GEN3_NOPROXY=true', "vpc_name=${this.vpcName}", "GEN3_HOME=${this.cloudAutomationPath}", "KUBECTL_NAMESPACE=${this.kubectlNamespace}"]) {
+def kube(String kubectlNamespace, Closure body) {
+  vpc_name = "qaplanetv1"
+  withEnv(['GEN3_NOPROXY=true', "vpc_name=${vpcName}", "GEN3_HOME=${cloudAutomationPath}", "KUBECTL_NAMESPACE=${kubectlNamespace}"]) {
     echo "GEN3_HOME is $env.GEN3_HOME"
     echo "CHANGE_BRANCH is $env.CHANGE_BRANCH"
     echo "GIT_COMMIT is $env.GIT_COMMIT"
@@ -59,93 +48,103 @@ def kube(Closure body) {
 *
 * @param method - lock or unlock
 * @param owner - owner to lock as; defaults to conf.UID
-* @returns klockResult
+* @returns klockResult - boolean True=success, False=failed
 */
-def klock(String method, String owner=null, String lockName="jenkins") {
-  if (null == owner) {
-    owner = this.config.UID
+def klock(String method, String owner, String lockName, String kubectlNamespace) {
+  if (null == method || null == owner || null == lockName) {
+    error("Missing a required parameter:\n  method: ${method}\n  owner: ${owner}\n  lockName: ${lockName}")
   }
   conditionalLockParams = ""
   if (method == "lock") {
     conditionalLockParams = "3600 -w 60"
   }
-  kube {
-    return sh( script: "bash ${this.cloudAutomationPath}/gen3/bin/klock.sh ${method} ${lockName} ${owner} ${conditionalLockParams}", returnStatus: true)
-  }
+  kube(kubectlNamespace, {
+    klockResult = sh( script: "bash ${cloudAutomationPath}/gen3/bin/klock.sh ${method} ${lockName} ${owner} ${conditionalLockParams}", returnStatus: true)
+    if (klockSuccess == 0) {
+      return True
+    } else {
+      return False
+    }
+  })
 }
 
 /**
 * Rolls all pods for kubectlNamespace
 */
-def deploy() {
-  kube {
-    sh "bash ${this.cloudAutomationPath}/gen3/bin/kube-roll-all.sh"
-    sh "bash ${this.cloudAutomationPath}/gen3/bin/kube-wait4-pods.sh || true"
-  }
+def deploy(String kubectlNamespace) {
+  kube(kubectlNamespace, {
+    sh "bash ${cloudAutomationPath}/gen3/bin/kube-roll-all.sh"
+    sh "bash ${cloudAutomationPath}/gen3/bin/kube-wait4-pods.sh || true"
+  })
 }
 
 /**
 * Reset kubernetes namespace gen3 objects/services
+* Note the reset script is internally acquiring a lock that we should keep track of
 */
-def reset() {
-  kube {
-    sh "yes | bash ${this.cloudAutomationPath}/gen3/bin/reset.sh"
-    sh "bash ${this.cloudAutomationPath}/gen3/bin/kube-setup-spark.sh"
-  }
+def reset(String kubectlNamespace) {
+  kube(kubectlNamespace, {
+    sh "yes | bash ${cloudAutomationPath}/gen3/bin/reset.sh"
+    sh "bash ${cloudAutomationPath}/gen3/bin/kube-setup-spark.sh"
+  })
 }
 
 /**
 * Wait for all pods to roll and check health
 */
-def waitForPods() {
-  kube {
-    sh "bash ${this.cloudAutomationPath}/gen3/bin/kube-wait4-pods.sh"
-  }
+def waitForPods(String kubectlNamespace) {
+  kube(kubectlNamespace, {
+    sh "bash ${cloudAutomationPath}/gen3/bin/kube-wait4-pods.sh"
+  })
 }
+
+/**
+* Struct for storing locks
+* see http://pleac.sourceforge.net/pleac_groovy/classesetc.html "Using Classes as Structs"
+*/
+class KubeLock { String kubectlNamespace; String owner; String lockName }
 
 /**
 * Attempts to lock a namespace
 * If it fails to lock a namespace, it raises an error, terminating the pipeline
 *
-* @param namespaces - List of namespaces to select from randomly; defaults to conf.namespaces
-* @param owner - lock owner; defaults to null, to be handled by klock()
+* @param owner - lock owner
 */
-def selectAndLockNamespace(List<String> namespaces=null, String owner=null) {
-  if (null == namespaces) {
-    if (this.config.containsKey('namespaces')) {
-      namespaces = this.config.namespaces
-    } else {
-      namespaces = ['jenkins-dcp', 'jenkins-niaid', 'jenkins-brain', 'jenkins-genomel']
-    }
-  }
+def selectAndLockNamespace(String lockOwner) {
+  namespaces = ['jenkins-dcp', 'jenkins-niaid', 'jenkins-brain', 'jenkins-genomel']
+  lockName = 'jenkins'
   int randNum = new Random().nextInt(namespaces.size());
-  this.obtainedLock = 1;
 
   // try to find an unlocked namespace
-  for (int i=0; i < namespaces.size() && this.obtainedLock != 0; ++i) {
+  for (int i=0; i < namespaces.size(); ++i) {
     randNum = (randNum + i) % namespaces.size();
     kubectlNamespace = namespaces.get(randNum)
-    println "attempting to lock namespace ${this.kubectlNamespace} with a wait time of 1 minutes"
-    this.obtainedLock = this.klock('lock', owner)
+    println("attempting to lock namespace ${kubectlNamespace} with a wait time of 1 minutes")
+    if (klock('lock', lockOwner, lockName, kubectlNamespace)) {
+      // return successful lock
+      return [kubectlNamespace, new KubeLock('kubectlNamespace', lockOwner, lockName)]
+    }
   }
-  if (this.obtainedLock != 0) {
-    error("aborting - no available workspace")
-  }
+  // unable to lock a namespace
+  error("aborting - no available workspace")
 }
 
 /**
 * Returns hostname of the current namespace
 */
-def getHostname() {
-  kube {
+def getHostname(String kubectlNamespace) {
+  kube(kubectlNamespace, {
     return sh(script: "kubectl -n $env.KUBECTL_NAMESPACE get configmap global -o jsonpath='{.data.hostname}'", returnStdout: true)
-  }
+  })
 }
 
-def teardown() {
-  if (this.obtainedLock == 0) {
-    klock('unlock')
+def teardown(List kubeLocks) {
+  kubeLocks.each {
+    klock('unlock', it.owner, it.lockName, it.kubectlNamespace)
   }
-  // unlock the reset lock
-  klock('unlock', 'gen3-reset', 'reset-lock')
+  // if (this.obtainedLock == 0) {
+  //   klock('unlock')
+  // }
+  // // unlock the reset lock
+  // klock('unlock', 'gen3-reset', 'reset-lock')
 }
