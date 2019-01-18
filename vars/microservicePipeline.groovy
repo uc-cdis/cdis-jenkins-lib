@@ -34,9 +34,11 @@ def call(Map config) {
           pipeConfig.serviceTesting.branch
         )
       }
-      // stage('K8sReset') {
-      //   kubeHelper.reset(kubectlNamespace)
-      // }
+      stage('K8sReset') {
+        // adding the gen3-reset lock in case reset fails before unlocking
+        kubeLocks << new kubeHelper.KubeLock(lockName: "reset-lock", lockOwner: "gen3-reset", kubectlNamespace: kubectlNamespace)
+        // kubeHelper.reset(kubectlNamespace)
+      }
       stage('VerifyClusterHealth') {
         kubeHelper.waitForPods(kubectlNamespace)
         testHelper.checkPodHealth(kubectlNamespace)
@@ -55,10 +57,10 @@ def call(Map config) {
         testHelper.fetchDataClient(dataCliBranch)
       }
       stage('RunTests') {
-        testHelper.runIntegrationTests(
-          kubectlNamespace,
-          pipeConfig.serviceTesting.name
-        )
+        // testHelper.runIntegrationTests(
+        //   kubectlNamespace,
+        //   pipeConfig.serviceTesting.name
+        // )
       }
     }
     catch (e) {
