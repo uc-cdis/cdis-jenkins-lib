@@ -1,9 +1,16 @@
+def setGitEnvVars() {
+  gitVars = checkout(scm)
+  for (e in map) {
+    println("key = ${e.key}, value = ${e.value}")
+    env[e.key] = e.value
+  }
+}
+
 /**
 * Pulls common repositories used for testing
 */
 def fetchAllRepos(String currentRepoName) {
-  // checkout current branch to set environment variables
-  checkout scm;
+  setGitEnvVars()
   sh("env")
   dir('gen3-qa') {
     if (currentRepoName == "gen3-qa") {
