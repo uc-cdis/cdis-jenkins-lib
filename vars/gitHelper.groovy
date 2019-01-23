@@ -2,6 +2,8 @@
 * Pulls common repositories used for testing
 */
 def fetchAllRepos(String currentRepoName) {
+  // checkout current branch to set environment variables
+  checkout(scm)
   dir('gen3-qa') {
     if (currentRepoName == "gen3-qa") {
       // testing the gen3-qa repo - check out the test branch here
