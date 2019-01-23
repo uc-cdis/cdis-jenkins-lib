@@ -67,7 +67,6 @@ def overwriteConfigFolders(String changedDir, String selectedNamespace) {
 * TODO: ask Thanh to document
 */
 def manifestDiff(String selectedNamespace) {
-    def manifestHelper = new uchicago.cdis.ManifestHelper(this)
     HashMap fileChanges = gitHelper.getLatestChangeOfBranch('HEAD')
     for (String key : fileChanges.keySet())
     {

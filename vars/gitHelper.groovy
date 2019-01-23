@@ -1,3 +1,8 @@
+/**
+* Checkout current branch and set environment variables
+* It appears that when using scripted pipelines,
+* checkout scm does not set env vars
+*/
 def setGitEnvVars() {
   gitVars = checkout(scm)
   for (e in gitVars) {
@@ -11,7 +16,6 @@ def setGitEnvVars() {
 */
 def fetchAllRepos(String currentRepoName) {
   setGitEnvVars()
-  sh("env")
   dir('gen3-qa') {
     if (currentRepoName == "gen3-qa") {
       // testing the gen3-qa repo - check out the test branch here
@@ -40,22 +44,6 @@ def fetchAllRepos(String currentRepoName) {
     git(
       url: 'https://github.com/uc-cdis/cloud-automation.git',
       branch: 'master'
-    )
-  }
-}
-
-/**
-* Clone branch of the current repository into the provided directory
-* Used to get different manifest branches for finding changes
-*
-* @param branchName
-* @param directoryName
-*/
-def checkoutBranch(String branchName, String directoryName) {
-  dir(directoryName) {
-    git(
-      url: this.config.gitVars.GIT_URL,
-      branch: branchName
     )
   }
 }

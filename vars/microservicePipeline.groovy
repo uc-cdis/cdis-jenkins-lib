@@ -14,13 +14,7 @@ def call(Map config) {
       stage('FetchCode') {
         gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
       }
-      println("hello: ${env.GIT_COMMIT}")
-      println("Env stuff:")
-      println("Config stuff:")
-      println(pipeConfig)
-      sh("env")
       if (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST != "True") {
-        println("Hello 2: ${env.GIT_COMMIT}")
         // Setup stages for NON manifest builds
         // Check for config if wait for quay (don't wait when testing jenkins lib)
         if (pipeConfig.waitForQuay != null && pipeConfig.waitForQuay == "True") {
