@@ -16,6 +16,8 @@ def call(Map config) {
       }
       println("hello: ${env.GIT_COMMIT}")
       println("Env stuff:")
+      println("Config stuff:")
+      println(pipeConfig)
       sh("env")
       if (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST != "True") {
         println("Hello 2: ${env.GIT_COMMIT}")
