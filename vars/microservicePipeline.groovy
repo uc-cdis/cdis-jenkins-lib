@@ -78,6 +78,9 @@ def call(Map config) {
           pipeConfig.serviceTesting.name
         )
       }
+      stage('CleanS3') {
+        testHelper.cleanS3()
+      }
     }
     catch (e) {
       pipelineHelper.handleError(e)
