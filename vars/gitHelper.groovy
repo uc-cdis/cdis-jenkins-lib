@@ -1,6 +1,6 @@
 def setGitEnvVars() {
   gitVars = checkout(scm)
-  for (e in map) {
+  for (e in gitVars) {
     println("key = ${e.key}, value = ${e.value}")
     env[e.key] = e.value
   }
