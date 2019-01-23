@@ -3,7 +3,7 @@
 */
 def fetchAllRepos(String currentRepoName) {
   // checkout current branch to set environment variables
-  checkout(scm)
+  checkout scm;
   sh("env")
   dir('gen3-qa') {
     if (currentRepoName == "gen3-qa") {
