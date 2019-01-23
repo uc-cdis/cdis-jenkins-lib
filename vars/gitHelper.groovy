@@ -4,6 +4,7 @@
 def fetchAllRepos(String currentRepoName) {
   // checkout current branch to set environment variables
   checkout(scm)
+  sh(env)
   dir('gen3-qa') {
     if (currentRepoName == "gen3-qa") {
       // testing the gen3-qa repo - check out the test branch here
