@@ -8,6 +8,6 @@ library identifier: "cdis-jenkins-lib@${env.CHANGE_BRANCH}"
 runPipeline {
   pipeline = 'microservice'
   serviceTesting = [name: 'fence', branch: 'master']
-  waitForQuay = "False"
-  MANIFEST = "False"
+  // waitForQuay = false
+  MANIFEST = false
 }
