@@ -26,11 +26,11 @@ def setupConfig(Map config) {
 @NonCPS
 def cancelPreviousRunningBuilds() {
   maxBuildsToSearch = 20
-  RunWrapper b = currentBuild
+  b = currentBuild
   for (int i=0; i<maxBuildsToSearch; i++) {
     b = b.getPreviousBuild();
     if (b == null) break;
-    Run<?,?> rawBuild = b.rawBuild
+    rawBuild = b.rawBuild
     if (rawBuild.isBuilding()) {
       println("Stopping build: ${rawBuild}")
       rawBuild.doStop()
