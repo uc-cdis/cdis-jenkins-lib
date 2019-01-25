@@ -79,8 +79,8 @@ def waitForBuild(String repoName, String formattedBranch) {
             println("inside second if")
             testing = "$env.GIT_PREVIOUS_COMMIT".startsWith(fields[1])
             testing2 = "$env.GIT_PREVIOUS_COMMIT".contains(fields[1])
-            println("previous starts with field1?: ${}")
-            println("previous starts with field2?: ${}")
+            println("previous starts with field1?: ${testing}")
+            println("previous starts with field2?: ${testing2}")
             if(env.GIT_COMMIT.startsWith(fields[1])) {
               println("inside third if")
               quayImageReady = fields[2].endsWith("complete")
