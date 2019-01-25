@@ -32,7 +32,6 @@ def waitForBuild(String repoName, String formattedBranch) {
     println "running time query"
     resList = sh(script: timeQuery, returnStdout: true).trim().split('"\n"')
     for (String res in resList) {
-      println("Reusults list: $resList")
       fields = res.replaceAll('"', "").split(',')
 
       //
@@ -43,8 +42,6 @@ def waitForBuild(String repoName, String formattedBranch) {
       if (fields.length > 2) {
         noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
         if(fields[0].startsWith(formattedBranch)) {
-          println("commit: $env.GIT_COMMIT")
-          println("Fields: $fields")
           if(env.GIT_COMMIT.startsWith(fields[1])) {
             quayImageReady = fields[2].endsWith("complete")
             if (quayImageReady) {
@@ -66,6 +63,7 @@ def waitForBuild(String repoName, String formattedBranch) {
     if (!quayImageReady) {
       println "time query failed, running limit query"
       resList = sh(script: limitQuery, returnStdout: true).trim().split('"\n"')
+      println("reslist: $resList")
       for (String res in resList) {
         fields = res.replaceAll('"', "").split(',')
         //
