@@ -1,21 +1,12 @@
 /**
-* Checkout current branch and set environment variables
+* Fetch some git values and set environment variables
 * It appears that when using scripted pipelines,
 * checkout scm does not set env vars
 */
 def setGitEnvVars() {
-  dir('temp-clone') {
-    gitVars = checkout(scm)
-    for (e in gitVars) {
-      println("key = ${e.key}, value = ${e.value}")
-      env[e.key] = e.value
-    }
-  }
-  sh('rm -rf temp-clone')
-  commitResult = sh(script: "git log -n 2 --pretty=format:'%h'", returnStdout: true).trim()
-  println(commitResult)
-  println(commitResult.split('\n'))
-  println(commitResult.split('\n')[0])
+  (gitCommit, gitPrevCommit) = sh(script: "git log -n 2 --pretty=format:'%h'", returnStdout: true).trim().split('\n')
+  env.GIT_COMMIT = gitCommit
+  env.GIT_PREVIOUS_COMMIT = gitPrevCommit
 }
 
 /**
