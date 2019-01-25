@@ -7,7 +7,7 @@ def waitForBuild(String repoName, String formattedBranch) {
   }
 
   echo("Waiting for Quay to build:\n  repoName: ${repoName}\n  branch: '${formattedBranch}'\n  commit: ${env.GIT_COMMIT}\n  previous commit: ${env.GIT_PREVIOUS_COMMIT}")
-
+  sh('git log')
   def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 60)
   def timeout = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) + 3600)
   QUAY_API = 'https://quay.io/api/v1/repository/cdis/'
