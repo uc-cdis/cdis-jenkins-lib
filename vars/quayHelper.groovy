@@ -1,16 +1,12 @@
 /**
 * Waits for Quay to finish building the branch in config
 */
-def waitForBuild(String repoName, String formattedBranch, String commit) {
-  if (null == repoName || null == formattedBranch || null == commit) {
-    error("Missing one or more properties required for checking Quay:\n  repoName: ${repoName}\n  formattedBranch: ${formattedBranch}\n  commit: ${commit}")
-  }
-
+def waitForBuild(String repoName, String formattedBranch) {
   if (repoName == 'cdis-jenkins-lib') {
     repoName = 'jenkins-lib'
   }
 
-  echo("Waiting for Quay to build:\n  repoName: ${repoName}\n  branch: '${formattedBranch}'\n  commit: ${commit}")
+  echo("Waiting for Quay to build:\n  repoName: ${repoName}\n  branch: '${formattedBranch}'\n  commit: ${env.GIT_COMMIT}")
 
   def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 60)
   def timeout = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) + 3600)
@@ -36,6 +32,7 @@ def waitForBuild(String repoName, String formattedBranch, String commit) {
     println "running time query"
     resList = sh(script: timeQuery, returnStdout: true).trim().split('"\n"')
     for (String res in resList) {
+      println("Reusults list: $resList")
       fields = res.replaceAll('"', "").split(',')
 
       //
@@ -46,7 +43,9 @@ def waitForBuild(String repoName, String formattedBranch, String commit) {
       if (fields.length > 2) {
         noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
         if(fields[0].startsWith(formattedBranch)) {
-          if(commit.startsWith(fields[1])) {
+          println("commit: $env.GIT_COMMIT")
+          println("Fields: $fields")
+          if(env.GIT_COMMIT.startsWith(fields[1])) {
             quayImageReady = fields[2].endsWith("complete")
             if (quayImageReady) {
               println "found quay build: "+res
@@ -58,7 +57,7 @@ def waitForBuild(String repoName, String formattedBranch, String commit) {
             break
           } else {
             currentBuild.result = 'ABORTED'
-            error("aborting build due to out of date git hash\ntag: ${formattedBranch}\npipeline: ${commit}\nquay: "+fields[1])
+            error("aborting build due to out of date git hash\npipeline commit: $env.GIT_COMMIT\nquay: "+fields[1])
           }
         }
       }
@@ -79,7 +78,7 @@ def waitForBuild(String repoName, String formattedBranch, String commit) {
           noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
           
           if(fields[0].startsWith(formattedBranch)) {
-            if(commit.startsWith(fields[1])) {
+            if(env.GIT_COMMIT.startsWith(fields[1])) {
               quayImageReady = fields[2].endsWith("complete")
               if (quayImageReady) {
                 println "found quay build: "+res
@@ -88,13 +87,14 @@ def waitForBuild(String repoName, String formattedBranch, String commit) {
             } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1])) {
               // previous commit is the newest - sleep and try again
               // things get annoying when quay gets slow
+              noPendingQuayBuilds = false
               break
             } else {
               // if previous commit is the newest one in quay, then maybe
               // the job's commit hasn't appeared yet. 
               // otherwise assume some other newer commit is in the process of building in quay
               currentBuild.result = 'ABORTED'
-              error("aborting build due to out of date git hash\ntag: ${formattedBranch}\npipeline: ${commit}\nquay: "+fields[1])
+              error("aborting build due to out of date git hash\ntag: $formattedBranch\npipeline: $env.GIT_COMMIT\nquay: "+fields[1])
             }
           }
         }
