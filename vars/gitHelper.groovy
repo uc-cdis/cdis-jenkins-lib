@@ -9,20 +9,10 @@
 * 2 ways of getting the commits.
 */
 def setGitEnvVars(String currentRepoName) {
-  // if (currentRepoName == 'cdis-jenkins-lib') {
   gitVars = checkout(scm: scm, clearWorkspace: true)
   for (e in gitVars) {
     env[e.key] = e.value
   }
-  // return
-  // }
-
-  // // get last 2 commits for branch that were not by Jenkins
-  // asdfg = sh(script: "git log --author='Jenkins' --invert-grep -2 --pretty=format:'%h'", returnStdout: true)
-  // println(asdfg)
-  // (gitCommit, gitPrevCommit) = sh(script: "git log --author='Jenkins' --invert-grep -2 --pretty=format:'%h'", returnStdout: true).trim().split('\n')
-  // env.GIT_COMMIT = gitCommit
-  // env.GIT_PREVIOUS_COMMIT = gitPrevCommit
 }
 
 /**
