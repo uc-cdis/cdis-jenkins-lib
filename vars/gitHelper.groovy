@@ -17,9 +17,8 @@ def setGitEnvVars(String currentRepoName) {
     return
   }
 
-  // get last 3 commits for branch.
-  // first commit is Jenkins' merge of branch into master (ignored)
-  (jenkinsMergeCommit, gitCommit, gitPrevCommit) = sh(script: "git log -n 3 --pretty=format:'%h'", returnStdout: true).trim().split('\n')
+  // get last 2 commits for branch that were not by Jenkins
+  (gitCommit, gitPrevCommit) = sh(script: "git log --author="Jenkins" --invert-grep -n 2 --pretty=format:'%h'", returnStdout: true).trim().split('\n')
   env.GIT_COMMIT = gitCommit
   env.GIT_PREVIOUS_COMMIT = gitPrevCommit
 }
