@@ -10,7 +10,7 @@
 */
 def setGitEnvVars(String currentRepoName) {
   // if (currentRepoName == 'cdis-jenkins-lib') {
-  gitVars = checkout(scm, clearWorkspace: true)
+  gitVars = checkout(scm: scm, clearWorkspace: true)
   for (e in gitVars) {
     env[e.key] = e.value
   }
