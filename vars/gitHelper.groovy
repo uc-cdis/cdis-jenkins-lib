@@ -12,6 +12,9 @@ def setGitEnvVars() {
     }
   }
   sh('rm -rf temp-clone')
+  commitResult = sh(script: "git log -n 2 --pretty=format:'%h'", returnStdout: true).trim()
+  println(commitResult)
+  println(commitResult.split('"\n"'))
 }
 
 /**
