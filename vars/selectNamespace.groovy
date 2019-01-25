@@ -1,8 +1,8 @@
 #!groovy
 
 def call() {
-    String[] namespaces = ['jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
-    int randNum = new Random().nextInt(namespaces.length);
+    String[] namespaces = ['jenkins-dcp'] // ['jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
+    int randNum = 0 //new Random().nextInt(namespaces.length);
     uid = env.service+"-"+env.quaySuffix+"-"+env.BUILD_NUMBER
     int lockStatus = 1;
 
