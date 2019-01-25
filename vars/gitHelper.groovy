@@ -4,11 +4,14 @@
 * checkout scm does not set env vars
 */
 def setGitEnvVars() {
-  gitVars = checkout(scm)
-  for (e in gitVars) {
-    println("key = ${e.key}, value = ${e.value}")
-    env[e.key] = e.value
+  dir('temp-clone') {
+    gitVars = checkout(scm)
+    for (e in gitVars) {
+      println("key = ${e.key}, value = ${e.value}")
+      env[e.key] = e.value
+    }
   }
+  sh('rm -rf temp-clone')
 }
 
 /**
