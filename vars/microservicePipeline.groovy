@@ -10,6 +10,7 @@ def call(Map config) {
     kubectlNamespace = null
     kubeLocks = []
     pipeConfig = pipelineHelper.setupConfig(config)
+    pipelineHelper.cancelPreviousRunningBuilds()
     try {
       stage('FetchCode') {
         gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])

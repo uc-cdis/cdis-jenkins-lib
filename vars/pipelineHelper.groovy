@@ -20,6 +20,25 @@ def setupConfig(Map config) {
 }
 
 /**
+* Cancel all previous builds that are currently running
+* Source: https://issues.jenkins-ci.org/browse/JENKINS-43353?focusedCommentId=294556&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-294556
+*/
+@NonCPS
+def cancelPreviousRunningBuilds() {
+  maxBuildsToSearch = 20
+  RunWrapper b = currentBuild
+  for (int i=0; i<maxBuildsToSearch; i++) {
+    b = b.getPreviousBuild();
+    if (b == null) break;
+    Run<?,?> rawBuild = b.rawBuild
+    if (rawBuild.isBuilding()) {
+      println("Stopping build: ${rawBuild}")
+      rawBuild.doStop()
+    }
+  }
+}
+
+/**
 * Generic error handler, prints error message and stacktrace
 *
 * @param e - Exception/Error to handle
