@@ -21,8 +21,7 @@ def call(Map config) {
           stage('WaitForQuayBuild') {
             quayHelper.waitForBuild(
               pipeConfig['currentRepoName'],
-              pipeConfig['currentBranchFormatted'],
-              env.GIT_COMMIT
+              pipeConfig['currentBranchFormatted']
             )
           }
         // }
