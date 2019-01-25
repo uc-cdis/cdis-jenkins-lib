@@ -24,6 +24,7 @@ def call(Map config) {
           )
         }
         stage('SelectNamespace') {
+          sleep(200)
           (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'])
           kubeLocks << lock
         }
