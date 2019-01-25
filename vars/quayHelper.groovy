@@ -28,7 +28,7 @@ def waitForBuild(String repoName, String formattedBranch) {
       error("aborting build due to timeout")
     }
 
-    // sleep(30)
+    sleep(15)
     println "running time query"
     resList = sh(script: timeQuery, returnStdout: true).trim().split('"\n"')
     for (String res in resList) {
@@ -63,7 +63,6 @@ def waitForBuild(String repoName, String formattedBranch) {
     if (!quayImageReady) {
       println "time query failed, running limit query"
       resList = sh(script: limitQuery, returnStdout: true).trim().split('"\n"')
-      println("reslist: $resList")
       for (String res in resList) {
         fields = res.replaceAll('"', "").split(',')
         //
@@ -74,22 +73,14 @@ def waitForBuild(String repoName, String formattedBranch) {
         //
         if (fields.length > 2) {
           noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
-          println("inside first if")
           if(fields[0].startsWith(formattedBranch)) {
-            println("inside second if")
-            testing = "$env.GIT_PREVIOUS_COMMIT".startsWith(fields[1])
-            testing2 = "$env.GIT_PREVIOUS_COMMIT".contains(fields[1])
-            println("previous starts with field1?: ${testing}")
-            println("previous starts with field2?: ${testing2}")
             if(env.GIT_COMMIT.startsWith(fields[1])) {
-              println("inside third if")
               quayImageReady = fields[2].endsWith("complete")
               if (quayImageReady) {
                 println "found quay build: "+res
               }
               break
             } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1])) {
-              println("inside fourth if")
               // previous commit is the newest - sleep and try again
               // things get annoying when quay gets slow
               noPendingQuayBuilds = false

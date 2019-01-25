@@ -1,21 +1,24 @@
 /**
 * Fetch some git values and set environment variables
 * It appears that when using scripted pipelines,
-* checkout scm does not set env vars
+* checkout scm does not set env vars.
+*
+* Also, strangely Jenkins does NOT pull branch into root directory when
+* pr is for cdis-jenkins-lib, while it IS pulled when
+* pr is for another service, which is why there are
+* 2 ways of getting the commits.
 */
 def setGitEnvVars(String currentRepoName) {
-  sh('pwd')
   if (currentRepoName == 'cdis-jenkins-lib') {
-    sh('ls')
     gitVars = checkout(scm)
-    sh('pwd')
-    sh('ls')
     for (e in gitVars) {
-      print "key = ${e.key}, value = ${e.value}"
       env[e.key] = e.value
     }
     return
   }
+
+  // get last 3 commits for branch.
+  // first commit is Jenkins' merge of branch into master (ignored)
   (jenkinsMergeCommit, gitCommit, gitPrevCommit) = sh(script: "git log -n 3 --pretty=format:'%h'", returnStdout: true).trim().split('\n')
   env.GIT_COMMIT = gitCommit
   env.GIT_PREVIOUS_COMMIT = gitPrevCommit
