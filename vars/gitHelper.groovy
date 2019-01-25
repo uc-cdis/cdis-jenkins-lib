@@ -3,8 +3,19 @@
 * It appears that when using scripted pipelines,
 * checkout scm does not set env vars
 */
-def setGitEnvVars() {
+def setGitEnvVars(String currentRepoName) {
   sh('pwd')
+  if (currentRepoName == 'cdis-jenkins-lib') {
+    sh('ls')
+    gitVars = checkout(scm)
+    sh('pwd')
+    sh('ls')
+    for (e in gitVars) {
+      print "key = ${e.key}, value = ${e.value}"
+      env[e.key] = e.value
+    }
+    return
+  }
   (jenkinsMergeCommit, gitCommit, gitPrevCommit) = sh(script: "git log -n 3 --pretty=format:'%h'", returnStdout: true).trim().split('\n')
   env.GIT_COMMIT = gitCommit
   env.GIT_PREVIOUS_COMMIT = gitPrevCommit
