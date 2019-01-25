@@ -74,15 +74,22 @@ def waitForBuild(String repoName, String formattedBranch) {
         //
         if (fields.length > 2) {
           noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
-          
+          println("inside first if")
           if(fields[0].startsWith(formattedBranch)) {
+            println("inside second if")
+            testing = env.GIT_PREVIOUS_COMMIT.startsWith(fields[1])
+            testing2 = env.GIT_PREVIOUS_COMMIT.contains(fields[1])
+            println("previous starts with field1?: ${}")
+            println("previous starts with field2?: ${}")
             if(env.GIT_COMMIT.startsWith(fields[1])) {
+              println("inside third if")
               quayImageReady = fields[2].endsWith("complete")
               if (quayImageReady) {
                 println "found quay build: "+res
               }
               break
             } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1])) {
+              println("inside fourth if")
               // previous commit is the newest - sleep and try again
               // things get annoying when quay gets slow
               noPendingQuayBuilds = false
