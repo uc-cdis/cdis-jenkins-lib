@@ -5,7 +5,7 @@
 */
 def setGitEnvVars() {
   sh('pwd')
-  (gitCommit, gitPrevCommit) = sh(script: "git log -n 2 --pretty=format:'%h'", returnStdout: true).trim().split('\n')
+  (jenkinsMergeCommit, gitCommit, gitPrevCommit) = sh(script: "git log -n 3 --pretty=format:'%h'", returnStdout: true).trim().split('\n')
   env.GIT_COMMIT = gitCommit
   env.GIT_PREVIOUS_COMMIT = gitPrevCommit
 }
