@@ -17,16 +17,14 @@ def call(Map config) {
       }
       if (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST == false) {
         // Setup stages for NON manifest builds
-        // Check for config if wait for quay (don't wait when testing jenkins lib)
-        // if (pipeConfig.waitForQuay != null && pipeConfig.waitForQuay == true) {
-          stage('WaitForQuayBuild') {
-            quayHelper.waitForBuild(
-              pipeConfig['currentRepoName'],
-              pipeConfig['currentBranchFormatted']
-            )
-          }
-        // }
+        stage('WaitForQuayBuild') {
+          quayHelper.waitForBuild(
+            pipeConfig['currentRepoName'],
+            pipeConfig['currentBranchFormatted']
+          )
+        }
         stage('SelectNamespace') {
+          sleep(200)
           (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'])
           kubeLocks << lock
         }

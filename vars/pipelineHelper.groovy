@@ -22,6 +22,8 @@ def setupConfig(Map config) {
 /**
 * Cancel all previous builds that are currently running
 * Source: https://issues.jenkins-ci.org/browse/JENKINS-43353?focusedCommentId=294556&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-294556
+* Note: Currently using @NonCPS decorator b/c I and others cant
+* seem to get it to work in var/ of shared libararies (https://groups.google.com/forum/#!topic/jenkinsci-users/fbkCThpjGv8)
 */
 def cancelPreviousRunningBuilds() {
   maxBuildsToSearch = 20
@@ -34,9 +36,9 @@ def cancelPreviousRunningBuilds() {
       println("Stopping build: ${rawBuild}")
       rawBuild.doStop()
     }
-    rawBuild = null
+    rawBuild = null // make null to keep pipeline serializable
   }
-  b = null
+  b = null // make null to keep pipeline serializable
 }
 
 /**
