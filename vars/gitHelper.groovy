@@ -18,7 +18,7 @@ def setGitEnvVars(String currentRepoName) {
   }
 
   // get last 2 commits for branch that were not by Jenkins
-  (gitCommit, gitPrevCommit) = sh(script: "git log --author="Jenkins" --invert-grep -n 2 --pretty=format:'%h'", returnStdout: true).trim().split('\n')
+  (gitCommit, gitPrevCommit) = sh(script: "git log --author='Jenkins' --invert-grep -n 2 --pretty=format:'%h'", returnStdout: true).trim().split('\n')
   env.GIT_COMMIT = gitCommit
   env.GIT_PREVIOUS_COMMIT = gitPrevCommit
 }
