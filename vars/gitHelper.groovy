@@ -14,8 +14,9 @@ def setGitEnvVars(String currentRepoName) {
     sh("ls")
     sh("pwd")
     sh('git log -10')
-    sh('git log --author=Jenkins')
-    sh('git log --author=Jenkins --invert-grep')
+    sh('git log --author=Jenkins -10')
+    sh('git log --author=Jenkins --invert-grep -10')
+    sh('git log --author=Jenkins --invert-grep -10 --pretty="format: %h"')
     deleteDir()
   }
   sh("ls")
