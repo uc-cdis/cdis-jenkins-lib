@@ -6,7 +6,6 @@
 def setGitEnvVars(String currentRepoName) {
   sh("ls")
   sh("pwd")
-  sh("git log -4")
   dir('tmpGitClone') {
     gitVars = checkout(scm: scm, clearWorkspace: true)
     // for (e in gitVars) {
