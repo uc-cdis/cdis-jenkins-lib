@@ -4,8 +4,6 @@
 * checkout scm does not set env vars.
 */
 def setGitEnvVars(String currentRepoName) {
-  sh("ls")
-  sh("pwd")
   dir('tmpGitClone') {
     gitVars = checkout(scm: scm, clearWorkspace: true)
     (gitCommit, gitPreviousCommit) = sh(script: 'git log --author=Jenkins --invert-grep -10 --pretty="format: %h"', returnStdout: true).split('\n')
@@ -15,8 +13,6 @@ def setGitEnvVars(String currentRepoName) {
     env.GIT_PREVIOUS_COMMIT = gitPreviousCommit
     deleteDir()
   }
-  sh("ls")
-  sh("pwd")
 }
 
 /**
