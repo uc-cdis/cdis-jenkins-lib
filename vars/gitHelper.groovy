@@ -9,8 +9,8 @@ def setGitEnvVars(String currentRepoName) {
     (gitCommit, gitPreviousCommit) = sh(script: 'git log --author=Jenkins --invert-grep -10 --pretty="format: %h"', returnStdout: true).split('\n')
     println(gitCommit)
     println(gitPreviousCommit)
-    env.GIT_COMMIT = gitCommit
-    env.GIT_PREVIOUS_COMMIT = gitPreviousCommit
+    env.GIT_COMMIT = gitCommit.trim()
+    env.GIT_PREVIOUS_COMMIT = gitPreviousCommit.trim()
     deleteDir()
   }
 }
