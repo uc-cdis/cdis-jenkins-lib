@@ -6,16 +6,19 @@
 def setGitEnvVars(String currentRepoName) {
   sh("ls")
   sh("pwd")
+  sh("git log -4")
   dir('tmpGitClone') {
     gitVars = checkout(scm: scm, clearWorkspace: true)
-    for (e in gitVars) {
-      env[e.key] = e.value
-    }
+    // for (e in gitVars) {
+    //   env[e.key] = e.value
+    // }
     sh("ls")
     sh("pwd")
     sh('git log -10')
+    sh('git log --author=Jenkins')
+    sh('git log --author=Jenkins --invert-grep')
+    deleteDir()
   }
-  sh('rm -rf tmpGitClone')
   sh("ls")
   sh("pwd")
 }
