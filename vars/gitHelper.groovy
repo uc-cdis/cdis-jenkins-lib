@@ -4,6 +4,12 @@
 * checkout scm does not set env vars.
 */
 def setGitEnvVars(String currentRepoName) {
+  sh("ls")
+  sh("pwd")
+  sh("git log -10")
+  dir('fence') {
+    sh("git log -10")
+  }
   gitVars = checkout(scm: scm, clearWorkspace: true)
   for (e in gitVars) {
     env[e.key] = e.value
