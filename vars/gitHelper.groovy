@@ -6,12 +6,18 @@
 def setGitEnvVars(String currentRepoName) {
   sh("ls")
   sh("pwd")
-  println(env.GIT_COMMIT)
-  println(env.GIT_PREVIOUS_COMMIT)
-  // gitVars = checkout(scm: scm, clearWorkspace: true)
-  // for (e in gitVars) {
-  //   env[e.key] = e.value
-  // }
+  dir('tmpGitClone') {
+    gitVars = checkout(scm: scm, clearWorkspace: true)
+    for (e in gitVars) {
+      env[e.key] = e.value
+    }
+    sh("ls")
+    sh("pwd")
+    sh('git log -10')
+  }
+  sh('rm -rf tmpGitClone')
+  sh("ls")
+  sh("pwd")
 }
 
 /**
