@@ -40,8 +40,6 @@ def waitForBuild(String repoName, String formattedBranch) {
       //
       if (fields.length > 2) {
         noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
-        println("starts with: ")
-        println(env.GIT_COMMIT.startsWith(fields[1]))
         if(fields[0].startsWith(formattedBranch)) {
           if(env.GIT_COMMIT.startsWith(fields[1])) {
             quayImageReady = fields[2].endsWith("complete")
