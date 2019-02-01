@@ -65,6 +65,7 @@ def getLatestChangeOfBranch(String branchName=env.CHANGE_BRANCH) {
   HashMap fileChanges = [:]
   def size = changes.size()
   for (int i = 0; i < size; i++) {
+    println(changes[i])
       def dirs = changes[i].split('/')
       def k = '.'
       if (dirs.size() > 1)
@@ -73,5 +74,10 @@ def getLatestChangeOfBranch(String branchName=env.CHANGE_BRANCH) {
           fileChanges[k] = []
       fileChanges[k].add(changes[i])
   }
+  println(fileChanges)
+  println("Branchname: ${branchName}")
+  sh("git log -10")
+  sh("git rev-parse HEAD")
+  sh("git diff --name-only origin/master...$branchName")
   return fileChanges
 }
