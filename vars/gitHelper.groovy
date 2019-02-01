@@ -5,13 +5,11 @@
 */
 def setGitEnvVars(String currentRepoName) {
   dir('tmpGitClone') {
-    gitVars = checkout(scm: scm, clearWorkspace: true)
     (gitCommit, gitPreviousCommit) = sh(script: 'git log --author=Jenkins --invert-grep -10 --pretty="format: %h"', returnStdout: true).split('\n')
     println(gitCommit)
     println(gitPreviousCommit)
     env.GIT_COMMIT = gitCommit.trim()
     env.GIT_PREVIOUS_COMMIT = gitPreviousCommit.trim()
-    deleteDir()
   }
 }
 
@@ -50,6 +48,9 @@ def fetchAllRepos(String currentRepoName) {
       branch: 'master'
     )
   }
+  dir('tmpGitClone') {
+    checkout(scm: scm, clearWorkspace: true)
+  }
 }
 
 /**
@@ -57,7 +58,6 @@ def fetchAllRepos(String currentRepoName) {
 */
 def getLatestChangeOfBranch(String branchName=env.CHANGE_BRANCH) {
   dir('tmpGitClone') {
-    checkout(scm)
     if (null == branchName) {
       error("unable to determine branch");    
     }
@@ -82,7 +82,6 @@ def getLatestChangeOfBranch(String branchName=env.CHANGE_BRANCH) {
     sh("git rev-parse HEAD")
     sh("git diff --name-only origin/master...$branchName")
 
-    deleteDir()
     return fileChanges
   }
 }

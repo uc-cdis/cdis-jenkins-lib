@@ -24,14 +24,14 @@ def editService(String commonsHostname, String serviceName, String quayBranchNam
 * TODO: ask Thanh to document this function
 */
 def mergeManifest(String changedDir, String selectedNamespace) {
-  String od = sh(returnStdout: true, script: "jq -r .global.dictionary_url < $changedDir/manifest.json").trim()
-  String pa = sh(returnStdout: true, script: "jq -r .global.portal_app < $changedDir/manifest.json").trim()
+  String od = sh(returnStdout: true, script: "jq -r .global.dictionary_url < tmpGitClone/$changedDir/manifest.json").trim()
+  String pa = sh(returnStdout: true, script: "jq -r .global.portal_app < tmpGitClone/$changedDir/manifest.json").trim()
   String s = sh(returnStdout: true, script: "jq -r keys < cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   println s
   def keys = new groovy.json.JsonSlurper().parseText(s)
   String dels = ""
   for (String k : keys) {
-    if (sh(returnStdout: true, script: "jq -r '.$k' < $changedDir/manifest.json").trim() == 'null') {
+    if (sh(returnStdout: true, script: "jq -r '.$k' < tmpGitClone/$changedDir/manifest.json").trim() == 'null') {
       if (dels == "")
         dels = dels + "del(.$k)"
       else
@@ -41,7 +41,7 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   if (dels != "") {
     sh(returnStdout: true, script: "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r \'${dels}\' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   }
-  sh(returnStdout: true, script: "bs=\$(jq -r .versions < $changedDir/manifest.json) "
+  sh(returnStdout: true, script: "bs=\$(jq -r .versions < tmpGitClone/$changedDir/manifest.json) "
           + "&& old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) "
           + """&& echo \$old | jq -r --arg od ${od} --arg pa ${pa} --argjson vs \"\$bs\"""" 
           + / '(.global.dictionary_url) |=/ + "\$od" + / | (.global.portal_app) |=/ + "\$pa"
@@ -56,11 +56,11 @@ def mergeManifest(String changedDir, String selectedNamespace) {
 def overwriteConfigFolders(String changedDir, String selectedNamespace) {
     List<String> folders = sh(returnStdout: true, script: "ls $changedDir").split()
     if (folders.contains('arrangerProjects'))
-      sh(script: "cp -rf $changedDir/arrangerProjects cdis-manifest/${selectedNamespace}.planx-pla.net/")
+      sh(script: "cp -rf tmpGitClone/$changedDir/arrangerProjects cdis-manifest/${selectedNamespace}.planx-pla.net/")
     if (folders.contains('portal'))
-      sh(script: "cp -rf $changedDir/portal cdis-manifest/${selectedNamespace}.planx-pla.net/")
+      sh(script: "cp -rf tmpGitClone/$changedDir/portal cdis-manifest/${selectedNamespace}.planx-pla.net/")
     if (folders.contains('etlMapping.yaml'))
-      sh(script: "cp -rf $changedDir/etlMapping.yaml cdis-manifest/${selectedNamespace}.planx-pla.net/")
+      sh(script: "cp -rf tmpGitClone/$changedDir/etlMapping.yaml cdis-manifest/${selectedNamespace}.planx-pla.net/")
   }
 
 /**
