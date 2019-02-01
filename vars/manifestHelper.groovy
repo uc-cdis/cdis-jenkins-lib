@@ -54,7 +54,7 @@ def mergeManifest(String changedDir, String selectedNamespace) {
 * TODO: ask Thanh to document
 */
 def overwriteConfigFolders(String changedDir, String selectedNamespace) {
-    List<String> folders = sh(returnStdout: true, script: "ls $changedDir").split()
+    List<String> folders = sh(returnStdout: true, script: "ls tmpGitClone/$changedDir").split()
     if (folders.contains('arrangerProjects'))
       sh(script: "cp -rf tmpGitClone/$changedDir/arrangerProjects cdis-manifest/${selectedNamespace}.planx-pla.net/")
     if (folders.contains('portal'))
