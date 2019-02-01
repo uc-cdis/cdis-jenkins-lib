@@ -1,8 +1,11 @@
 #!groovy
 
-@Library('cdis-jenkins-lib@feat/performancePipeline') _
+def call(body) {
+  def config = [:]
+  body.resolveStrategy = Closure.DELEGATE_FIRST
+  body.delegate = config
+  body()
 
-def call(Map config) {
   pipeline {
     agent any
   
@@ -13,7 +16,11 @@ def call(Map config) {
     stages {
       stage('FetchCode') {
         steps {
-          fetchCode([:])
+          script {
+            env.service = "$env.JOB_NAME".split('/')[1]
+            env.quaySuffix = "$env.CHANGE_BRANCH".replaceAll("/", "_")
+            fetchCode(config)
+          }
         }
       }
 
@@ -26,20 +33,16 @@ def call(Map config) {
       stage('SelectNamespace') {
         steps {
           selectNamespace(['jenkins-perf'] as String[])
-          dir('gen3-qa') {
-            sh "git branch -D feat/regression-pipeline"
-            sh "git checkout feat/regression-pipeline"
-          }
         }
       }
 
       stage('WaitForQuayBuild') {
-          steps {
-            script {
-              waitForQuay()
-              }
-            }
+        steps {
+          script {
+            waitForQuay()
           }
+        }
+      }
 
       stage('ModifyManifest') {
         steps {
@@ -92,9 +95,11 @@ def call(Map config) {
             steps {
               dir('gen3-qa') {
                 sh "git checkout feat/regression-pipeline"
+                // sh "aws s3 cp --recursive s3://cdis-terraform-state/regressions/subm_100/ $env.WORKSPACE/testData"
+                sh "aws s3 cp s3://cdis-terraform-state/regressions/subm_100/DataImportOrder.txt $env.WORKSPACE/testData/DataImportOrderPath.txt"
                 sh "aws s3 cp s3://cdis-terraform-state/regressions/subm_100/DataImportOrder.txt DataImportOrder.txt"
 
-                withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=$env.WORKSPACE/testData/", "DATAURL=https://cdis-terraform-state.s3.amazonaws.com/regressions/subm_100/core_metadata_collection.json?AWSAccessKeyId=ASIA2JSRVZXPZS6REPE4&Expires=1546457738&x-amz-security-token=FQoGZXIvYXdzEJT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaDKqxBov7h4Rw7XZrjCL%2FAdrGYv7Mu5j45vfLv8nc5HBNF3xJMn5bOvJrnJ1REPDZcdJUld%2B%2BVfhikiPmluiukwidwTHRbW0EHEdT1HlsPU7JUtNFa7aJkU1e18BH1yuWil4MEScImSgWKND1N4m3it7pejwIjgCdu81fS8xH%2BchaqOr%2BdRIAU%2Bv2ywQTUo6%2FqOpUxpf4Z6dWFJNnsnwB5o24YU%2Fvy%2F0QG9RtgdSUhzkFfyAqzD7BuH2F5rP%2BJ11GJn2aovk51Wjy2fjT5y8tLuhZryGrg2YFrurkkEawNh8Eaq%2B9UzfxfUjxDpY%2BXrmgG0MH%2FFVeo4siyQG8AK98gyhy1PapTyqJ7neXShVCWiiMiLThBQ%3D%3D&Signature=0qH8aivItn2mivra2ETvpVU3bpg%3D"]) {
+                withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=''"]) {
                   sh "bash ./run-regressions.sh $env.KUBECTL_NAMESPACE --service=$env.service"
                 }
               }
@@ -108,30 +113,34 @@ def call(Map config) {
           stage('RunRegressionsTestsOn100') {
             steps {
               dir('gen3-qa') {
+                // sh "aws s3 cp --recursive s3://cdis-terraform-state/regressions/subm_100/ $env.WORKSPACE/testData"
+                // sh "aws s3 cp s3://cdis-terraform-state/regressions/subm_100/DataImportOrder.txt $env.WORKSPACE/testData/DataImportOrderPath.txt"
                 sh "aws s3 cp s3://cdis-terraform-state/regressions/subm_100/DataImportOrder.txt DataImportOrder.txt"
-
-                withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=$env.WORKSPACE/testData/", "DATAURL=https://cdis-terraform-state.s3.amazonaws.com/regressions/subm_100/core_metadata_collection.json?AWSAccessKeyId=ASIA2JSRVZXPZS6REPE4&Expires=1546457738&x-amz-security-token=FQoGZXIvYXdzEJT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaDKqxBov7h4Rw7XZrjCL%2FAdrGYv7Mu5j45vfLv8nc5HBNF3xJMn5bOvJrnJ1REPDZcdJUld%2B%2BVfhikiPmluiukwidwTHRbW0EHEdT1HlsPU7JUtNFa7aJkU1e18BH1yuWil4MEScImSgWKND1N4m3it7pejwIjgCdu81fS8xH%2BchaqOr%2BdRIAU%2Bv2ywQTUo6%2FqOpUxpf4Z6dWFJNnsnwB5o24YU%2Fvy%2F0QG9RtgdSUhzkFfyAqzD7BuH2F5rP%2BJ11GJn2aovk51Wjy2fjT5y8tLuhZryGrg2YFrurkkEawNh8Eaq%2B9UzfxfUjxDpY%2BXrmgG0MH%2FFVeo4siyQG8AK98gyhy1PapTyqJ7neXShVCWiiMiLThBQ%3D%3D&Signature=0qH8aivItn2mivra2ETvpVU3bpg%3D"]) {
+                
+                withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=''"]) {
                   sh "bash ./run-regressions.sh $env.KUBECTL_NAMESPACE --service=$env.service"
                 }
               }
             }
           }
-          stage('RollDBDump1000_1') {
-            steps {
-              restoreDbDump('regressions/psql_dumps/1000_psql.sql')
-            }
-          }
-          stage('RunRegressionsTestsOn1000') {
-            steps {
-              dir('gen3-qa') {
-                sh "aws s3 cp s3://cdis-terraform-state/regressions/subm_100/DataImportOrder.txt DataImportOrder.txt"
+          // stage('RollDBDump1000_1') {
+          //   steps {
+          //     restoreDbDump('regressions/psql_dumps/1000_psql.sql')
+          //   }
+          // }
+          // stage('RunRegressionsTestsOn1000') {
+          //   steps {
+          //     dir('gen3-qa') {
+          //       // sh "aws s3 cp --recursive s3://cdis-terraform-state/regressions/subm_100/ $env.WORKSPACE/testData"
+          //       // sh "aws s3 cp s3://cdis-terraform-state/regressions/subm_100/DataImportOrder.txt $env.WORKSPACE/testData/DataImportOrderPath.txt"
+          //       sh "aws s3 cp s3://cdis-terraform-state/regressions/subm_100/DataImportOrder.txt DataImportOrder.txt"
 
-                withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=$env.WORKSPACE/testData/", "DATAURL=https://cdis-terraform-state.s3.amazonaws.com/regressions/subm_100/core_metadata_collection.json?AWSAccessKeyId=ASIA2JSRVZXPZS6REPE4&Expires=1546457738&x-amz-security-token=FQoGZXIvYXdzEJT%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaDKqxBov7h4Rw7XZrjCL%2FAdrGYv7Mu5j45vfLv8nc5HBNF3xJMn5bOvJrnJ1REPDZcdJUld%2B%2BVfhikiPmluiukwidwTHRbW0EHEdT1HlsPU7JUtNFa7aJkU1e18BH1yuWil4MEScImSgWKND1N4m3it7pejwIjgCdu81fS8xH%2BchaqOr%2BdRIAU%2Bv2ywQTUo6%2FqOpUxpf4Z6dWFJNnsnwB5o24YU%2Fvy%2F0QG9RtgdSUhzkFfyAqzD7BuH2F5rP%2BJ11GJn2aovk51Wjy2fjT5y8tLuhZryGrg2YFrurkkEawNh8Eaq%2B9UzfxfUjxDpY%2BXrmgG0MH%2FFVeo4siyQG8AK98gyhy1PapTyqJ7neXShVCWiiMiLThBQ%3D%3D&Signature=0qH8aivItn2mivra2ETvpVU3bpg%3D"]) {
-                  sh "bash ./run-regressions.sh $env.KUBECTL_NAMESPACE --service=$env.service"
-                }
-              }
-            }
-          }
+          //       withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=''"]) {
+          //         sh "bash ./run-regressions.sh $env.KUBECTL_NAMESPACE --service=$env.service"
+          //       }
+          //     }
+          //   }
+          // }
         }
       }
 
@@ -145,7 +154,7 @@ def call(Map config) {
           stage('RunQueryTestsOn10') {
             steps {
               dir('gen3-qa') {
-                withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=$env.WORKSPACE/testData/"]) {
+                withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=''", "PROGRAM_SLASH_PROJECT=jnkns/jenkins"]) {
                   script {
                     sh "ls"
                   }
@@ -162,7 +171,7 @@ def call(Map config) {
           stage('RunQueryTestsOn100') {
             steps {
               dir('gen3-qa') {
-                withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=$env.WORKSPACE/testData/"]) {
+                withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=''", "PROGRAM_SLASH_PROJECT=jnkns/jenkins"]) {
                   sh "bash ./run-queries.sh $env.KUBECTL_NAMESPACE --service=$env.service"
                 }
               }
@@ -172,11 +181,11 @@ def call(Map config) {
             steps {
               restoreDbDump('regressions/psql_dumps/1000_psql.sql')
             }
-          
+          }
           stage('RunQueryTestsOn1000') {
             steps {
               dir('gen3-qa') {
-                withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=$env.WORKSPACE/testData/"]) {
+                withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=''", "PROGRAM_SLASH_PROJECT=jnkns/jenkins"]) {
                   sh "bash ./run-queries.sh $env.KUBECTL_NAMESPACE --service=$env.service"
                 }
               }
@@ -195,11 +204,11 @@ def call(Map config) {
           stage('RunExportTestsOn10') {
             steps {
               dir('gen3-qa') {
-                withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=$env.WORKSPACE/testData/", "PROGRAM_SLASH_PROJECT=dev/test"]) {
+                withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=''", "PROGRAM_SLASH_PROJECT=jnkns/jenkins"]) {
                   script {
                     sh "ls"
                   }
-                  sh "bash ./run-queries.sh $env.KUBECTL_NAMESPACE --service=$env.service"
+                  sh "bash ./run-export.sh $env.KUBECTL_NAMESPACE --service=$env.service"
                 }
               }
             }
@@ -212,8 +221,8 @@ def call(Map config) {
           stage('RunExportTestsOn100') {
             steps {
               dir('gen3-qa') {
-                withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=$env.WORKSPACE/testData/", "PROGRAM_SLASH_PROJECT=dev/test"]) {
-                  sh "bash ./run-queries.sh $env.KUBECTL_NAMESPACE --service=$env.service"
+                withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=''", "PROGRAM_SLASH_PROJECT=jnkns/jenkins"]) {
+                  sh "bash ./run-export.sh $env.KUBECTL_NAMESPACE --service=$env.service"
                 }
               }
             }
@@ -226,16 +235,14 @@ def call(Map config) {
           stage('RunExportTestsOn1000') {
             steps {
               dir('gen3-qa') {
-                withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=$env.WORKSPACE/testData/", "PROGRAM_SLASH_PROJECT=dev/test"]) {
-                  sh "bash ./run-queries.sh $env.KUBECTL_NAMESPACE --service=$env.service"
+                withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=''", "PROGRAM_SLASH_PROJECT=jnkns/jenkins"]) {
+                  sh "bash ./run-export.sh $env.KUBECTL_NAMESPACE --service=$env.service"
                 }
               }
             }
           }
         }
       }
-      
-      
     }
     post {
       success {

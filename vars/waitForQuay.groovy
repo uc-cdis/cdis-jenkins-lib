@@ -1,7 +1,13 @@
 #!groovy
 
 def call() {
-    service = "$env.JOB_NAME".split('/')[1]
+    if ("$env.JOB_NAME".contains("perf")) {
+        service = "$env.JOB_NAME".split('-')[1].split('/')[0]
+    } else {
+        service = "$env.JOB_NAME".split('/')[1]
+    }
+
+    // service = "$env.JOB_NAME".split('/')[1]
     quaySuffix = "$env.CHANGE_BRANCH".replaceAll("/", "_")
     if (service == 'cdis-jenkins-lib') {
         service = 'jenkins-lib'
