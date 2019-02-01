@@ -4,7 +4,5 @@
 library identifier: "cdis-jenkins-lib@${env.CHANGE_BRANCH}"
 
 testPipeline {
-  pipeline = 'microservice'
-  serviceTesting = [name: 'fence', branch: 'master']
   MANIFEST = false
 }
