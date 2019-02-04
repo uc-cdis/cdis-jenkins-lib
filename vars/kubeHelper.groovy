@@ -91,7 +91,7 @@ def newKubeLock(String kubectlNamespace, String lockOwner, String lockName) {
 * @param owner - lock owner
 */
 def selectAndLockNamespace(String lockOwner) {
-  namespaces = ['jenkins-blood'] //'jenkins-dcp', 'jenkins-niaid', 'jenkins-brain', 'jenkins-genomel']
+  namespaces = ['jenkins-blood', 'jenkins-dcp', 'jenkins-niaid', 'jenkins-brain', 'jenkins-genomel']
   lockName = 'jenkins'
   int randNum = new Random().nextInt(namespaces.size());
 
