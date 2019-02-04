@@ -5,7 +5,12 @@
 */
 def setupConfig(Map config) {
   // get git info of repo/branch that triggered build
-  config.currentBranchFormatted = "${env.CHANGE_BRANCH}".replaceAll("/", "_")
+  if (!env.CHANGE_BRANCH) {
+    config.currentBranchFormatted = "${env.BRANCH_NAME}"
+  } else {
+    config.currentBranchFormatted = "${env.CHANGE_BRANCH}".replaceAll("/", "_")
+  }
+
   config.currentRepoName = "$env.JOB_NAME"
   if ("$env.JOB_NAME".contains("perf")) {
     config.currentRepoName = "$env.JOB_NAME".split('-')[1].split('/')[0]

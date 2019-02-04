@@ -6,12 +6,11 @@ def call(body) {
   body.delegate = config
   body()
 
-  kubectlNamespace = null
-  kubeLocks = []
-  pipeConfig = pipelineHelper.setupConfig(config)
-  pipelineHelper.cancelPreviousRunningBuilds()
-
   node {
+    kubectlNamespace = null
+    kubeLocks = []
+    pipeConfig = pipelineHelper.setupConfig(config)
+    pipelineHelper.cancelPreviousRunningBuilds()
     try {
       stage('FetchCode') {
         gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
@@ -20,7 +19,7 @@ def call(body) {
         testHelper.fetchDataClient()
       }
       stage('SelectNamespace') {
-        (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(['jenkins-perf'] as String[])
+        (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'], ["jenkins-perf"])
         kubeLocks << lock
       }
       stage('WaitForQuayBuild') {
@@ -45,20 +44,26 @@ def call(body) {
         testHelper.checkPodHealth(kubectlNamespace)
       }
       stage('DownloadS3data') {
-        copyS3('s3://cdis-terraform-state/regressions/psql_dumps/', 'regressions/psql_dumps/')
-        copyS3('s3://cdis-terraform-state/regressions/subm_100/DataImportOrder.txt', "$env.WORKSPACE/testData/DataImportOrderPath.txt")
+        copyS3('s3://cdis-terraform-state/regressions/dumps/', "$env.WORKSPACE/regressions/dumps/", '--recursive')
+        copyS3('s3://cdis-terraform-state/regressions/subm/10/DataImportOrder.txt', "$env.WORKSPACE/testData/DataImportOrderPath.txt")
         dir('gen3-qa') {
-          copyS3('s3://cdis-terraform-state/regressions/subm_100/DataImportOrder.txt', 'DataImportOrder.txt')
+          copyS3('s3://cdis-terraform-state/regressions/subm/10/DataImportOrder.txt', 'DataImportOrder.txt')
         }
       }
 
-      for (db in [10, 100]) {
-        stage("Submission${db}") {
-          restoreDbDump('regressions/psql_dumps/${db}_psql.sql')
-          dir('gen3-qa') {
-            sh "git checkout feat/regression-pipeline"
-            withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=''"]) {
-              sh "bash ./run-regressions.sh $env.KUBECTL_NAMESPACE --service=$env.service"
+      for (db in [10, 100, 1000]) {
+        for (size in [10, 100]) {
+          stage("Submission: DB=${db} subm=${size}") {
+            restoreDbDump(kubectlNamespace, "regressions/dumps/psql_${db}.sql")
+            dir('gen3-qa') {            
+              sh "git checkout master"
+              sh "git branch -D feat/regression-pipeline"
+              sh "git checkout feat/regression-pipeline"
+
+              testHelper.gen3Qa(kubectlNamespace,
+                { sh "bash ./run-performance-tests.sh ${namespace} --tests=submission --size=${size}" },
+                ["TEST_DATA_PATH=''"]
+              )
             }
           }
         }
@@ -66,23 +71,25 @@ def call(body) {
 
       for (db in [10, 100, 1000]) {
         stage("Query${db}") {
-          restoreDbDump('regressions/psql_dumps/${db}_psql.sql')
+          restoreDbDump(kubectlNamespace, "regressions/dumps/psql_${db}.sql")
           dir('gen3-qa') {
-            withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=''", "PROGRAM_SLASH_PROJECT=jnkns/jenkins"]) {
-              sh "bash ./run-queries.sh $env.KUBECTL_NAMESPACE --service=$env.service"
-            }
+            testHelper.gen3Qa(kubectlNamespace,
+              { sh "bash ./run-performance-tests.sh ${namespace} --tests=query" },
+              ["TEST_DATA_PATH=''"]
+            )
           }
         }
       }
 
-      for (db in [10, 100]) {
+      for (db in [10, 100, 1000]) {
         stage("Export${db}") {
-          restoreDbDump('regressions/psql_dumps/${db}_psql.sql')
+          restoreDbDump(kubectlNamespace, "regressions/dumps/psql_${db}.sql")
           dir('gen3-qa') {
-            sh "git checkout feat/regression-pipeline"
-            withEnv(['GEN3_NOPROXY=true', "vpc_name=$env.KUBECTL_NAMESPACE", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "NAMESPACE=$env.KUBECTL_NAMESPACE", "TEST_DATA_PATH=''"]) {
-              sh "bash ./run-export.sh $env.KUBECTL_NAMESPACE --service=$env.service"
-            }
+            testHelper.gen3Qa(kubectlNamespace,
+              { sh "bash ./run-performance-tests.sh ${namespace} --tests=export" },
+              ["TEST_DATA_PATH=''",
+               "PROGRAM_SLASH_PROJECT=jnkns/jenkins"]
+            )
           }
         }
       }
@@ -92,6 +99,11 @@ def call(body) {
     }
     finally {
       stage('Post') {
+        sh "rm -rf $env.WORKSPACE/regressions/dumps/"
+        sh "rm -rf $env.WORKSPACE/testData/DataImportOrderPath.txt"
+        dir('gen3-qa') {
+          sh "rm -rf DataImportOrder.txt"
+        }
         kubeHelper.teardown(kubeLocks)
         pipelineHelper.teardown(currentBuild.result)
       }
