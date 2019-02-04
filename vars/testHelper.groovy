@@ -4,8 +4,20 @@
 * @param namespace - namespace to run command in
 * @param body - command(s) to run
 */
-def gen3Qa(String namespace, Closure body) {
-  withEnv(['GEN3_NOPROXY=true', "vpc_name=qaplanetv1", "GEN3_HOME=$env.WORKSPACE/cloud-automation", "KUBECTL_NAMESPACE=${namespace}", "NAMESPACE=${namespace}", "TEST_DATA_PATH=$env.WORKSPACE/testData/", "DATA_CLIENT_PATH=$env.WORKSPACE"]) {
+def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) {
+  env_variables = ["GEN3_NOPROXY=true",
+    "vpc_name=qaplanetv1",
+    "GEN3_HOME=$env.WORKSPACE/cloud-automation",
+    "KUBECTL_NAMESPACE=${namespace}",
+    "NAMESPACE=${namespace}",
+    "TEST_DATA_PATH=$env.WORKSPACE/testData/",
+    "DATA_CLIENT_PATH=$env.WORKSPACE"]
+
+  if (add_env_variables) {
+    env_variables += add_env_variables
+  }
+
+  withEnv(env_variables) {
     return body()
   }
 }
