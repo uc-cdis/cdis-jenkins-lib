@@ -15,7 +15,7 @@ def call(Map config) {
       stage('FetchCode') {
         gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
       }
-      if (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST == false) {
+      if (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST == false || pipeConfig.MANIFEST != "True") {
         // Setup stages for NON manifest builds
         stage('WaitForQuayBuild') {
           quayHelper.waitForBuild(
@@ -36,7 +36,7 @@ def call(Map config) {
         }
       }
 
-      if (pipeConfig.MANIFEST != null && pipeConfig.MANIFEST == true) {
+      if (pipeConfig.MANIFEST != null && (pipeConfig.MANIFEST == true || pipeConfig.MANIFEST == "True")) {
         // Setup stages for MANIFEST builds
         stage('SelectNamespace') {
           (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'])
