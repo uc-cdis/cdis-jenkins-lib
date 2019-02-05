@@ -59,17 +59,14 @@ def handleError(e) {
 * @param buildResult - the current build result (accessible by currentBuild.result)
 */
 def teardown(String buildResult) {
+  archiveArtifacts(artifacts: '**/output/*.png', fingerprint: true)
   if ("UNSTABLE" == buildResult) {
-    echo "Unstable!"
-    // slack.sendUnstable()
+    echo "Build Unstable!"
   }
   else if ("FAILURE" == buildResult) {
-    echo "Failure!"
-    archiveArtifacts(artifacts: '**/output/*.png', fingerprint: true)
-    // slack.sendFailure()
+    echo "Build Failure!"
   }
   else if ("SUCCESS" == buildResult) {
-    echo "Success!"
-    // slack.sendSuccess()
+    echo "Build Success!"
   }
 }
