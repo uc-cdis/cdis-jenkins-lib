@@ -120,6 +120,6 @@ def teardown() {
   catch(e) {
     def st = new StringWriter()
     e.printStackTrace(new PrintWriter(st))
-    echo "WARNING: ${e.message}\n\nStackTrace:\n${st}"
+    echo "WARNING: Got the following exception when parsing juint test result:\n${e.message}\n\nStackTrace:\n${st}"
   }
 }

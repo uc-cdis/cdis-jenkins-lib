@@ -85,6 +85,7 @@ def call(Map config) {
     finally {
       stage('Post') {
         kubeHelper.teardown(kubeLocks)
+        testHelper.teardown()
         pipelineHelper.teardown(currentBuild.result)
       }
     }
