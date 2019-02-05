@@ -1,0 +1,5 @@
+#!groovy
+
+@Library('cdis-jenkins-lib@master') _
+
+queueManager.cleanBuilds()
