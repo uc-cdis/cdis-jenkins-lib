@@ -55,14 +55,14 @@ def call(body) {
         for (size in [10, 100]) {
           stage("Submission: DB=${db} subm=${size}") {
             restoreDbDump(kubectlNamespace, "regressions/dumps/psql_${db}.sql")
-            dir('gen3-qa') {            
-              sh "git checkout master"
-              sh "git branch -D feat/regression-pipeline"
+            dir('gen3-qa') {
               sh "git checkout feat/regression-pipeline"
 
               testHelper.gen3Qa(kubectlNamespace,
-                { sh "bash ./run-performance-tests.sh ${namespace} --tests=submission --size=${size}" },
-                ["TEST_DATA_PATH=''"]
+                { sh "bash ./run-performance-tests.sh ${namespace} --tests=submission --size=${size} --db=${db}" },
+                ["TEST_DATA_PATH=''",
+                "DB=${db}",
+                "SIZE=${size}"]
               )
             }
           }
@@ -73,9 +73,13 @@ def call(body) {
         stage("Query${db}") {
           restoreDbDump(kubectlNamespace, "regressions/dumps/psql_${db}.sql")
           dir('gen3-qa') {
+            sh "git checkout master"
+            sh "git branch -D feat/regression-pipeline"
+            sh "git checkout feat/regression-pipeline"
             testHelper.gen3Qa(kubectlNamespace,
-              { sh "bash ./run-performance-tests.sh ${namespace} --tests=query" },
-              ["TEST_DATA_PATH=''"]
+              { sh "bash ./run-performance-tests.sh ${namespace} --tests=query --db=${db}" },
+              ["TEST_DATA_PATH=''",
+               "DB=${db}"]
             )
           }
         }
@@ -86,9 +90,10 @@ def call(body) {
           restoreDbDump(kubectlNamespace, "regressions/dumps/psql_${db}.sql")
           dir('gen3-qa') {
             testHelper.gen3Qa(kubectlNamespace,
-              { sh "bash ./run-performance-tests.sh ${namespace} --tests=export" },
+              { sh "bash ./run-performance-tests.sh ${namespace} --tests=export --db=${db}" },
               ["TEST_DATA_PATH=''",
-               "PROGRAM_SLASH_PROJECT=jnkns/jenkins"]
+               "PROGRAM_SLASH_PROJECT=jnkns/jenkins",
+               "DB=${db}"]
             )
           }
         }
@@ -104,8 +109,13 @@ def call(body) {
         dir('gen3-qa') {
           sh "rm -rf DataImportOrder.txt"
         }
+        if (env.CHANGE_ID) {
+          pullRequest.comment("""Jenkins Build ${env.BUILD_NUMBER} : time taken ${currentBuild.durationString.replace(' and counting', '')}
+          Check the ${RUN_DISPLAY_URL}""")
+        }
         kubeHelper.teardown(kubeLocks)
-        pipelineHelper.teardown(currentBuild.result)
+        testHelper.teardown()
+        // pipelineHelper.teardown(currentBuild.result)
       }
     }
   }
