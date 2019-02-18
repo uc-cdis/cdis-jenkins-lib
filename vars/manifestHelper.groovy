@@ -55,12 +55,24 @@ def mergeManifest(String changedDir, String selectedNamespace) {
 */
 def overwriteConfigFolders(String changedDir, String selectedNamespace) {
     List<String> folders = sh(returnStdout: true, script: "ls tmpGitClone/$changedDir").split()
-    if (folders.contains('arrangerProjects'))
+    if (folders.contains('arrangerProjects')) {
       sh(script: "cp -rf tmpGitClone/$changedDir/arrangerProjects cdis-manifest/${selectedNamespace}.planx-pla.net/")
-    if (folders.contains('portal'))
+    }
+    if (folders.contains('portal')) {
       sh(script: "cp -rf tmpGitClone/$changedDir/portal cdis-manifest/${selectedNamespace}.planx-pla.net/")
-    if (folders.contains('etlMapping.yaml'))
+
+      // Some commons display a user agreement quiz after logging in for the
+      // first time. This quiz is too customizable to be included in the tests
+      // at the moment. This removes the requiredCerts var from the config so
+      // that NO quizzes will be displayed.
+      config_location = "cdis-manifest/${selectedNamespace}.planx-pla.net/portal/gitops.json"
+      if (fileExists(config_location)) {
+        sh(script: "sed -i '/\"requiredCerts\":/d' ${config_location}")
+      }
+    }
+    if (folders.contains('etlMapping.yaml')) {
       sh(script: "cp -rf tmpGitClone/$changedDir/etlMapping.yaml cdis-manifest/${selectedNamespace}.planx-pla.net/")
+    }
   }
 
 /**
