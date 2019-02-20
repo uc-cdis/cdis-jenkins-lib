@@ -5,8 +5,18 @@
 */
 def setupConfig(Map config) {
   // get git info of repo/branch that triggered build
-  config.currentBranchFormatted = "${env.CHANGE_BRANCH}".replaceAll("/", "_")
-  config.currentRepoName = "$env.JOB_NAME".split('/')[1]
+  if (!env.CHANGE_BRANCH) {
+    config.currentBranchFormatted = "${env.BRANCH_NAME}"
+  } else {
+    config.currentBranchFormatted = "${env.CHANGE_BRANCH}".replaceAll("/", "_")
+  }
+
+  config.currentRepoName = "$env.JOB_NAME"
+  if ("$env.JOB_NAME".contains("perf")) {
+    config.currentRepoName = "$env.JOB_NAME".split('-')[1].split('/')[0]
+  } else {
+    config.currentRepoName = "$env.JOB_NAME".split('/')[1]
+  }
 
   // update config with the service we are testing
   // if no info is provided, we assume we are testing the current repository and branch
