@@ -71,9 +71,6 @@ def call(body) {
         stage("Query${db}") {
           restoreDbDump(kubectlNamespace, "regressions/dumps/psql_${db}.sql")
           dir('gen3-qa') {
-            sh "git checkout master"
-            sh "git branch -D feat/regression-pipeline"
-            sh "git checkout feat/regression-pipeline"
             testHelper.gen3Qa(kubectlNamespace,
               { sh "bash ./run-performance-tests.sh ${namespace} --tests=query --db=${db}" },
               ["TEST_DATA_PATH=''",
