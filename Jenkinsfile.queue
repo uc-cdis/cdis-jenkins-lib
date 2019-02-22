@@ -1,5 +1,5 @@
 #!groovy
 
-@Library('cdis-jenkins-lib@feat/q') _
+@Library('cdis-jenkins-lib@master') _
 
 queueManager.cleanBuilds()
