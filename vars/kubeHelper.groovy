@@ -102,9 +102,6 @@ def selectAndLockNamespace(String lockOwner, List<String> namespaces = null) {
   times = 0
 
   while(times != 120) {
-    times += 1
-    sleep(60)
-
     // try to find an unlocked namespace
     for (int i=0; i < namespaces.size(); ++i) {
       randNum = (randNum + i) % namespaces.size();
@@ -118,6 +115,8 @@ def selectAndLockNamespace(String lockOwner, List<String> namespaces = null) {
         echo("no available workspace, yet...")
       }
     }
+    times += 1
+    sleep(60)
   }
 }
 
