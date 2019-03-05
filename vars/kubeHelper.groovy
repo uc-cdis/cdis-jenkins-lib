@@ -99,18 +99,26 @@ def selectAndLockNamespace(String lockOwner, List<String> namespaces = null) {
   lockName = 'jenkins'
   int randNum = new Random().nextInt(namespaces.size());
 
-  // try to find an unlocked namespace
-  for (int i=0; i < namespaces.size(); ++i) {
-    randNum = (randNum + i) % namespaces.size();
-    kubectlNamespace = namespaces.get(randNum)
-    println("attempting to lock namespace ${kubectlNamespace} with a wait time of 1 minutes")
-    if (klock('lock', lockOwner, lockName, kubectlNamespace)) {
-      // return successful lock
-      return [kubectlNamespace, newKubeLock(kubectlNamespace, lockOwner, lockName)]
+  times = 0
+
+  while(times != 120) {
+    times += 1
+    sleep(60)
+
+    // try to find an unlocked namespace
+    for (int i=0; i < namespaces.size(); ++i) {
+      randNum = (randNum + i) % namespaces.size();
+      kubectlNamespace = namespaces.get(randNum)
+      println("attempting to lock namespace ${kubectlNamespace} with a wait time of 1 minutes")
+      if (klock('lock', lockOwner, lockName, kubectlNamespace)) {
+        echo("namespace ${kubectlNamespace}")
+        return [kubectlNamespace, newKubeLock(kubectlNamespace, lockOwner, lockName)]
+      } else {
+        // unable to lock a namespace
+        echo("no available workspace, yet...")
+      }
     }
   }
-  // unable to lock a namespace
-  error("aborting - no available workspace")
 }
 
 /**
