@@ -44,7 +44,7 @@ def fetchAllRepos(String currentRepoName) {
   dir('cloud-automation') {
     git(
       url: 'https://github.com/uc-cdis/cloud-automation.git',
-      branch: 'fix/reset-again2'
+      branch: 'master'
     )
   }
   dir('tmpGitClone') {
