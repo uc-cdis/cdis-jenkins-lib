@@ -50,47 +50,13 @@ def call(body) {
           copyS3('s3://cdis-terraform-state/regressions/subm/10/DataImportOrder.txt', 'DataImportOrder.txt')
         }
       }
-
-      for (db in [10, 100, 1000]) {
-        for (size in [10, 100]) {
-          stage("Submission: DB=${db} subm=${size}") {
-            restoreDbDump(kubectlNamespace, "regressions/dumps/psql_${db}.sql")
-            dir('gen3-qa') {
-              testHelper.gen3Qa(kubectlNamespace,
-                { sh "bash ./run-performance-tests.sh ${namespace} --tests=submission --size=${size} --db=${db}" },
-                ["TEST_DATA_PATH=''",
-                "DB=${db}",
-                "SIZE=${size}"]
-              )
-            }
-          }
-        }
-      }
-
-      for (db in [10, 100, 1000]) {
-        stage("Query${db}") {
-          restoreDbDump(kubectlNamespace, "regressions/dumps/psql_${db}.sql")
-          dir('gen3-qa') {
-            testHelper.gen3Qa(kubectlNamespace,
-              { sh "bash ./run-performance-tests.sh ${namespace} --tests=query --db=${db}" },
-              ["TEST_DATA_PATH=''",
-               "DB=${db}"]
-            )
-          }
-        }
-      }
-
-      for (db in [10, 100, 1000]) {
-        stage("Export${db}") {
-          restoreDbDump(kubectlNamespace, "regressions/dumps/psql_${db}.sql")
-          dir('gen3-qa') {
-            testHelper.gen3Qa(kubectlNamespace,
-              { sh "bash ./run-performance-tests.sh ${namespace} --tests=export --db=${db}" },
-              ["TEST_DATA_PATH=''",
-               "PROGRAM_SLASH_PROJECT=jnkns/jenkins",
-               "DB=${db}"]
-            )
-          }
+      stage("RunPerformanceTests") {
+        dir('gen3-qa') {
+          testHelper.gen3Qa(kubectlNamespace,
+            { sh "bash ./run-performance-tests.sh ${namespace}" },
+            ["TEST_DATA_PATH=''",
+              "PROGRAM_SLASH_PROJECT=jnkns/jenkins"]
+          )
         }
       }
     }
