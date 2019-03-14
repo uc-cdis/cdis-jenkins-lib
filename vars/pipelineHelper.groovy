@@ -4,11 +4,16 @@
 * @param config - pipeline config
 */
 def setupConfig(Map config) {
+  //
   // get git info of repo/branch that triggered build
+  // currentBranchFormatted should match the quay tag name,
+  // and should not include shell-unfriendly characters
+  // as it also goes into the klock user id
+  //
   if (!env.CHANGE_BRANCH) {
-    config.currentBranchFormatted = "${env.BRANCH_NAME}"
+    config.currentBranchFormatted = "${env.BRANCH_NAME}".replaceAll("[/()]", "_")
   } else {
-    config.currentBranchFormatted = "${env.CHANGE_BRANCH}".replaceAll("/", "_")
+    config.currentBranchFormatted = "${env.CHANGE_BRANCH}".replaceAll("[/()]", "_")
   }
 
   config.currentRepoName = "$env.JOB_NAME"
