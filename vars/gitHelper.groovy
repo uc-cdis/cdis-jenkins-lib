@@ -30,7 +30,7 @@ def fetchAllRepos(String currentRepoName) {
     }
   }
   dir('data-simulator') {
-    if (currentRepoName == "gen3-qa") {
+    if (currentRepoName == "data-simulator") {
       // testing the data-simulator repo - check out the test branch here
       println("INFO: checkout data-simulator/ from JOB repo branch ...")
       checkout scm;
