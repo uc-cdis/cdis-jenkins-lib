@@ -30,10 +30,16 @@ def fetchAllRepos(String currentRepoName) {
     }
   }
   dir('data-simulator') {
-    git(
-      url: 'https://github.com/uc-cdis/data-simulator.git',
-      branch: 'master'
-    )
+    if (currentRepoName == "data-simulator") {
+      // testing the data-simulator repo - check out the test branch here
+      println("INFO: checkout data-simulator/ from JOB repo branch ...")
+      checkout scm;
+    } else {
+      git(
+        url: 'https://github.com/uc-cdis/data-simulator.git',
+        branch: 'master'
+      );
+    }
   }
   dir('cdis-manifest') {
     git(
@@ -42,10 +48,16 @@ def fetchAllRepos(String currentRepoName) {
     )
   }
   dir('cloud-automation') {
-    git(
-      url: 'https://github.com/uc-cdis/cloud-automation.git',
-      branch: 'master'
-    )
+    if (currentRepoName == "cloud-automation") {
+      // testing the data-simulator repo - check out the test branch here
+      println("INFO: checkout cloud-automation/ from JOB repo branch ...")
+      checkout scm;
+    } else {
+      git(
+        url: 'https://github.com/uc-cdis/cloud-automation.git',
+        branch: 'master'
+      );
+    }
   }
   dir('tmpGitClone') {
     checkout(scm: scm, clearWorkspace: true)
