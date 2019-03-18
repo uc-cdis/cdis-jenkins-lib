@@ -1,5 +1,7 @@
 #!groovy
 
+import hudson.tasks.test.AbstractTestResultAction
+
 def call(body) {
   def config = [:]
   body.resolveStrategy = Closure.DELEGATE_FIRST
@@ -71,8 +73,8 @@ def call(body) {
           sh "rm -rf DataImportOrder.txt"
         }
         if (env.CHANGE_ID) {
-          pullRequest.comment("""Jenkins Build ${env.BUILD_NUMBER} : time taken ${currentBuild.durationString.replace(' and counting', '')}
-          Check the ${RUN_DISPLAY_URL}""")
+          r = junitReport.junitReportTable()
+          pullRequest.comment(r)
         }
         kubeHelper.teardown(kubeLocks)
         testHelper.teardown()
