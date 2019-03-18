@@ -1,7 +1,5 @@
 #!groovy
 
-import hudson.tasks.test.AbstractTestResultAction
-
 def call(body) {
   def config = [:]
   body.resolveStrategy = Closure.DELEGATE_FIRST
@@ -72,13 +70,13 @@ def call(body) {
         dir('gen3-qa') {
           sh "rm -rf DataImportOrder.txt"
         }
+        kubeHelper.teardown(kubeLocks)
+        testHelper.teardown()
+
         if (env.CHANGE_ID) {
           def r = junitReport.junitReportTable()
           pullRequest.comment(r)
         }
-        kubeHelper.teardown(kubeLocks)
-        testHelper.teardown()
-        // pipelineHelper.teardown(currentBuild.result)
       }
     }
   }
