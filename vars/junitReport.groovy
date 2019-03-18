@@ -56,8 +56,8 @@ def formatJunitForBuild(String firstLine, AbstractTestResultAction branchTestRes
         def testResult = both[index]
 
         def name = testResult[0].getName()
-        name = name.replaceAll(".*?@", "@")
-        name = name.replaceAll("| ", "")
+        name = name.replaceAll("^.*?\\@", "@")
+        name = name.replaceAll("\\| ", "")
 
         if (name.contains('Generate')) {
             continue
