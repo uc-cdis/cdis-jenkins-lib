@@ -40,6 +40,11 @@ def formatJunitForBuild(String firstLine, AbstractTestResultAction branchTestRes
         summary += "| ${name} | ${branchDuration} | ${masterDuration} | ${diffStr} |"
         summary += '\n'
     }
+
+    unpackBranch = null
+    unpackMaster = null
+    both = null
+
     return summary
 }
 
@@ -59,6 +64,8 @@ def getTestResultForBuild(AbstractTestResultAction testResultAction) {
         tests.add([passedTest.getTitle(), passedTest.getDuration()])
     }
 
+    results = null
+
     return [total, failed, skipped, passedTests]
 }
 
@@ -71,6 +78,7 @@ def junitReport(Integer total, Integer failed, Integer skipped) {
     return summary
 }
 
+@NonCPS
 def junitReportTable() {
     currentTestResult = currentBuild.rawBuild.getAction(AbstractTestResultAction.class)
     masterTestResult = Jenkins.instance.getAllItems(Job.class).findAll{
@@ -80,5 +88,7 @@ def junitReportTable() {
     firstLine = """Jenkins Build ${env.BUILD_NUMBER} : time taken ${currentBuild.durationString.replace(' and counting', '')}
     Check the ${RUN_DISPLAY_URL}\n\n\n"""
     r = formatJunitForBuild(firstLine, currentTestResult, masterTestResult)
+    currentTestResult = null
+    masterTestResult = null
     return r
 }
