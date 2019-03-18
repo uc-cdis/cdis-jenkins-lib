@@ -41,10 +41,6 @@ def formatJunitForBuild(String firstLine, AbstractTestResultAction branchTestRes
         summary += '\n'
     }
 
-    unpackBranch = null
-    unpackMaster = null
-    both = null
-
     return summary
 }
 
@@ -63,8 +59,6 @@ def getTestResultForBuild(AbstractTestResultAction testResultAction) {
         def passedTest = passedTests[pti]
         tests.add([passedTest.getTitle(), passedTest.getDuration()])
     }
-
-    results = null
 
     return [total, failed, skipped, passedTests]
 }
@@ -87,7 +81,5 @@ def junitReportTable() {
 
     def firstLine = "Jenkins Build ${env.BUILD_NUMBER} : time taken ${currentBuild.durationString.replace(' and counting', '')}\nCheck the ${RUN_DISPLAY_URL}\n\n\n"
     def r = formatJunitForBuild(firstLine, currentTestResult, masterTestResult)
-    currentTestResult = null
-    masterTestResult = null
     return r
 }

@@ -73,7 +73,7 @@ def call(body) {
           sh "rm -rf DataImportOrder.txt"
         }
         if (env.CHANGE_ID) {
-          r = junitReport.junitReportTable()
+          def r = junitReport.junitReportTable()
           pullRequest.comment(r)
         }
         kubeHelper.teardown(kubeLocks)
