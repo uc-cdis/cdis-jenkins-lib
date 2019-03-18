@@ -74,12 +74,12 @@ def junitReport(Integer total, Integer failed, Integer skipped) {
 
 @NonCPS
 def junitReportTable() {
-    def currentTestResult = currentBuild.rawBuild.getAction(AbstractTestResultAction.class)
-    def masterTestResult = Jenkins.instance.getAllItems(Job.class).findAll{
+    currentTestResult = currentBuild.rawBuild.getAction(AbstractTestResultAction.class)
+    masterTestResult = Jenkins.instance.getAllItems(Job.class).findAll{
         it.name == 'master'
     }.collect{ it.getLastSuccessfulBuild().getAction(AbstractTestResultAction.class) }.first()
 
-    def firstLine = "Jenkins Build ${env.BUILD_NUMBER} : time taken ${currentBuild.durationString.replace(' and counting', '')}\nCheck the ${RUN_DISPLAY_URL}\n\n\n"
-    def r = formatJunitForBuild(firstLine, currentTestResult, masterTestResult)
+    firstLine = "Jenkins Build ${env.BUILD_NUMBER} : time taken ${currentBuild.durationString.replace(' and counting', '')}\nCheck the ${RUN_DISPLAY_URL}\n\n\n"
+    r = formatJunitForBuild(firstLine, currentTestResult, masterTestResult)
     return r
 }
