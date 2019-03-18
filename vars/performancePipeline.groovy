@@ -70,13 +70,13 @@ def call(body) {
         dir('gen3-qa') {
           sh "rm -rf DataImportOrder.txt"
         }
-        if (env.CHANGE_ID) {
-          pullRequest.comment("""Jenkins Build ${env.BUILD_NUMBER} : time taken ${currentBuild.durationString.replace(' and counting', '')}
-          Check the ${RUN_DISPLAY_URL}""")
-        }
         kubeHelper.teardown(kubeLocks)
         testHelper.teardown()
-        // pipelineHelper.teardown(currentBuild.result)
+
+        if (env.CHANGE_ID) {
+          def r = junitReport.junitReportTable()
+          pullRequest.comment(r)
+        }
       }
     }
   }
