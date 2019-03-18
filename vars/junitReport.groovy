@@ -74,8 +74,8 @@ def junitReport(Integer total, Integer failed, Integer skipped) {
 
 @NonCPS
 def junitReportTable() {
-    currentTestResult = currentBuild.rawBuild.getAction(AbstractTestResultAction.class)
-    masterTestResult = Jenkins.instance.getAllItems(Job.class).findAll{
+    def currentTestResult = currentBuild.rawBuild.getAction(AbstractTestResultAction.class)
+    def masterTestResult = Jenkins.instance.getAllItems(Job.class).findAll{
         it.name == 'master'
     }.collect{ it.getLastSuccessfulBuild().getAction(AbstractTestResultAction.class) }.first()
 
