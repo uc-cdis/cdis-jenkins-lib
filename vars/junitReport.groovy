@@ -41,13 +41,9 @@ def formatJunitForBuild(String firstLine, AbstractTestResultAction branchTestRes
     summary += '\n'
 
     def unpackMaster = getTestResultForBuild(masterTestResultAction)
-    def totalM = unpackMaster[0]
-    def failedM = unpackMaster[1]
-    def skippedM = unpackMaster[2]
     def testsM = unpackMaster[3]
 
-    summary += junitReport(totalM, failedM, skippedM)
-    summary += '\n'
+    summary += '\n\n\n'
 
     summary += '| Test | Time (`PR`) | Time (`master`) | Diff |'
     summary += '\n'
@@ -60,9 +56,21 @@ def formatJunitForBuild(String firstLine, AbstractTestResultAction branchTestRes
         def testResult = both[index]
 
         def name = testResult[0].getName()
+        name = name.replaceAll(".*?@", "@")
+        name = name.replaceAll("| ", "")
+
+        if (name.contains('Generate')) {
+            continue
+        }
+
         def branchDuration = testResult[0].getDuration()
         def masterDuration = testResult[1].getDuration()
-        def diffStr = String.format("%.2f", branchDuration - masterDuration)
+        def diff = branchDuration - masterDuration
+        def diffStr = String.format("%.2f", diff)
+
+        if (diff < 0.05 * masterDuration) {
+            continue
+        }
 
         summary += "| ${name} | ${branchDuration} | ${masterDuration} | ${diffStr} |"
         summary += '\n'
