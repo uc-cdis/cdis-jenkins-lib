@@ -71,23 +71,22 @@ def getTestResultForBuild(AbstractTestResultAction testResultAction) {
 
 @NonCPS
 def junitReport(Integer total, Integer failed, Integer skipped) {
-    summary = "Test results:\n\t"
-    summary = summary + ("Passed: " + (total - failed - skipped))
-    summary = summary + (", Failed: " + failed)
-    summary = summary + (", Skipped: " + skipped)
+    def summary = "Test results:\n\t"
+    summary += ("Passed: " + (total - failed - skipped))
+    summary += (", Failed: " + failed)
+    summary += (", Skipped: " + skipped)
     return summary
 }
 
 @NonCPS
 def junitReportTable() {
-    currentTestResult = currentBuild.rawBuild.getAction(AbstractTestResultAction.class)
-    masterTestResult = Jenkins.instance.getAllItems(Job.class).findAll{
+    def currentTestResult = currentBuild.rawBuild.getAction(AbstractTestResultAction.class)
+    def masterTestResult = Jenkins.instance.getAllItems(Job.class).findAll{
         it.name == 'master'
     }.collect{ it.getLastSuccessfulBuild().getAction(AbstractTestResultAction.class) }.first()
 
-    firstLine = """Jenkins Build ${env.BUILD_NUMBER} : time taken ${currentBuild.durationString.replace(' and counting', '')}
-    Check the ${RUN_DISPLAY_URL}\n\n\n"""
-    r = formatJunitForBuild(firstLine, currentTestResult, masterTestResult)
+    def firstLine = "Jenkins Build ${env.BUILD_NUMBER} : time taken ${currentBuild.durationString.replace(' and counting', '')}\nCheck the ${RUN_DISPLAY_URL}\n\n\n"
+    def r = formatJunitForBuild(firstLine, currentTestResult, masterTestResult)
     currentTestResult = null
     masterTestResult = null
     return r
