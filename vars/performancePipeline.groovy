@@ -12,6 +12,9 @@ def call(body) {
     pipeConfig = pipelineHelper.setupConfig(config)
     pipelineHelper.cancelPreviousRunningBuilds()
     try {
+      stage('PreBuildMaster') {
+        jenkinsHelper.preBuildMaster()
+      }
       stage('FetchCode') {
         gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
       }
