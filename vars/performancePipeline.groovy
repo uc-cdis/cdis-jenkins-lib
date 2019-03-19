@@ -6,6 +6,8 @@ def call(body) {
   body.delegate = config
   body()
 
+  properties([pipelineTriggers([cron(env.BRANCH_NAME == 'master' ? 'H * * * *' : '')])])
+
   node {
     kubectlNamespace = null
     kubeLocks = []
