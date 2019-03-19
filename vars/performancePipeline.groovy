@@ -7,14 +7,17 @@ def call(body) {
   body()
 
   node {
+    stage('PreBuildMaster') {
+      jenkinsHelper.preBuildMaster()
+    }
+  }
+
+  node {
     kubectlNamespace = null
     kubeLocks = []
     pipeConfig = pipelineHelper.setupConfig(config)
     pipelineHelper.cancelPreviousRunningBuilds()
     try {
-      stage('PreBuildMaster') {
-        jenkinsHelper.preBuildMaster()
-      }
       stage('FetchCode') {
         gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
       }
