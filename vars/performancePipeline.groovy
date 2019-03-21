@@ -6,7 +6,7 @@ def call(body) {
   body.delegate = config
   body()
 
-  properties([pipelineTriggers([cron(env.BRANCH_NAME == 'master' ? 'H 0-10,16 * * *' : '')])])
+  properties([pipelineTriggers([cron(env.BRANCH_NAME == 'master' ? 'H 0-10,16-23 * * *' : '')])])
 
   node {
     kubectlNamespace = null
