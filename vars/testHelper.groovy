@@ -30,8 +30,9 @@ def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) 
 */
 def runIntegrationTests(String namespace, String service) {
   dir('gen3-qa') {
+    hostname = kubeHelper.getHostname(namespace)
     gen3Qa(namespace, {
-      sh "bash ./run-tests.sh ${namespace} --service=${service}"
+      sh "bash ./run-tests.sh ${namespace} --service=${service} --hostname=${hostname}"
     })
   }
 }
