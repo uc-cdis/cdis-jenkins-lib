@@ -77,6 +77,7 @@ def overwriteConfigFolders(String changedDir, String selectedNamespace) {
 
 /**
 * TODO: ask Thanh to document
+* @returns name of the changed cdis-manifest directory (=environment which is being tested)
 */
 def manifestDiff(String selectedNamespace) {
     HashMap fileChanges = gitHelper.getLatestChangeOfBranch('HEAD')
@@ -87,7 +88,7 @@ def manifestDiff(String selectedNamespace) {
         String rs = mergeManifest(key, selectedNamespace)
         echo "new manifest $rs"
         overwriteConfigFolders(key, selectedNamespace)
-        break;
+        return key
       }
     }
   }

@@ -9,6 +9,7 @@ def call(Map config) {
   node {
     kubectlNamespace = null
     kubeLocks = []
+    testedEnv = "" // for manifest pipeline
     pipeConfig = pipelineHelper.setupConfig(config)
     pipelineHelper.cancelPreviousRunningBuilds()
     try {
@@ -43,7 +44,7 @@ def call(Map config) {
           kubeLocks << lock
         }
         stage('ModifyManifest') {
-          manifestHelper.manifestDiff(kubectlNamespace)
+          testedEnv = manifestHelper.manifestDiff(kubectlNamespace)
         }
       }
 
@@ -72,7 +73,8 @@ def call(Map config) {
       stage('RunTests') {
         testHelper.runIntegrationTests(
           kubectlNamespace,
-          pipeConfig.serviceTesting.name
+          pipeConfig.serviceTesting.name,
+          testedEnv
         )
       }
       stage('CleanS3') {

@@ -27,11 +27,12 @@ def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) 
 *
 * @param namespace - namespace to run integration tests in
 * @param service - name of service the test is being run for
+* @param testedEnv - environment the test is being run for (for manifest PRs)
 */
-def runIntegrationTests(String namespace, String service) {
+def runIntegrationTests(String namespace, String service, String testedEnv) {
   dir('gen3-qa') {
     gen3Qa(namespace, {
-      sh "bash ./run-tests.sh ${namespace} --service=${service}"
+      sh "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv}"
     })
   }
 }
