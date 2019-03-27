@@ -32,7 +32,7 @@ def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) 
 def runIntegrationTests(String namespace, String service, String testedEnv) {
   dir('gen3-qa') {
     gen3Qa(namespace, {
-      sh "bash ./run-tests.sh ${namespace} --service=${service} --hostname=${testedEnv}"
+      sh "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv}"
     })
   }
 }
