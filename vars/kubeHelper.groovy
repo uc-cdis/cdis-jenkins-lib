@@ -54,6 +54,7 @@ def klock(String method, String owner, String lockName, String kubectlNamespace)
 def deploy(String kubectlNamespace) {
   kube(kubectlNamespace, {
     sh "bash ${cloudAutomationPath()}/gen3/bin/kube-roll-all.sh"
+    sh "bash ${cloudAutomationPath()}/gen3/bin/kube-setup-jupyterhub.sh || true"
     sh "bash ${cloudAutomationPath()}/gen3/bin/kube-wait4-pods.sh || true"
   })
 }
@@ -66,6 +67,7 @@ def reset(String kubectlNamespace) {
   kube(kubectlNamespace, {
     sh "yes | bash ${cloudAutomationPath()}/gen3/bin/reset.sh"
     sh "bash ${cloudAutomationPath()}/gen3/bin/kube-setup-spark.sh || true"
+    sh "bash ${cloudAutomationPath()}/gen3/bin/kube-setup-jupyterhub.sh || true"
   })
 }
 
