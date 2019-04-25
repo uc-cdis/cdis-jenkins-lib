@@ -68,7 +68,7 @@ def formatJunitForBuild(String firstLine, AbstractTestResultAction branchTestRes
         def diff = branchDuration - masterDuration
         def diffStr = String.format("%.2f", diff)
 
-        if (diff < 0.05 * masterDuration) {
+        if (diff.abs() < 0.05 * masterDuration) {
             continue
         }
 
