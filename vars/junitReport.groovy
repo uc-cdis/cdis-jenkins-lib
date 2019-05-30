@@ -81,9 +81,13 @@ def formatJunitForBuild(String firstLine, AbstractTestResultAction branchTestRes
 @NonCPS
 def junitReportTable() {
     def currentTestResult = currentBuild.rawBuild.getAction(AbstractTestResultAction.class)
-    def masterTestResult = Jenkins.instance.getAllItems(Job.class).findAll{
-        it.name == 'master'
-    }.collect{ it.getLastSuccessfulBuild().getAction(AbstractTestResultAction.class) }.first()
+
+    def jobNameParts = env.JOB_NAME.tokenize('/') as String[]
+    def projectName = jobNameParts[1] // 1 for multibranch project in the organization
+
+    def masterTestResult = Jenkins.instance.getAllItems(Job).findAll{
+        it.fullDisplayName.matches("Perf.*${projectName}.*master")
+    }.collect{ it.getLastSuccessfulBuild()?.getAction(AbstractTestResultAction.class) }[0]
 
     def firstLine = "Jenkins Build ${env.BUILD_NUMBER} : time taken ${currentBuild.durationString.replace(' and counting', '')}\nCheck the ${RUN_DISPLAY_URL}\n\n\n"
     def r = formatJunitForBuild(firstLine, currentTestResult, masterTestResult)
