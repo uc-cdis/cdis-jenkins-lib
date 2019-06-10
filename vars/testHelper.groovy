@@ -37,7 +37,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv) {
       sh "mkdir output"
       sh "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv}"
       // if the test succeeds, then verify that we got some test results ...
-      sh "ls output/ | grep '.*\.xml'"
+      sh "ls output/ | grep '.*\\.xml'"
     })
   }
 }
