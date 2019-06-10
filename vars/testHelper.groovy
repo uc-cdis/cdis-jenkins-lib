@@ -32,7 +32,12 @@ def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) 
 def runIntegrationTests(String namespace, String service, String testedEnv) {
   dir('gen3-qa') {
     gen3Qa(namespace, {
+      // clean up old test artifacts in the workspace
+      sh "/bin/rm -rf output/ || true"
+      sh "mkdir output"
       sh "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv}"
+      // if the test succeeds, then verify that we got some test results ...
+      sh "ls output/ | grep '.*\.xml'"
     })
   }
 }
@@ -133,6 +138,6 @@ def teardown() {
   catch(e) {
     def st = new StringWriter()
     e.printStackTrace(new PrintWriter(st))
-    echo "WARNING: Got the following exception when parsing juint test result:\n${e.message}\n\nStackTrace:\n${st}"
+    echo "WARNING: Got the following exception when parsing junit test result:\n${e.message}\n\nStackTrace:\n${st}"
   }
 }
