@@ -75,6 +75,8 @@ def handleError(e) {
 */
 def teardown(String buildResult) {
   archiveArtifacts(artifacts: '**/output/*.png', fingerprint: true)
+  archiveArtifacts(artifacts: '**/output/*.log.gz', fingerprint: true)
+
   if ("UNSTABLE" == buildResult) {
     echo "Build Unstable!"
   }

@@ -35,9 +35,17 @@ def runIntegrationTests(String namespace, String service, String testedEnv) {
       // clean up old test artifacts in the workspace
       sh "/bin/rm -rf output/ || true"
       sh "mkdir output"
-      sh "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv}"
-      // if the test succeeds, then verify that we got some test results ...
-      sh "ls output/ | grep '.*\\.xml'"
+      testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv}", returnStatus: true);
+      if (testResult == 0) {
+        // if the test succeeds, then verify that we got some test results ...
+        testResult = sh(script: "ls output/ | grep '.*\\.xml'", returnStatus: true)
+      }
+      if (testResult != 0) {
+        // collect and archive service logs
+        echo "TODO: collect and archive service logs via 'gen3 logs snapshot'"
+        currentBuild.result = 'ABORTED'
+        error("aborting build - testsuite failed")
+      }
     })
   }
 }
