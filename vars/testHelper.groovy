@@ -43,7 +43,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv) {
       dir('output') {
         // collect and archive service logs
         echo "Archiving service logs via 'gen3 logs snapshot'"
-        sh(script: "${env.WORKSPACE}/cloud-automation/gen3/bin/logs.sh snapshot", returnStatus: true)
+        sh(script: "bash ${env.WORKSPACE}/cloud-automation/gen3/bin/logs.sh snapshot", returnStatus: true)
       }
       if (testResult != 0) {
         currentBuild.result = 'ABORTED'
