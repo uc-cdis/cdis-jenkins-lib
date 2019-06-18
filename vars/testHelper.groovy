@@ -32,7 +32,23 @@ def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) 
 def runIntegrationTests(String namespace, String service, String testedEnv) {
   dir('gen3-qa') {
     gen3Qa(namespace, {
-      sh "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv}"
+      // clean up old test artifacts in the workspace
+      sh "/bin/rm -rf output/ || true"
+      sh "mkdir output"
+      testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv}", returnStatus: true);
+      if (testResult == 0) {
+        // if the test succeeds, then verify that we got some test results ...
+        testResult = sh(script: "ls output/ | grep '.*\\.xml'", returnStatus: true)
+      }
+      dir('output') {
+        // collect and archive service logs
+        echo "Archiving service logs via 'gen3 logs snapshot'"
+        sh(script: "bash ${env.WORKSPACE}/cloud-automation/gen3/bin/logs.sh snapshot", returnStatus: true)
+      }
+      if (testResult != 0) {
+        currentBuild.result = 'ABORTED'
+        error("aborting build - testsuite failed")
+      }
     })
   }
 }
@@ -133,6 +149,6 @@ def teardown() {
   catch(e) {
     def st = new StringWriter()
     e.printStackTrace(new PrintWriter(st))
-    echo "WARNING: Got the following exception when parsing juint test result:\n${e.message}\n\nStackTrace:\n${st}"
+    echo "WARNING: Got the following exception when parsing junit test result:\n${e.message}\n\nStackTrace:\n${st}"
   }
 }
