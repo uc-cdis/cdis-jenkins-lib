@@ -40,14 +40,14 @@ def runIntegrationTests(String namespace, String service, String testedEnv) {
         // if the test succeeds, then verify that we got some test results ...
         testResult = sh(script: "ls output/ | grep '.*\\.xml'", returnStatus: true)
       }
+      dir('output') {
+        // collect and archive service logs
+        echo "Archiving service logs via 'gen3 logs snapshot'"
+        sh(script: "${env.WORKSPACE}/cloud-automation/gen3/bin/logs.sh snapshot", returnStatus: true)
+      }
       if (testResult != 0) {
-        dir('output') {
-          // collect and archive service logs
-          echo "Archiving service logs via 'gen3 logs snapshot'"
-          sh(script: "${env.WORKSPACE}/cloud-automation/gen3/bin/logs.sh snapshot", returnStatus: true)
-          currentBuild.result = 'ABORTED'
-          error("aborting build - testsuite failed")
-        }
+        currentBuild.result = 'ABORTED'
+        error("aborting build - testsuite failed")
       }
     })
   }
