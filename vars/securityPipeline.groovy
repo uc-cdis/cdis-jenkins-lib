@@ -29,7 +29,7 @@ def call(body) {
 
     if (isStartedByNonUser && (today.getDayOfWeek() != DayOfWeek.SATURDAY)) {
         println("Running only on Saturdays")
-        currentBuild.result = 'NOT_BUILT'
+        currentBuild.result = 'SUCCESS'
         return
     }
 
@@ -37,7 +37,7 @@ def call(body) {
     println("Days since first run: ${daysSinceFirstRun}")
     if (isStartedByNonUser && ((daysSinceFirstRun % 14) != 0)) {
         println("Running only on second weeks")
-        currentBuild.result = 'NOT_BUILT'
+        currentBuild.result = 'SUCCESS'
         return
     }
 
