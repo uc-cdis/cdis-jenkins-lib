@@ -93,7 +93,7 @@ def newKubeLock(String kubectlNamespace, String lockOwner, String lockName) {
 */
 def selectAndLockNamespace(String lockOwner, List<String> namespaces = null) {
   if (!namespaces) {
-    namespaces = ['jenkins-blood', 'jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
+    namespaces = ['jenkins-dcp']
   }
 
   lockName = 'jenkins'
