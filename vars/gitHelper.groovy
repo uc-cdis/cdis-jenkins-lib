@@ -25,7 +25,7 @@ def fetchAllRepos(String currentRepoName) {
     } else {
       git(
         url: 'https://github.com/uc-cdis/gen3-qa.git',
-        branch: 'fix/no-nde-portal-tests'
+        branch: 'master'
       );
     }
   }
@@ -44,7 +44,7 @@ def fetchAllRepos(String currentRepoName) {
   dir('cdis-manifest') {
     git(
       url: 'https://github.com/uc-cdis/gitops-qa.git',
-      branch: 'test/mingfei'
+      branch: 'chore/jenkins-etl'
     )
   }
   dir('cloud-automation') {
