@@ -48,7 +48,7 @@ def call(body) {
     }
     stage('ArchiveCode') {
       dir(name) {
-        sh "git archive -o ../${name}.zip HEAD"
+        sh "zip ../${name}.zip -r . -i@.secinclude -x@.secexclude"
       }
     }
     stage('VeracodeScanning') {
