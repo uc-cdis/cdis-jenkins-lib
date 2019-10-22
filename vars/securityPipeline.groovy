@@ -48,7 +48,12 @@ def call(body) {
     }
     stage('ArchiveCode') {
       dir(name) {
-        sh "zip ../${name}.zip -r . -i@.secinclude -x@.secexclude"
+        sh """
+        args=""
+        if [[ -f .secinclude ]]; then args+=" -i@.secinclude"; fi
+        if [[ -f .secexclude ]]; then args+=" -x@.secexclude"; fi
+        zip ../${name}.zip -r . \$args
+        """
       }
     }
     stage('VeracodeScanning') {
