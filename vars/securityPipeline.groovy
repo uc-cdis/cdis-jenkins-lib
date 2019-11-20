@@ -48,7 +48,7 @@ def call(body) {
     }
     stage('ArchiveCode') {
       dir(name) {
-        sh """
+        sh """#!/bin/bash
         args=""
         if [[ -f .secinclude ]]; then args+=" -i@.secinclude"; fi
         if [[ -f .secexclude ]]; then args+=" -x@.secexclude"; fi
