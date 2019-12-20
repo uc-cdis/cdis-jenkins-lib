@@ -5,6 +5,9 @@ def waitForBuild(String repoName, String formattedBranch) {
   if (repoName == 'cdis-jenkins-lib') {
     repoName = 'jenkins-lib'
   }
+  if (repoName == 'docker-nginx') {
+    repoName = 'nginx';
+  }
 
   echo("Waiting for Quay to build:\n  repoName: ${repoName}\n  branch: '${formattedBranch}'\n  commit: ${env.GIT_COMMIT}\n  previous commit: ${env.GIT_PREVIOUS_COMMIT}")
   def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 60)

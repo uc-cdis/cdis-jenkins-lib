@@ -28,6 +28,9 @@ def setupConfig(Map config) {
   if (null == config || !config.containsKey('serviceTesting')) {
     config.serviceTesting = [name: config.currentRepoName, branch: config.currentBranchFormatted]
   }
+  if (!config.containsKey('quayRegistry')) {
+    config.quayRegistry = config.currentRepoName;
+  }
 
   config.UID = "${config.currentRepoName}-${config.currentBranchFormatted}-${env.BUILD_NUMBER}"
 

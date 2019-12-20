@@ -20,7 +20,7 @@ def call(Map config) {
         // Setup stages for NON manifest builds
         stage('WaitForQuayBuild') {
           quayHelper.waitForBuild(
-            pipeConfig['currentRepoName'],
+            pipeConfig['quayRegistry'],
             pipeConfig['currentBranchFormatted']
           )
         }
