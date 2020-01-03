@@ -5,4 +5,5 @@ library identifier: "cdis-jenkins-lib@${env.CHANGE_BRANCH}"
 
 testPipeline {
   MANIFEST = false
+  quayRegistry = "jenkins-lib"
 }
