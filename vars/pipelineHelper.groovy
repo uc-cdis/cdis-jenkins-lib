@@ -23,10 +23,16 @@ def setupConfig(Map config) {
     config.currentRepoName = "$env.JOB_NAME".split('/')[1]
   }
 
+  if (!config.containsKey('quayRegistry')) {
+    config.quayRegistry = config.currentRepoName;
+  }
   // update config with the service we are testing
   // if no info is provided, we assume we are testing the current repository and branch
   if (null == config || !config.containsKey('serviceTesting')) {
-    config.serviceTesting = [name: config.currentRepoName, branch: config.currentBranchFormatted]
+    config.serviceTesting = [name: config.quayRegistry, branch: config.currentBranchFormatted]
+  }
+  if (!config.serviceTesting.containsKey('branch')) {
+    config.serviceTesting.branch = config.currentBranchFormatted;
   }
 
   config.UID = "${config.currentRepoName}-${config.currentBranchFormatted}-${env.BUILD_NUMBER}"

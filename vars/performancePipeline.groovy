@@ -27,7 +27,7 @@ def call(body) {
       }
       stage('WaitForQuayBuild') {
         quayHelper.waitForBuild(
-          pipeConfig['currentRepoName'],
+          pipeConfig['quayRegistry'],
           pipeConfig['currentBranchFormatted']
         )
       }
