@@ -57,7 +57,7 @@ def call(body) {
       }
     }
     stage('VeracodeScanning') {
-      withCredentials([usernamePassword(credentialsId: 'Veracode', passwordVariable: 'VCSECRET', usernameVariable: 'VCID')]) {
+      withCredentials([usernamePassword(credentialsId: 'Veracode', passwordVariable: 'VCKEY', usernameVariable: 'VCID')]) {
         veracode applicationName: name,
         canFailJob: true,
         criticality: 'High',
