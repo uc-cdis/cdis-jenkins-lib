@@ -57,7 +57,7 @@ def call(body) {
       }
     }
     stage('VeracodeScanning') {
-      withCredentials([usernamePassword(credentialsId: 'Veracode', passwordVariable: 'VCPASS', usernameVariable: 'VCUSER')]) {
+      withCredentials([usernamePassword(credentialsId: 'Veracode', passwordVariable: 'VCSECRET', usernameVariable: 'VCID')]) {
         veracode applicationName: name,
         canFailJob: true,
         criticality: 'High',
@@ -71,10 +71,11 @@ def call(body) {
         timeout: 120,
         uploadExcludesPattern: '',
         uploadIncludesPattern: "${name}.zip",
-        vid: '',
-        vkey: '',
-        vpassword: VCPASS,
-        vuser: VCUSER,
+        useIDkey: true,
+        vid: VCID,
+        vkey: VCKEY,
+        vpassword: '',
+        vuser: '',
         waitForScan: true
       }
     }
