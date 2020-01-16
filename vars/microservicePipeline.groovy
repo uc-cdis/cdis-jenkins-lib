@@ -7,12 +7,41 @@
 */
 def call(Map config) {
   node {
+    def AVAILABLE_NAMESPACES = ['jenkins-blood', 'jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
+    List<String> namespaces = []
+    prLabels = null
     kubectlNamespace = null
     kubeLocks = []
     testedEnv = "" // for manifest pipeline
     pipeConfig = pipelineHelper.setupConfig(config)
     pipelineHelper.cancelPreviousRunningBuilds()
+    prLabels = githubHelper.fetchLabels()
     try {
+      stage('CheckPRLabels') {
+        for(label in prLabels) {
+          println(label['name']);
+          switch(label['name']) {
+            case "doc-only":
+              println('TODO: Skip tests')
+              break
+            case "debug":
+              println("Call npm test with --debug")
+              println("leverage CodecepJS feature require('codeceptjs').output.debug feature")
+              break
+            case AVAILABLE_NAMESPACES:
+              println('found this namespace label! ' + label['name']);
+              namespaces.add(label['name'])
+              break
+           default:
+            println('no-effect label')
+            break
+          }
+        }
+        // If none of the jenkins envs. have been selected pick one at random
+        if (namespaces.size == 0) {
+          namespaces = AVAILABLE_NAMESPACES
+        }
+      }
       stage('FetchCode') {
         gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
       }
@@ -25,7 +54,7 @@ def call(Map config) {
           )
         }
         stage('SelectNamespace') {
-          (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'])
+          (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'], namespaces)
           kubeLocks << lock
         }
         stage('ModifyManifest') {
@@ -40,7 +69,7 @@ def call(Map config) {
       if (pipeConfig.MANIFEST != null && (pipeConfig.MANIFEST == true || pipeConfig.MANIFEST == "True")) {
         // Setup stages for MANIFEST builds
         stage('SelectNamespace') {
-          (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'])
+          (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'], namespaces)
           kubeLocks << lock
         }
         stage('ModifyManifest') {
