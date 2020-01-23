@@ -9,6 +9,7 @@ def call(Map config) {
   node {
     def AVAILABLE_NAMESPACES = ['jenkins-blood', 'jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
     List<String> namespaces = []
+    isDocumentationOnly = false
     prLabels = null
     kubectlNamespace = null
     kubeLocks = []
@@ -23,6 +24,7 @@ def call(Map config) {
           switch(label['name']) {
             case "doc-only":
               println('TODO: Skip tests')
+	      isDocumentationOnly = true
               break
             case "debug":
               println("Call npm test with --debug")
@@ -43,7 +45,12 @@ def call(Map config) {
         }
       }
       stage('FetchCode') {
-        gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
+        when {
+          expression { isDocumentationOnly == false }
+        }
+	steps {
+          gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
+	}
       }
       if (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST == false || pipeConfig.MANIFEST != "True") {
         // Setup stages for NON manifest builds
@@ -54,60 +61,109 @@ def call(Map config) {
           )
         }
         stage('SelectNamespace') {
-          (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'], namespaces)
-          kubeLocks << lock
+	  when {
+            expression { isDocumentationOnly == false }
+          }
+	  steps {
+            (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'], namespaces)
+            kubeLocks << lock
+	  }
         }
         stage('ModifyManifest') {
-          manifestHelper.editService(
-            kubeHelper.getHostname(kubectlNamespace),
-            pipeConfig.serviceTesting.name,
-            pipeConfig.serviceTesting.branch
-          )
+	  when {
+            expression { isDocumentationOnly == false }
+          }
+	  steps {
+            manifestHelper.editService(
+              kubeHelper.getHostname(kubectlNamespace),
+              pipeConfig.serviceTesting.name,
+              pipeConfig.serviceTesting.branch
+            )
+	  }
         }
       }
 
       if (pipeConfig.MANIFEST != null && (pipeConfig.MANIFEST == true || pipeConfig.MANIFEST == "True")) {
         // Setup stages for MANIFEST builds
         stage('SelectNamespace') {
-          (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'], namespaces)
-          kubeLocks << lock
+	  when {
+            expression { isDocumentationOnly == false }
+          }
+	  steps {
+            (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'], namespaces)
+            kubeLocks << lock
+	  }
         }
         stage('ModifyManifest') {
-          testedEnv = manifestHelper.manifestDiff(kubectlNamespace)
-        }
+	  when {
+            expression { isDocumentationOnly == false }
+          }
+	  steps {
+            testedEnv = manifestHelper.manifestDiff(kubectlNamespace)
+          }
       }
 
       stage('K8sReset') {
-        // adding the reset-lock lock in case reset fails before unlocking
-        kubeLocks << kubeHelper.newKubeLock(kubectlNamespace, "gen3-reset", "reset-lock")
-        kubeHelper.reset(kubectlNamespace)
+        when {
+          expression { isDocumentationOnly == false }
+        }
+        steps {
+          // adding the reset-lock lock in case reset fails before unlocking
+          kubeLocks << kubeHelper.newKubeLock(kubectlNamespace, "gen3-reset", "reset-lock")
+          kubeHelper.reset(kubectlNamespace)
+	}
       }
       stage('VerifyClusterHealth') {
-        kubeHelper.waitForPods(kubectlNamespace)
-        testHelper.checkPodHealth(kubectlNamespace)
+        when {
+          expression { isDocumentationOnly == false }
+        }
+	steps {
+          kubeHelper.waitForPods(kubectlNamespace)
+          testHelper.checkPodHealth(kubectlNamespace)
+	}
       }
       stage('GenerateData') {
-        testHelper.simulateData(kubectlNamespace)
+        when {
+          expression { isDocumentationOnly == false }
+        }
+	steps {
+          testHelper.simulateData(kubectlNamespace)
+        }
       }
       stage('FetchDataClient') {
-        // we get the data client from master, unless the service being
-        // tested is the data client itself, in which case we get the
-        // executable for the current branch
-        dataCliBranch = "master"
-        if (pipeConfig.currentRepoName == "cdis-data-client") {
-          dataCliBranch = env.CHANGE_BRANCH
+        when {
+          expression { isDocumentationOnly == false }
         }
-        testHelper.fetchDataClient(dataCliBranch)
+	steps {
+          // we get the data client from master, unless the service being
+          // tested is the data client itself, in which case we get the
+          // executable for the current branch
+          dataCliBranch = "master"
+          if (pipeConfig.currentRepoName == "cdis-data-client") {
+            dataCliBranch = env.CHANGE_BRANCH
+          }
+          testHelper.fetchDataClient(dataCliBranch)
+	}
       }
       stage('RunTests') {
-        testHelper.runIntegrationTests(
-          kubectlNamespace,
-          pipeConfig.serviceTesting.name,
-          testedEnv
-        )
+        when {
+          expression { isDocumentationOnly == false }
+        }
+        steps {
+          testHelper.runIntegrationTests(
+            kubectlNamespace,
+            pipeConfig.serviceTesting.name,
+            testedEnv
+          )
+	}
       }
       stage('CleanS3') {
-        testHelper.cleanS3()
+        when {
+          expression { isDocumentationOnly == false }
+        }
+	steps {
+          testHelper.cleanS3()
+	}
       }
     }
     catch (e) {
