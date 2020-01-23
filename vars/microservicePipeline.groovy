@@ -55,10 +55,15 @@ def call(Map config) {
       if (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST == false || pipeConfig.MANIFEST != "True") {
         // Setup stages for NON manifest builds
         stage('WaitForQuayBuild') {
-          quayHelper.waitForBuild(
-            pipeConfig['quayRegistry'],
-            pipeConfig['currentBranchFormatted']
-          )
+	  when {
+            expression { isDocumentationOnly == false }
+          }
+	  steps {
+            quayHelper.waitForBuild(
+              pipeConfig['quayRegistry'],
+              pipeConfig['currentBranchFormatted']
+            )
+	  }
         }
         stage('SelectNamespace') {
 	  when {
@@ -101,6 +106,7 @@ def call(Map config) {
 	  steps {
             testedEnv = manifestHelper.manifestDiff(kubectlNamespace)
           }
+	}
       }
 
       stage('K8sReset') {
