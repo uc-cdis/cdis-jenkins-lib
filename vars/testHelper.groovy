@@ -35,7 +35,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
       // clean up old test artifacts in the workspace
       sh "/bin/rm -rf output/ || true"
       sh "mkdir output"
-      testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv}" --isGen3Release=${isGen3Release}, returnStatus: true);
+      testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release}", returnStatus: true);
       if (testResult == 0) {
         // if the test succeeds, then verify that we got some test results ...
         testResult = sh(script: "ls output/ | grep '.*\\.xml'", returnStatus: true)
