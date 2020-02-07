@@ -12,7 +12,7 @@ def call(Map config) {
     def AVAILABLE_NAMESPACES = ['jenkins-blood', 'jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
     List<String> namespaces = []
     isDocumentationOnly = false
-    isGen3Release = false
+    isGen3Release = "false"
     prLabels = null
     kubectlNamespace = null
     kubeLocks = []
@@ -31,7 +31,7 @@ def call(Map config) {
               break
             case "gen3-release":
               println('Enable additional tests and automation')
-              isGen3Release = true
+              isGen3Release = "true"
               break
             case "debug":
               println("Call npm test with --debug")
