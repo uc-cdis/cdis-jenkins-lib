@@ -12,6 +12,7 @@ def call(Map config) {
     def AVAILABLE_NAMESPACES = ['jenkins-blood', 'jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
     List<String> namespaces = []
     isDocumentationOnly = false
+    isGen3Release = "false"
     prLabels = null
     kubectlNamespace = null
     kubeLocks = []
@@ -28,6 +29,10 @@ def call(Map config) {
               println('TODO: Skip tests')
 	      isDocumentationOnly = true
               break
+            case "gen3-release":
+              println('Enable additional tests and automation')
+              isGen3Release = "true"
+              break
             case "debug":
               println("Call npm test with --debug")
               println("leverage CodecepJS feature require('codeceptjs').output.debug feature")
@@ -36,9 +41,9 @@ def call(Map config) {
               println('found this namespace label! ' + label['name']);
               namespaces.add(label['name'])
               break
-           default:
-            println('no-effect label')
-            break
+            default:
+              println('no-effect label')
+              break
           }
         }
         // If none of the jenkins envs. have been selected pick one at random
@@ -148,7 +153,8 @@ def call(Map config) {
           testHelper.runIntegrationTests(
             kubectlNamespace,
             pipeConfig.serviceTesting.name,
-            testedEnv
+            testedEnv,
+            isGen3Release
           )
         } else {
           Utils.markStageSkippedForConditional(STAGE_NAME)
