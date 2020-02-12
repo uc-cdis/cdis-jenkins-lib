@@ -33,7 +33,7 @@ def call(Map config) {
 	      HashMap fileChanges = gitHelper.getLatestChangeOfBranch('HEAD')
               for (String key : fileChanges.keySet())
               {
-	        println('modified file: ' + key)
+	        println('modified file: ' + fileChanges[key])
 	      }
 	      isDocumentationOnly = true
               break
