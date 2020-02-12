@@ -2,7 +2,6 @@ def checkTestSkippingCriteria() {
   HashMap fileChanges = gitHelper.getLatestChangeOfBranch('HEAD')
   for (String key : fileChanges.keySet()) {
     fileChange = fileChanges[key][0]
-    // println('checking: ' + fileChange)
     def releasesFolder = fileChange =~ /^(releases\/.*)/
     def markdownFile = fileChange =~ /(.*\.md)/
     if (releasesFolder) {
