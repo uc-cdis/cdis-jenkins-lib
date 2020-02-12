@@ -31,7 +31,7 @@ def call(Map config) {
             case "doc-only":
               println('Skip tests if git diff matches expected criteria')
 	      isDocumentationOnly = docOnlyHelper.checkTestSkippingCriteria()
-	      break
+              break
             case "gen3-release":
               println('Enable additional tests and automation')
               isGen3Release = "true"
