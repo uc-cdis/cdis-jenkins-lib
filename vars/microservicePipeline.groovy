@@ -26,7 +26,12 @@ def call(Map config) {
           println(label['name']);
           switch(label['name']) {
             case "doc-only":
-              println('TODO: Skip tests')
+              println('Skip tests if git diff matches expected criteria')
+	      HashMap fileChanges = gitHelper.getLatestChangeOfBranch('HEAD')
+              for (String key : fileChanges.keySet())
+              {
+	        println('modified file: ' + key)
+	      }
 	      isDocumentationOnly = true
               break
             case "gen3-release":
