@@ -21,6 +21,9 @@ def call(Map config) {
     pipelineHelper.cancelPreviousRunningBuilds()
     prLabels = githubHelper.fetchLabels()
     try {
+      stage('FetchCode') {
+        gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
+      }
       stage('CheckPRLabels') {
         for(label in prLabels) {
           println(label['name']);
@@ -55,14 +58,7 @@ def call(Map config) {
         if (namespaces.size == 0) {
           namespaces = AVAILABLE_NAMESPACES
         }
-      }
-      stage('FetchCode') {
-        if(!isDocumentationOnly) {
-          gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
-	} else {
-	  Utils.markStageSkippedForConditional(STAGE_NAME)
-	}
-      }
+      }      
       if (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST == false || pipeConfig.MANIFEST != "True") {
         // Setup stages for NON manifest builds
         stage('WaitForQuayBuild') {
