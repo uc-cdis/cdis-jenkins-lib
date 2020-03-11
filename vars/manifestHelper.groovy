@@ -80,7 +80,7 @@ def manifestDiff(String selectedNamespace) {
     HashMap fileChanges = gitHelper.getLatestChangeOfBranch('HEAD')
     for (String key : fileChanges.keySet())
     {
-      if (key != '.')
+      if (key != '.' && key != '.githooks')
       {
         String rs = mergeManifest(key, selectedNamespace)
         echo "new manifest $rs"
