@@ -21,6 +21,9 @@ def call(Map config) {
     pipelineHelper.cancelPreviousRunningBuilds()
     prLabels = githubHelper.fetchLabels()
     try {
+      stage('CleanWorkspace') {
+        cleanWs()
+      }
       stage('FetchCode') {
         gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
       }
