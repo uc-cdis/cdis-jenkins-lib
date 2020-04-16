@@ -13,6 +13,7 @@ def call(Map config) {
     List<String> namespaces = []
     isDocumentationOnly = false
     isGen3Release = "false"
+    selectedTest = ""
     prLabels = null
     kubectlNamespace = null
     kubeLocks = []
@@ -31,6 +32,12 @@ def call(Map config) {
         for(label in prLabels) {
           println(label['name']);
           switch(label['name']) {
+            case ~/^test-.*/:
+              println('Select a specific test suite and feature')
+              selectedTestLabel = label['name'].split("-")
+              println "selected test: suites/" + selectedTestLabel[1] + "/" + selectedTestLabel[2] + ".js"
+              selectedTest = "suites/" + selectedTestLabel[1] + "/" + selectedTestLabel[2] + ".js"
+              break
             case "doc-only":
               println('Skip tests if git diff matches expected criteria')
 	      isDocumentationOnly = docOnlyHelper.checkTestSkippingCriteria()
@@ -153,7 +160,8 @@ def call(Map config) {
             kubectlNamespace,
             pipeConfig.serviceTesting.name,
             testedEnv,
-            isGen3Release
+            isGen3Release,
+            selectedTest
           )
         } else {
           Utils.markStageSkippedForConditional(STAGE_NAME)
