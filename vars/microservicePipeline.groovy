@@ -13,7 +13,7 @@ def call(Map config) {
     List<String> namespaces = []
     isDocumentationOnly = false
     isGen3Release = "false"
-    selectedTest = ""
+    selectedTest = "all"
     prLabels = null
     kubectlNamespace = null
     kubeLocks = []
