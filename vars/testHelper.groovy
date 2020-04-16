@@ -29,7 +29,7 @@ def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) 
 * @param service - name of service the test is being run for
 * @param testedEnv - environment the test is being run for (for manifest PRs)
 */
-def runIntegrationTests(String namespace, String service, String testedEnv, String isGen3Release, String selectedTest) {
+def runIntegrationTests(String namespace, String service, String testedEnv, String isGen3Release, String selectedTest="all") {
   dir('gen3-qa') {
     gen3Qa(namespace, {
       // clean up old test artifacts in the workspace
