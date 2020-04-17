@@ -128,7 +128,7 @@ def call(Map config) {
       stage('VerifyClusterHealth') {
         if(!isDocumentationOnly) {
           kubeHelper.waitForPods(kubectlNamespace)
-          testHelper.checkPodHealth(kubectlNamespace)
+          testHelper.checkPodHealth(kubectlNamespace, testedEnv)
         } else {
           Utils.markStageSkippedForConditional(STAGE_NAME)
         }

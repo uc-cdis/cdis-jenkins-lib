@@ -132,10 +132,10 @@ def cleanS3() {
 /**
 * Verify pods are health
 */
-def checkPodHealth(String namespace) {
+def checkPodHealth(String namespace, String testedEnv) {
   dir('gen3-qa') {
     gen3Qa(namespace, {
-      sh "bash ./check-pod-health.sh"
+      sh "bash ./check-pod-health.sh $testedEnv"
     })
   }
 }
