@@ -3,7 +3,7 @@ def checkTestSkippingCriteria() {
   for (String key : fileChanges.keySet()) {
     fileChange = fileChanges[key][0]
     def releasesFolder = fileChange =~ /^(releases\/.*)/
-    def openapisFolder = fileChange =~ /^(openapis\/*.yaml)/
+    def openapisFolder = fileChange =~ /^(openapis\/*\.yaml)/
     def docFile = fileChange =~ /(.*\.md)|(.*\.png)|(.*\.txt)|(.*\.feature)/
     if (releasesFolder) {
       println('Found releases folder: ' + releasesFolder[0][0])
