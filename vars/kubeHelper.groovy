@@ -100,8 +100,8 @@ def selectAndLockNamespace(String lockOwner, List<String> namespaces = null) {
   while(times != 120) {
     // try to find an unlocked namespace
     for (int i=0; i < namespaces.size(); ++i) {
-      randNum = (randNum + i) % namespaces.size();
-      kubectlNamespace = namespaces.get(randNum)
+      namespaceIndex = (randNum + i) % namespaces.size();
+      kubectlNamespace = namespaces.get(namespaceIndex)
       println("attempting to lock namespace ${kubectlNamespace} with a wait time of 1 minutes")
       if (klock('lock', lockOwner, lockName, kubectlNamespace)) {
         echo("namespace ${kubectlNamespace}")
