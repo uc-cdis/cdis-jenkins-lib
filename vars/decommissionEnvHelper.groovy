@@ -4,7 +4,7 @@ def checkDecommissioningEnvironment() {
 
   rawContentURL="https://raw.githubusercontent.com/uc-cdis/cdis-manifest/${env.BRANCH_NAME}/${nameOfEnvironment}/manifest.json"
   println("Shooting a request to: " + rawContentURL);
-  def get = new URL(labels_url).openConnection();
+  def get = new URL(rawContentURL).openConnection();
   def getRC = get.getResponseCode();
   println(getRC);
   if(getRC.equals(404)) {
