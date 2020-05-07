@@ -42,6 +42,9 @@ def call(Map config) {
               println('Skip tests if git diff matches expected criteria')
 	      isDocumentationOnly = docOnlyHelper.checkTestSkippingCriteria()
               break
+            case "decomission-environment":
+              println('Skip tests if an environment folder is deleted')
+              isDocumentationOnly = decommissionEnvHelper.checkDecommissioningEnvironment()
             case "gen3-release":
               println('Enable additional tests and automation')
               isGen3Release = "true"
