@@ -11,7 +11,7 @@ def call(Map config) {
   node {
     def AVAILABLE_NAMESPACES = ['jenkins-blood', 'jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
     List<String> namespaces = []
-    isDocumentationOnly = false
+    doNotRunTests = false
     isGen3Release = "false"
     selectedTest = "all"
     prLabels = null
@@ -40,8 +40,11 @@ def call(Map config) {
               break
             case "doc-only":
               println('Skip tests if git diff matches expected criteria')
-	      isDocumentationOnly = docOnlyHelper.checkTestSkippingCriteria()
+	      doNotRunTests = docOnlyHelper.checkTestSkippingCriteria()
               break
+            case "decommission-environment":
+              println('Skip tests if an environment folder is deleted')
+              doNotRunTests = decommissionEnvHelper.checkDecommissioningEnvironment()
             case "gen3-release":
               println('Enable additional tests and automation')
               isGen3Release = "true"
@@ -67,7 +70,7 @@ def call(Map config) {
       if (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST == false || pipeConfig.MANIFEST != "True") {
         // Setup stages for NON manifest builds
         stage('WaitForQuayBuild') {
-          if(!isDocumentationOnly) {
+          if(!doNotRunTests) {
             quayHelper.waitForBuild(
               pipeConfig['quayRegistry'],
               pipeConfig['currentBranchFormatted']
@@ -77,7 +80,7 @@ def call(Map config) {
           }
         }
         stage('SelectNamespace') {
-          if(!isDocumentationOnly) {
+          if(!doNotRunTests) {
             (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'], namespaces)
             kubeLocks << lock
 	  } else {
@@ -85,7 +88,7 @@ def call(Map config) {
           }
         }
         stage('ModifyManifest') {
-          if(!isDocumentationOnly) {
+          if(!doNotRunTests) {
             manifestHelper.editService(
               kubeHelper.getHostname(kubectlNamespace),
               pipeConfig.serviceTesting.name,
@@ -100,7 +103,7 @@ def call(Map config) {
       if (pipeConfig.MANIFEST != null && (pipeConfig.MANIFEST == true || pipeConfig.MANIFEST == "True")) {
         // Setup stages for MANIFEST builds
         stage('SelectNamespace') {
-          if(!isDocumentationOnly) {
+          if(!doNotRunTests) {
             (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'], namespaces)
             kubeLocks << lock
           } else {
@@ -108,7 +111,7 @@ def call(Map config) {
           }
         }
         stage('ModifyManifest') {
-          if(!isDocumentationOnly) {
+          if(!doNotRunTests) {
             testedEnv = manifestHelper.manifestDiff(kubectlNamespace)
 	  } else {
 	    Utils.markStageSkippedForConditional(STAGE_NAME)
@@ -117,7 +120,7 @@ def call(Map config) {
       }
 
       stage('K8sReset') {
-        if(!isDocumentationOnly) {
+        if(!doNotRunTests) {
           // adding the reset-lock lock in case reset fails before unlocking
           kubeLocks << kubeHelper.newKubeLock(kubectlNamespace, "gen3-reset", "reset-lock")
           kubeHelper.reset(kubectlNamespace)
@@ -126,7 +129,7 @@ def call(Map config) {
         }
       }
       stage('VerifyClusterHealth') {
-        if(!isDocumentationOnly) {
+        if(!doNotRunTests) {
           kubeHelper.waitForPods(kubectlNamespace)
           testHelper.checkPodHealth(kubectlNamespace, testedEnv)
         } else {
@@ -134,14 +137,14 @@ def call(Map config) {
         }
       }
       stage('GenerateData') {
-        if(!isDocumentationOnly) {
+        if(!doNotRunTests) {
           testHelper.simulateData(kubectlNamespace)
         } else {
           Utils.markStageSkippedForConditional(STAGE_NAME)
         }
       }
       stage('FetchDataClient') {
-        if(!isDocumentationOnly) {
+        if(!doNotRunTests) {
           // we get the data client from master, unless the service being
           // tested is the data client itself, in which case we get the
           // executable for the current branch
@@ -155,7 +158,7 @@ def call(Map config) {
         }
       }
       stage('RunTests') {
-        if(!isDocumentationOnly) {
+        if(!doNotRunTests) {
           testHelper.runIntegrationTests(
             kubectlNamespace,
             pipeConfig.serviceTesting.name,
@@ -168,7 +171,7 @@ def call(Map config) {
         }
       }
       stage('CleanS3') {
-        if(!isDocumentationOnly) {
+        if(!doNotRunTests) {
           testHelper.cleanS3()
 	} else {
 	  Utils.markStageSkippedForConditional(STAGE_NAME)
