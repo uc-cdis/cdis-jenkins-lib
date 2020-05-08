@@ -57,6 +57,10 @@ def call(Map config) {
               println('found this namespace label! ' + label['name']);
               namespaces.add(label['name'])
               break
+            case "qaplanetv2":
+              println('This PR check will run in a qaplanetv2 environment! ');
+              namespaces.add('ci-env-1')
+              break
             default:
               println('no-effect label')
               break
