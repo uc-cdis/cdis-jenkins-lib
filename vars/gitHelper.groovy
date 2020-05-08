@@ -44,7 +44,7 @@ def fetchAllRepos(String currentRepoName) {
   dir('cdis-manifest') {
     git(
       url: 'https://github.com/uc-cdis/gitops-qa.git',
-      branch: 'master'
+      branch: 'test/fix'
     )
   }
   dir('cloud-automation') {
