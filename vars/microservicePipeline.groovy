@@ -2,26 +2,59 @@
 
 import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 
+def AVAILABLE_NAMESPACES = ['jenkins-blood', 'jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
+List<String> namespaces = []
+doNotRunTests = false
+doNotModifyManifest = false
+isGen3Release = "false"
+selectedTest = "all"
+prLabels = null
+kubectlNamespace = null
+kubeLocks = []
+testedEnv = "" // for manifest pipeline
+pipeConfig = pipelineHelper.setupConfig(config)
+pipelineHelper.cancelPreviousRunningBuilds()
+prLabels = githubHelper.fetchLabels()
+
 /**
 * Pipline for building and testing microservices
 * 
 * @param config - pipeline configuration
 */
 def call(Map config) {
-  node {
-    def AVAILABLE_NAMESPACES = ['jenkins-blood', 'jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
-    List<String> namespaces = []
-    doNotRunTests = false
-    doNotModifyManifest = false
-    isGen3Release = "false"
-    selectedTest = "all"
-    prLabels = null
-    kubectlNamespace = null
-    kubeLocks = []
-    testedEnv = "" // for manifest pipeline
-    pipeConfig = pipelineHelper.setupConfig(config)
-    pipelineHelper.cancelPreviousRunningBuilds()
-    prLabels = githubHelper.fetchLabels()
+  agent {
+    kubernetes {
+      yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: shell
+    image: quay.io/cdis/jenkins:master
+    command:
+    - sleep
+    args:
+    - infinity
+    env:
+    - name: AWS_DEFAULT_REGION
+      value: us-east-1
+    - name: JAVA_OPTS
+      value: "-Xmx3072m"
+    - name: AWS_ACCESS_KEY_ID
+      valueFrom:
+        secretKeyRef:
+          name: jenkins-secret
+          key: aws_access_key_id
+    - name: AWS_SECRET_ACCESS_KEY
+      valueFrom:
+        secretKeyRef:
+          name: jenkins-secret
+          key: aws_secret_access_key
+'''
+            defaultContainer 'shell'
+    }
+  }
+  stages { 
     try {
       stage('CleanWorkspace') {
         cleanWs()
