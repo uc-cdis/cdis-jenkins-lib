@@ -4,11 +4,14 @@ def checkTestSkippingCriteria() {
     fileChange = fileChanges[key][0]
     def releasesFolder = fileChange =~ /^(releases\/.*)/
     def openapisFolder = fileChange =~ /^(openapis\/.*\.yaml)/
+    def dotFolder = fileChange =~ /^(\..*)/
     def docFile = fileChange =~ /(.*\.md)|(.*\.png)|(.*\.txt)|(.*\.feature)/
     if (releasesFolder) {
       println('Found releases folder: ' + releasesFolder[0][0])
     } else if (openapisFolder) {
       println('Found yaml file: ' + openapisFolder[0][0])
+    } else if (dotFolder) {
+      println('Found changes in a file inside dot folder: ' + dotFolder[0][0])
     } else if (docFile) {
       println('Found text file: ' + docFile[0][0])
     } else {
