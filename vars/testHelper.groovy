@@ -130,6 +130,62 @@ def cleanS3() {
 }
 
 /**
+* Delete Service Account keys from the dcf-integration Google Cloud Platform project
+* Lingering keys are causing intermittent failures in the CI tests
+*/
+def deleteGCPServiceAccountKeys(jenkinsNamespace) {
+  withCredentials([file(credentialsId: 'fence-google-app-creds-secret', variable: 'MY_SECRET_GCLOUD_APP_CREDENTIALS_FILE')]) {
+    sh '''
+      cat $MY_SECRET_GCLOUD_APP_CREDENTIALS_FILE > fence_google_app_creds_secret.json
+      gcloud auth activate-service-account --key-file fence_google_app_creds_secret.json
+
+
+      # set shorter jenkins namespace identity
+      JPREFIX=""
+
+      case $SELECTED_JENKINS_NAMESPACE in
+      jenkins-dcp)
+        echo "Deleting jdcp keys"
+        JPREFIX="jdcp"
+      ;;
+      jenkins-brain)
+        echo "Deleting jbrain keys"
+        JPREFIX="jbrain"
+      ;;
+      jenkins-genomel)
+        echo "Deleting jgmel keys"
+        JPREFIX="jgmel"
+      ;;
+      jenkins-blood)
+        echo "Deleting jblood keys"
+        JPREFIX="jblood"
+      ;;
+      jenkins-niaid)
+        echo "Deleting jniaid keys"
+        JPREFIX="jniaid"
+      ;;
+      esac
+
+      svc_accounts=($JPREFIX-cdisautotestgmailcom-6@dcf-integration.iam.gserviceaccount.com $JPREFIX-cdisautotestgmailcom-7@dcf-integration.iam.gserviceaccount.com $JPREFIX-cdisautotestgmailcom-8@dcf-integration.iam.gserviceaccount.com)
+
+      for sa in ${svc_accounts[@]}; do
+        echo "deleting keys for ${sa}..."
+        keys_list="$(gcloud iam service-accounts keys list --iam-account $sa | awk "{ print $1 }" | tail -n +2)"
+        keys=($keys_list)
+        for key in ${keys[@]}; do
+          echo "deleting key: ${key}..."
+          # yes | gcloud iam service-accounts keys delete ${key} --iam-account ${sa}
+        done
+      done
+
+      echo "done"
+
+    '''
+  }
+  println("The GCP keys correspondent to this jenkins namespace have been deleted.");
+}
+
+/**
 * Verify pods are health
 */
 def checkPodHealth(String namespace, String testedEnv) {
