@@ -165,7 +165,9 @@ def deleteGCPServiceAccountKeys(jenkinsNamespace) {
       break;
     default:
       println("invalid jenkins namespace: " + SELECTED_JENKINS_NAMESPACE);
-      break;
+      // If the CI environment is not listed here
+      // it is probably not configured for google integration tests
+      return 0;
     }
 
     def svc_accounts = ['JPREFIX-cdisautotestgmailcom-6@dcf-integration.iam.gserviceaccount.com', 'JPREFIX-cdisautotestgmailcom-7@dcf-integration.iam.gserviceaccount.com', 'JPREFIX-cdisautotestgmailcom-8@dcf-integration.iam.gserviceaccount.com']
