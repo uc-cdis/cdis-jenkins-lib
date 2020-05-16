@@ -179,7 +179,7 @@ def deleteGCPServiceAccountKeys(jenkinsNamespace) {
 
       key_rows = sa_keys.split("\n");
       for (int i = 0; i < key_rows.length; i++) {
-        // Skipe headers
+        // Skip headers
         if (i == 0) continue
         println("key row: " + key_rows[i])
         def key_id = key_rows[i].split(" ")[0]
