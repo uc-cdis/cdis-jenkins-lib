@@ -138,51 +138,55 @@ def deleteGCPServiceAccountKeys(jenkinsNamespace) {
     sh '''
       mv $MY_SECRET_GCLOUD_APP_CREDENTIALS_FILE fence_google_app_creds_secret.json
       gcloud auth activate-service-account --key-file fence_google_app_creds_secret.json
-
-
-      # set shorter jenkins namespace identity
-      JPREFIX=""
-
-      case $SELECTED_JENKINS_NAMESPACE in
-      jenkins-dcp)
-        echo "Deleting jdcp keys"
-        JPREFIX="jdcp"
-      ;;
-      jenkins-brain)
-        echo "Deleting jbrain keys"
-        JPREFIX="jbrain"
-      ;;
-      jenkins-genomel)
-        echo "Deleting jgmel keys"
-        JPREFIX="jgmel"
-      ;;
-      jenkins-blood)
-        echo "Deleting jblood keys"
-        JPREFIX="jblood"
-      ;;
-      jenkins-niaid)
-        echo "Deleting jniaid keys"
-        JPREFIX="jniaid"
-      ;;
-      esac
-
-      svc_accounts=($JPREFIX-cdisautotestgmailcom-6@dcf-integration.iam.gserviceaccount.com $JPREFIX-cdisautotestgmailcom-7@dcf-integration.iam.gserviceaccount.com $JPREFIX-cdisautotestgmailcom-8@dcf-integration.iam.gserviceaccount.com)
-
-      for sa in ${svc_accounts[@]}; do
-        echo "deleting keys for ${sa}..."
-        keys_list="$(gcloud iam service-accounts keys list --iam-account $sa | awk "{ print $1 }" | tail -n +2)"
-        keys=($keys_list)
-        for key in ${keys[@]}; do
-          echo "deleting key: ${key}..."
-          # yes | gcloud iam service-accounts keys delete ${key} --iam-account ${sa}
-        done
-      done
-
-      echo "done"
-
     '''
+    def SELECTED_JENKINS_NAMESPACE = jenkinsNamespace;
+    def JPREFIX="";
+
+    switch(SELECTED_JENKINS_NAMESPACE) {
+    case "jenkins-dcp":
+      println("deleting jdcp keys");
+      JPREFIX="jdcp"
+      break;
+    case "jenkins-brain":
+      println("deleting jbrain keys");
+      JPREFIX="jbrain"
+      break;
+    case "jenkins-blood":
+      println("deleting jblood keys");
+      JPREFIX="jblood"
+      break;
+    case "jenkins-genomel":
+      println("deleting jgmel keys");
+      JPREFIX="jgmel"
+      break;
+    case "jenkins-niaid":
+      println("deleting jniaid keys");
+      JPREFIX="jniaid"
+      break;
+    default:
+      println("invalid jenkins namespace: " + SELECTED_JENKINS_NAMESPACE);
+      break;
+    }
+
+    def svc_accounts = ['JPREFIX-cdisautotestgmailcom-6@dcf-integration.iam.gserviceaccount.com', 'JPREFIX-cdisautotestgmailcom-7@dcf-integration.iam.gserviceaccount.com', 'JPREFIX-cdisautotestgmailcom-8@dcf-integration.iam.gserviceaccount.com']
+
+    for(String sa: svc_accounts) {
+      sa = sa.replace("JPREFIX", JPREFIX)
+      println("deleting keys for ${sa}...");
+      def sa_keys = sh(script: "gcloud iam service-accounts keys list --iam-account $sa", returnStdout: true)
+
+      key_rows = sa_keys.split("\n");
+      for (int i = 0; i < key_rows.length; i++) {
+        // Skipe headers
+        if (i == 0) continue
+        println("key row: " + key_rows[i])
+        def key_id = key_rows[i].split(" ")[0]
+        def deletion_result = sh(script: "gcloud iam service-accounts keys delete $key_id --iam-account $sa --quiet", returnStdout: true, returnStatus:true)
+        println(deletion_result)
+      }
+    }
+    println("The GCP keys correspondent to this jenkins namespace have been deleted.");
   }
-  println("The GCP keys correspondent to this jenkins namespace have been deleted.");
 }
 
 /**
