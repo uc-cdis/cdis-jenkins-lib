@@ -98,8 +98,8 @@ def call(Map config) {
         stage('CleanUp3rdPartyResources') {
           if(!doNotRunTests) {
             testHelper.deleteGCPServiceAccountKeys(kubectlNamespace)
-	  } else {
-	    Utils.markStageSkippedForConditional(STAGE_NAME)
+          } else {
+            Utils.markStageSkippedForConditional(STAGE_NAME)
           }
         }
         stage('ModifyManifest') {
