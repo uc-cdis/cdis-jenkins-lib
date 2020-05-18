@@ -130,6 +130,68 @@ def cleanS3() {
 }
 
 /**
+* Delete Service Account keys from the dcf-integration Google Cloud Platform project
+* Lingering keys are causing intermittent failures in the CI tests
+*/
+def deleteGCPServiceAccountKeys(jenkinsNamespace) {
+  withCredentials([file(credentialsId: 'fence-google-app-creds-secret', variable: 'MY_SECRET_GCLOUD_APP_CREDENTIALS_FILE')]) {
+    sh '''
+      mv $MY_SECRET_GCLOUD_APP_CREDENTIALS_FILE fence_google_app_creds_secret.json
+      gcloud auth activate-service-account --key-file fence_google_app_creds_secret.json
+    '''
+    def SELECTED_JENKINS_NAMESPACE = jenkinsNamespace;
+    def JPREFIX="";
+
+    switch(SELECTED_JENKINS_NAMESPACE) {
+    case "jenkins-dcp":
+      println("deleting jdcp keys");
+      JPREFIX="jdcp"
+      break;
+    case "jenkins-brain":
+      println("deleting jbrain keys");
+      JPREFIX="jbrain"
+      break;
+    case "jenkins-blood":
+      println("deleting jblood keys");
+      JPREFIX="jblood"
+      break;
+    case "jenkins-genomel":
+      println("deleting jgmel keys");
+      JPREFIX="jgmel"
+      break;
+    case "jenkins-niaid":
+      println("deleting jniaid keys");
+      JPREFIX="jniaid"
+      break;
+    default:
+      println("invalid jenkins namespace: " + SELECTED_JENKINS_NAMESPACE);
+      // If the CI environment is not listed here
+      // it is probably not configured for google integration tests
+      return 0;
+    }
+
+    def svc_accounts = ['JPREFIX-cdisautotestgmailcom-6@dcf-integration.iam.gserviceaccount.com', 'JPREFIX-cdisautotestgmailcom-7@dcf-integration.iam.gserviceaccount.com', 'JPREFIX-cdisautotestgmailcom-8@dcf-integration.iam.gserviceaccount.com']
+
+    for(String sa: svc_accounts) {
+      sa = sa.replace("JPREFIX", JPREFIX)
+      println("deleting keys for ${sa}...");
+      def sa_keys = sh(script: "gcloud iam service-accounts keys list --iam-account $sa || exit 0", returnStdout: true)
+
+      key_rows = sa_keys.split("\n");
+      for (int i = 0; i < key_rows.length; i++) {
+        // Skip headers
+        if (i == 0) continue
+        println("key row: " + key_rows[i])
+        def key_id = key_rows[i].split(" ")[0]
+        def deletion_result = sh(script: "gcloud iam service-accounts keys delete $key_id --iam-account $sa --quiet", returnStdout: true, returnStatus:true)
+        println(deletion_result)
+      }
+    }
+    println("The GCP keys correspondent to this jenkins namespace have been deleted.");
+  }
+}
+
+/**
 * Verify pods are health
 */
 def checkPodHealth(String namespace, String testedEnv) {
