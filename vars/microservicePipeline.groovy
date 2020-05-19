@@ -12,7 +12,6 @@ def call(Map config) {
     def AVAILABLE_NAMESPACES = ['jenkins-blood', 'jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
     List<String> namespaces = []
     doNotRunTests = false
-    doNotModifyManifest = false
     isGen3Release = "false"
     selectedTest = "all"
     prLabels = null
@@ -46,9 +45,6 @@ def call(Map config) {
             case "decommission-environment":
               println('Skip tests if an environment folder is deleted')
               doNotRunTests = decommissionEnvHelper.checkDecommissioningEnvironment()
-            case "commission-environment":
-              println('Skip ModifyManifest step to introduce a new CI environment')
-              doNotModifyManifest = true 
             case "gen3-release":
               println('Enable additional tests and automation')
               isGen3Release = "true"
@@ -103,7 +99,7 @@ def call(Map config) {
           }
         }
         stage('ModifyManifest') {
-          if(!doNotRunTests && !doNotModifyManifest) {
+          if(!doNotRunTests) {
             manifestHelper.editService(
               kubeHelper.getHostname(kubectlNamespace),
               pipeConfig.serviceTesting.name,
