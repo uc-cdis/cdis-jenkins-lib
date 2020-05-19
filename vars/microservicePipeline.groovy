@@ -125,6 +125,13 @@ def call(Map config) {
             Utils.markStageSkippedForConditional(STAGE_NAME)
           }
         }
+        stage('CleanUp3rdPartyResources') {
+          if(!doNotRunTests) {
+            testHelper.deleteGCPServiceAccountKeys(kubectlNamespace)
+          } else {
+            Utils.markStageSkippedForConditional(STAGE_NAME)
+          }
+        }
         stage('ModifyManifest') {
           if(!doNotRunTests) {
             testedEnv = manifestHelper.manifestDiff(kubectlNamespace)
