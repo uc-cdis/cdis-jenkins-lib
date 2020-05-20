@@ -175,7 +175,7 @@ def deleteGCPServiceAccountKeys(jenkinsNamespace) {
     for(String sa: svc_accounts) {
       sa = sa.replace("JPREFIX", JPREFIX)
       println("deleting keys for ${sa}...");
-      def sa_keys = sh(script: "gcloud iam service-accounts keys list --iam-account $sa || exit 0", returnStdout: true)
+      def sa_keys = sh(script: "gcloud iam service-accounts keys list --iam-account $sa --managed-by user || exit 0", returnStdout: true)
 
       key_rows = sa_keys.split("\n");
       for (int i = 0; i < key_rows.length; i++) {
