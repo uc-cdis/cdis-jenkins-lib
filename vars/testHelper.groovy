@@ -170,20 +170,29 @@ def deleteGCPServiceAccountKeys(jenkinsNamespace) {
       return 0;
     }
 
-    def svc_accounts = ['JPREFIX-cdisautotestgmailcom-6@dcf-integration.iam.gserviceaccount.com', 'JPREFIX-cdisautotestgmailcom-7@dcf-integration.iam.gserviceaccount.com', 'JPREFIX-cdisautotestgmailcom-8@dcf-integration.iam.gserviceaccount.com', 'JPREFIX-dcf-integration-test-11@dcf-integration.iam.gserviceaccount.com', 'JPREFIX-dcf-integration-test-13@dcf-integration.iam.gserviceaccount.com', 'JPREFIX-dcf-integration-test-17@dcf-integration.iam.gserviceaccount.com', 'JPREFIX-dcf-integration-test-18@dcf-integration.iam.gserviceaccount.com']
+    println("finding all the service accounts associated with this Jenkins namespace...");
+    def set_project = sh(script: "gcloud config set project dcf-integration || exit 0", returnStdout: true);
+    println("set_project: ${set_project}");
 
-    for(String sa: svc_accounts) {
-      sa = sa.replace("JPREFIX", JPREFIX)
-      println("deleting keys for ${sa}...");
-      def sa_keys = sh(script: "gcloud iam service-accounts keys list --iam-account $sa --managed-by user || exit 0", returnStdout: true)
+    def sas = sh(script: "gcloud iam service-accounts list --filter=\"Email:($JPREFIX)\" --format=\"table(Email)\" || exit 0", returnStdout: true);
+
+    def svc_accounts = sas.split("\n");
+    for (int i = 0; i < svc_accounts.length; i++) {
+      // Skip header
+      if (i == 0) continue
+      def sa = svc_accounts[i];
+      println("deleting keys for svc account: " + sa);
+
+      def sa_keys = sh(script: "gcloud iam service-accounts keys list --iam-account $sa --managed-by user || exit 0", returnStdout: true);
+      println "sa_keys: ${sa_keys}";
 
       key_rows = sa_keys.split("\n");
-      for (int i = 0; i < key_rows.length; i++) {
+      for (int j = 0; j < key_rows.length; j++) {
         // Skip headers
-        if (i == 0) continue
-        println("key row: " + key_rows[i])
-        def key_id = key_rows[i].split(" ")[0]
-        def deletion_result = sh(script: "gcloud iam service-accounts keys delete $key_id --iam-account $sa --quiet", returnStdout: true, returnStatus:true)
+        if (j == 0) continue
+        // println("key row: " + key_rows[j])
+        def key_id = key_rows[j].split(" ")[0]
+        def deletion_result = sh(script: "gcloud iam service-accounts keys delete $key_id --iam-account $sa --quiet", returnStatus:true)
         println(deletion_result)
       }
     }
