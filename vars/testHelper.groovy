@@ -170,7 +170,7 @@ def deleteGCPServiceAccountKeys(jenkinsNamespace) {
       return 0;
     }
 
-    def svc_accounts = ['JPREFIX-cdisautotestgmailcom-6@dcf-integration.iam.gserviceaccount.com', 'JPREFIX-cdisautotestgmailcom-7@dcf-integration.iam.gserviceaccount.com', 'JPREFIX-cdisautotestgmailcom-8@dcf-integration.iam.gserviceaccount.com']
+    def svc_accounts = ['JPREFIX-cdisautotestgmailcom-6@dcf-integration.iam.gserviceaccount.com', 'JPREFIX-cdisautotestgmailcom-7@dcf-integration.iam.gserviceaccount.com', 'JPREFIX-cdisautotestgmailcom-8@dcf-integration.iam.gserviceaccount.com', 'JPREFIX-dcf-integration-test-11@dcf-integration.iam.gserviceaccount.com', 'JPREFIX-dcf-integration-test-13@dcf-integration.iam.gserviceaccount.com', 'JPREFIX-dcf-integration-test-17@dcf-integration.iam.gserviceaccount.com', 'JPREFIX-dcf-integration-test-18@dcf-integration.iam.gserviceaccount.com']
 
     for(String sa: svc_accounts) {
       sa = sa.replace("JPREFIX", JPREFIX)
