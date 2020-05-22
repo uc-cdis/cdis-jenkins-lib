@@ -45,7 +45,7 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   }
   sh(returnStdout: true, script: "bs=\$(jq -r .versions < tmpGitClone/$changedDir/manifest.json) "
           + "&& old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) "
-          + """&& echo \$old | jq -r --arg od ${od} --arg pa ${pa} --argjson sj ${sj} --argjson vs \"\$bs\"""" 
+          + """&& echo \$old | jq -r --arg od ${od} --arg pa ${pa} --argjson sj \"\$sj\" --argjson vs \"\$bs\"""" 
           + / '(.global.dictionary_url) |=/ + "\$od" + / | (.global.portal_app) |=/ + "\$pa"
           + / | (.versions) |=/ + "\$vs" + / | (.sower) |=/ + "\$sj" + /'/ + " > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   String rs = sh(returnStdout: true, script: "cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
