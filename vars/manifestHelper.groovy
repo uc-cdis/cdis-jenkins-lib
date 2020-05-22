@@ -48,8 +48,8 @@ def mergeManifest(String changedDir, String selectedNamespace) {
           + / '(.global.dictionary_url) |=/ + "\$od" + / | (.global.portal_app) |=/ + "\$pa"
           + / | (.versions) |=/ + "\$vs" + /'/ + " > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   sh(returnStdout: true, script: "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) "
-          + """&& echo \$old | jq -r --argjson sj \"${sj}\" """
-          + "'(.sower) |=/ . + \$sj' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
+          + """&& echo \$old | jq -r --argjson sj ${sj} """
+          + "'(.sower) |= . + \$sj' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   String rs = sh(returnStdout: true, script: "cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   return rs
 }
