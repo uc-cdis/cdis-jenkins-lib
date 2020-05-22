@@ -39,7 +39,7 @@ def mergeManifest(String changedDir, String selectedNamespace) {
     }
   }
   if (dels != "") {
-    sh(returnStdout: true, script: "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r \'${dels}\' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json && jq '.sower = []' cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
+    sh(returnStdout: true, script: "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r \'${dels}\' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json && echo \$old | jq '.sower = []' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   }
   sh(returnStdout: true, script: "bs=\$(jq -r .versions < tmpGitClone/$changedDir/manifest.json) "
           + "&& old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) "
