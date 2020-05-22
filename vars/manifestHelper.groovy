@@ -26,7 +26,7 @@ def editService(String commonsHostname, String serviceName, String quayBranchNam
 def mergeManifest(String changedDir, String selectedNamespace) {
   String od = sh(returnStdout: true, script: "jq -r .global.dictionary_url < tmpGitClone/$changedDir/manifest.json").trim()
   String pa = sh(returnStdout: true, script: "jq -r .global.portal_app < tmpGitClone/$changedDir/manifest.json").trim()
-  String sj = sh(returnStdout: true, script: "jq .sower < tmpGitClone/$changedDir/manifest.json").trim()
+  String sj = sh(returnStdout: true, script: "jq -r .sower < tmpGitClone/$changedDir/manifest.json").trim()
   String s = sh(returnStdout: true, script: "jq -r keys < cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   println s
   def keys = new groovy.json.JsonSlurper().parseText(s)
