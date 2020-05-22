@@ -41,11 +41,11 @@ def mergeManifest(String changedDir, String selectedNamespace) {
     }
   }
   if (dels != "") {
-    sh(returnStdout: true, script: "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r \'${dels}\' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json && echo \$old | jq '.sower = []' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
+    sh(returnStdout: true, script: "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r \'${dels}\' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json && echo \$old | jq -r '.sower = []' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   }
   sh(returnStdout: true, script: "bs=\$(jq -r .versions < tmpGitClone/$changedDir/manifest.json) "
           + "&& old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) "
-          + """&& echo \$old | jq -r --arg od ${od} --arg pa ${pa} --arg sj ${sj} --argjson vs \"\$bs\"""" 
+          + """&& echo \$old | jq -r --arg od ${od} --arg pa ${pa} --argjson sj ${sj} --argjson vs \"\$bs\"""" 
           + / '(.global.dictionary_url) |=/ + "\$od" + / | (.global.portal_app) |=/ + "\$pa"
           + / | (.versions) |=/ + "\$vs" + / | (.sower) |=/ + "\$sj" + /'/ + " > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   String rs = sh(returnStdout: true, script: "cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
