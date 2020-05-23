@@ -50,7 +50,7 @@ def mergeManifest(String changedDir, String selectedNamespace) {
           + / | (.versions) |=/ + "\$vs" + /'/ + " > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   String sowerBlock = sh(returnStdout: true, script: "cat sower_block.json")
   if (sowerBlock != "null") {
-    sh(returnStdout: true, script: "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sj \"${sowerBlock}\" '(.sower) |= . + \$sj' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
+    sh(returnStdout: true, script: "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sj \"\$(cat sower_block.json)\" '(.sower) |= . + \$sj' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
     // set Jenkins CI service accounts for sower jobs if the property exists
     sh(returnStdout: true, script: "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r '.sower[] | if has(\"serviceAccountName\") then .serviceAccountName = \"jobs-${selectedNamespace}-planx-pla-net\" else . end' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   }
