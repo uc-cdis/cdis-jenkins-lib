@@ -53,7 +53,7 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   if (sowerBlock != "null") {
     sh(returnStdout: true, script: "echo ${old} | jq -r --argjson sj \"${sowerBlock}\" '(.sower) |= . + \$sj' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
     // set Jenkins CI service accounts for sower jobs if the property exists
-    sh(returnStdout: true, script: "echo ${old} | jq -r '.sower[] | if has("serviceAccountName") then .serviceAccountName = "jobs-${selectedNamespace}-planx-pla-net" else . end' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
+    sh(returnStdout: true, script: "echo ${old} | jq -r '.sower[] | if has(\"serviceAccountName\") then .serviceAccountName = \"jobs-${selectedNamespace}-planx-pla-net\" else . end' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   }
   String rs = sh(returnStdout: true, script: "cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   return rs
