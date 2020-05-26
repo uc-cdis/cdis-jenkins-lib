@@ -58,7 +58,7 @@ def mergeManifest(String changedDir, String selectedNamespace) {
     sh(returnStdout: true, script: "cat sower_block.json | jq -s . | tee sower_block.json")
     String sowerBlock3 = sh(returnStdout: true, script: "cat sower_block.json")
     println(sowerBlock3)
-   sh(returnStdout: true, script: "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sj \"\$(cat sower_block.json)\" '(.sower) |= . + \$sj' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
+    sh(returnStdout: true, script: "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sj \"\$(cat sower_block.json)\" '(.sower) |= . + \$sj' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   }
   String rs = sh(returnStdout: true, script: "cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   return rs
