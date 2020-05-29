@@ -117,8 +117,9 @@ spec:
 	     	namespaces.add(label['name'])
 	     	break
 	          case "qaplanetv2":
-	     	println('This PR check will run in a qaplanetv2 environment! ');
-	     	namespaces.add('ci-env-1')
+	     	  println('This PR check will run in a qaplanetv2 environment! ');
+	     	  namespaces.add('ci-env-1')
+                  // TODO: Change default vpc_name
 	     	break
 	          default:
 	     	println('no-effect label')
