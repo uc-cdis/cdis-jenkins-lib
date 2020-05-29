@@ -52,6 +52,8 @@ spec:
         secretKeyRef:
           name: jenkins-secret
           key: aws_secret_access_key
+  serviceAccount: gen3-self-service-account
+  serviceAccountName: gen3-self-service-account
 '''
         defaultContainer 'shell'
       }
