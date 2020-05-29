@@ -2,26 +2,27 @@
 
 import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 
-def AVAILABLE_NAMESPACES = ['jenkins-blood', 'jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
-List<String> namespaces = []
-doNotRunTests = false
-doNotModifyManifest = false
-isGen3Release = "false"
-selectedTest = "all"
-prLabels = null
-kubectlNamespace = null
-kubeLocks = []
-testedEnv = "" // for manifest pipeline
-pipeConfig = pipelineHelper.setupConfig(config)
-pipelineHelper.cancelPreviousRunningBuilds()
-prLabels = githubHelper.fetchLabels()
-
 /**
 * Pipline for building and testing microservices
 * 
 * @param config - pipeline configuration
 */
 def call(Map config) {
+
+  def AVAILABLE_NAMESPACES = ['jenkins-blood', 'jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
+  List<String> namespaces = []
+  doNotRunTests = false
+  doNotModifyManifest = false
+  isGen3Release = "false"
+  selectedTest = "all"
+  prLabels = null
+  kubectlNamespace = null
+  kubeLocks = []
+  testedEnv = "" // for manifest pipeline
+  pipeConfig = pipelineHelper.setupConfig(config)
+  pipelineHelper.cancelPreviousRunningBuilds()
+  prLabels = githubHelper.fetchLabels()
+
   pipeline {
     agent {
       kubernetes {
