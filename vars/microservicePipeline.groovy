@@ -303,9 +303,11 @@ spec:
     }
     post {
       always {
-        kubeHelper.teardown(kubeLocks)
-        testHelper.teardown()
-        pipelineHelper.teardown(currentBuild.result)
+        script {
+          kubeHelper.teardown(kubeLocks)
+          testHelper.teardown()
+          pipelineHelper.teardown(currentBuild.result)
+	}
       }
     }
   }
