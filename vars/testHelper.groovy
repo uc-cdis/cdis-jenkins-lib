@@ -81,7 +81,7 @@ def fetchDataClient(String dataClientBranch="master") {
     download_location = "dataclient.zip"
     sh String.format("aws s3 cp s3://cdis-dc-builds/%s/dataclient_%s.zip %s", branch, os, download_location)
     assert fileExists(download_location)
-    unzip(download_location)
+    sh "unzip ${download_location}"    
 
     // make sure we can execute it
     executable_name = "gen3-client"
