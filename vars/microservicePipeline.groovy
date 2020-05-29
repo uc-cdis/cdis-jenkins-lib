@@ -58,10 +58,12 @@ spec:
     stages {
       stage('CleanWorkspace') {
         steps {
-          try {
-	    cleanWs()
-	  } catch (e) {
-	    pipelineHelper.handleError(e)
+	  script {
+            try {
+	      cleanWs()
+	    } catch (e) {
+	      pipelineHelper.handleError(e)
+	    }
 	  }
 	}
       }
