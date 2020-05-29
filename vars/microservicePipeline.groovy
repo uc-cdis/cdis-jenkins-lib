@@ -57,11 +57,12 @@ spec:
     }
     stages {
       stage('CleanWorkspace') {
-
-try {
-	  cleanWs()
-	} catch (e) {
-	  pipelineHelper.handleError(e)
+        steps {
+          try {
+	    cleanWs()
+	  } catch (e) {
+	    pipelineHelper.handleError(e)
+	  }
 	}
       }
       stage('FetchCode') {
