@@ -57,17 +57,20 @@ spec:
     }
     stages {
       stage('CleanWorkspace') {
-	  try {
+
+try {
 	  cleanWs()
 	} catch (e) {
 	  pipelineHelper.handleError(e)
 	}
       }
       stage('FetchCode') {
-	try {
-	  gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
-	} catch (e) {
-	  pipelineHelper.handleError(e)
+	steps {
+	  try {
+	    gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
+	  } catch (e) {
+	    pipelineHelper.handleError(e)
+	  }
 	}
       }
       stage('CheckPRLabels') {
