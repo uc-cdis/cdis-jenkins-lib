@@ -6,7 +6,7 @@
 */
 def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) {
   env_variables = ["GEN3_NOPROXY=true",
-    "vpc_name=qaplanetv1",
+    "vpc_name=qaplanetv2",
     "GEN3_HOME=$env.WORKSPACE/cloud-automation",
     "KUBECTL_NAMESPACE=${namespace}",
     "NAMESPACE=${namespace}",
