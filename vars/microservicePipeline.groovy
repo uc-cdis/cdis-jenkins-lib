@@ -56,7 +56,6 @@ spec:
       }
     }
     stages {
-      try {
         stage('CleanWorkspace') {
 	  try {
             cleanWs()
