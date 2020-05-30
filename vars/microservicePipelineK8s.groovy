@@ -52,6 +52,11 @@ spec:
         secretKeyRef:
           name: jenkins-secret
           key: aws_secret_access_key
+    - name: GOOGLE_APP_CREDS_JSON
+      valueFrom:
+        secretKeyRef:
+          name: jenkins-g3auto
+          key: google_app_creds.json 
   serviceAccount: gen3-self-service-account
   serviceAccountName: gen3-self-service-account
 '''
