@@ -5,7 +5,7 @@
 * @param body - command(s) to run
 */
 def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) {
-  def vpc_name = sh(script: "kubectl get cm --namespace ${namespace} global -o jsonpath=\"{.data.environment}\", returnStatus: true);
+  def vpc_name = sh(script: "kubectl get cm --namespace ${namespace} global -o jsonpath=\"{.data.environment}\"", returnStatus: true);
   env_variables = ["GEN3_NOPROXY=true",
     "vpc_name=${vpc_name}",
     "GEN3_HOME=$env.WORKSPACE/cloud-automation",
