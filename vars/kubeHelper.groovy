@@ -10,7 +10,7 @@ def cloudAutomationPath() {
 * @returns bodyResult
 */
 def kube(String kubectlNamespace, Closure body) {
-  def vpc_name = sh(script: "kubectl get cm --namespace ci-env-1 global -o jsonpath=\"{.data.environment}\"", returnStatus: true);
+  def vpc_name = sh(script: "kubectl get cm --namespace ci-env-1 global -o jsonpath=\"{.data.environment}\"", returnStdout: true);
   withEnv(['GEN3_NOPROXY=true', "vpc_name=${vpc_name}", "GEN3_HOME=${cloudAutomationPath()}", "KUBECTL_NAMESPACE=${kubectlNamespace}"]) {
     echo "GEN3_HOME is $env.GEN3_HOME"
     echo "BRANCH_NAME is $env.BRANCH_NAME"
