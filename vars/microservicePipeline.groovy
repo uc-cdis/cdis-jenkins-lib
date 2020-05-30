@@ -16,7 +16,7 @@ def call(Map config) {
     selectedTest = "all"
     prLabels = null
     kubectlNamespace = null
-    VPCNAME = "qaplanetv1"
+    def VPCNAME = "qaplanetv1"
     kubeLocks = []
     testedEnv = "" // for manifest pipeline
     pipeConfig = pipelineHelper.setupConfig(config)
