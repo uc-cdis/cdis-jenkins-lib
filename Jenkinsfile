@@ -5,6 +5,5 @@ library identifier: "cdis-jenkins-lib@${env.CHANGE_BRANCH}"
 
 testPipeline {
   MANIFEST = false
-  VPCNAME = "qaplanetv1"
   quayRegistry = "jenkins-lib"
 }

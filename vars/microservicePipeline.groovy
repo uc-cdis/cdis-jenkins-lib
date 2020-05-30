@@ -16,7 +16,6 @@ def call(Map config) {
     selectedTest = "all"
     prLabels = null
     kubectlNamespace = null
-    def VPCNAME = "qaplanetv1"
     kubeLocks = []
     testedEnv = "" // for manifest pipeline
     pipeConfig = pipelineHelper.setupConfig(config)
@@ -61,7 +60,6 @@ def call(Map config) {
             case "qaplanetv2":
               println('This PR check will run in a qaplanetv2 environment! ');
               namespaces.add('ci-env-1')
-              VPCNAME = "qaplanetv2"
               break
             default:
               println('no-effect label')
