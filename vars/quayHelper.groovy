@@ -35,6 +35,7 @@ def waitForBuild(String repoName, String formattedBranch) {
       // that can happen if someone re-runs a Jenkins job interactively or whatever
       //
       if (fields.length > 2) {
+        println("fields: " + fields)
         noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
         if(fields[0].startsWith(formattedBranch)) {
           if(env.GIT_COMMIT.startsWith(fields[1])) {
