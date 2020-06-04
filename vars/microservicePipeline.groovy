@@ -8,7 +8,7 @@ import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 * @param config - pipeline configuration
 */
 def call(Map config) {
-  node {
+  node('master') {
     def AVAILABLE_NAMESPACES = ['jenkins-blood', 'jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
     List<String> namespaces = []
     doNotRunTests = false
