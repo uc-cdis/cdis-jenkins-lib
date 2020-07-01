@@ -145,23 +145,23 @@ def deleteGCPServiceAccounts(jenkinsNamespace) {
 
     switch(SELECTED_JENKINS_NAMESPACE) {
     case "jenkins-dcp":
-      println("deleting jdcp keys");
+      println("deleting jdcp svc accounts");
       JPREFIX="jdcp"
       break;
     case "jenkins-brain":
-      println("deleting jbrain keys");
+      println("deleting jbrain svc accounts");
       JPREFIX="jbrain"
       break;
     case "jenkins-blood":
-      println("deleting jblood keys");
+      println("deleting jblood svc accounts");
       JPREFIX="jblood"
       break;
     case "jenkins-genomel":
-      println("deleting jgmel keys");
+      println("deleting jgmel svc accounts");
       JPREFIX="jgmel"
       break;
     case "jenkins-niaid":
-      println("deleting jniaid keys");
+      println("deleting jniaid svc accounts");
       JPREFIX="jniaid"
       break;
     default:
@@ -182,7 +182,7 @@ def deleteGCPServiceAccounts(jenkinsNamespace) {
       // Skip header
       if (i == 0) continue
       def sa = svc_accounts[i];
-      println("deleting keys for svc account: " + sa);
+      println("deleting svc account: " + sa);
 
       def sa_deletion_result = sh(script: "gcloud iam service-accounts delete $sa  --quiet || exit 0", returnStdout: true);
       println "sa_deletion_result: ${sa_deletion_result}";
