@@ -131,10 +131,10 @@ def cleanS3() {
 }
 
 /**
-* Delete Service Account keys from the dcf-integration Google Cloud Platform project
-* Lingering keys are causing intermittent failures in the CI tests
+* Delete Service Accounts from the dcf-integration Google Cloud Platform project
+* This should avoid intermittent failures in the CI tests
 */
-def deleteGCPServiceAccountKeys(jenkinsNamespace) {
+def deleteGCPServiceAccounts(jenkinsNamespace) {
   withCredentials([file(credentialsId: 'fence-google-app-creds-secret', variable: 'MY_SECRET_GCLOUD_APP_CREDENTIALS_FILE')]) {
     sh '''
       mv $MY_SECRET_GCLOUD_APP_CREDENTIALS_FILE fence_google_app_creds_secret.json
@@ -184,20 +184,10 @@ def deleteGCPServiceAccountKeys(jenkinsNamespace) {
       def sa = svc_accounts[i];
       println("deleting keys for svc account: " + sa);
 
-      def sa_keys = sh(script: "gcloud iam service-accounts keys list --iam-account $sa --managed-by user || exit 0", returnStdout: true);
-      println "sa_keys: ${sa_keys}";
-
-      key_rows = sa_keys.split("\n");
-      for (int j = 0; j < key_rows.length; j++) {
-        // Skip headers
-        if (j == 0) continue
-        // println("key row: " + key_rows[j])
-        def key_id = key_rows[j].split(" ")[0]
-        def deletion_result = sh(script: "gcloud iam service-accounts keys delete $key_id --iam-account $sa --quiet", returnStatus:true)
-        println(deletion_result)
-      }
+      def sa_deletion_result = sh(script: "gcloud iam service-accounts delete $sa  --quiet || exit 0", returnStdout: true);
+      println "sa_deletion_result: ${sa_deletion_result}";
     }
-    println("The GCP keys correspondent to this jenkins namespace have been deleted.");
+    println("The Service Accounts correspondent to this jenkins namespace have been deleted.");
   }
 }
 

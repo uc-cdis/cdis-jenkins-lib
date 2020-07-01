@@ -93,7 +93,7 @@ def call(Map config) {
         }
         stage('CleanUp3rdPartyResources') {
           if(!doNotRunTests) {
-            testHelper.deleteGCPServiceAccountKeys(kubectlNamespace)
+            testHelper.deleteGCPServiceAccounts(kubectlNamespace)
           } else {
             Utils.markStageSkippedForConditional(STAGE_NAME)
           }
@@ -123,7 +123,7 @@ def call(Map config) {
         }
         stage('CleanUp3rdPartyResources') {
           if(!doNotRunTests) {
-            testHelper.deleteGCPServiceAccountKeys(kubectlNamespace)
+            testHelper.deleteGCPServiceAccounts(kubectlNamespace)
           } else {
             Utils.markStageSkippedForConditional(STAGE_NAME)
           }
