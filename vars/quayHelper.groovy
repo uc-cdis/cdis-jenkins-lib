@@ -3,7 +3,7 @@
 */
 def waitForBuild(String repoName, String formattedBranch) {
   echo("Waiting for Quay to build:\n  repoName: ${repoName}\n  branch: '${formattedBranch}'\n  commit: ${env.GIT_COMMIT}\n  previous commit: ${env.GIT_PREVIOUS_COMMIT}")
-  def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 60)
+  def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 3600)
   def timeout = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) + 3600)
   QUAY_API = 'https://quay.io/api/v1/repository/cdis/'
   timeUrl = "$QUAY_API"+repoName+"/build/?since="+timestamp
@@ -78,7 +78,6 @@ def waitForBuild(String repoName, String formattedBranch) {
             } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1])) {
               // previous commit is the newest - sleep and try again
               // things get annoying when quay gets slow
-              noPendingQuayBuilds = false
               break
             } else {
               // if previous commit is the newest one in quay, then maybe
