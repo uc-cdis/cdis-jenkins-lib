@@ -1,6 +1,8 @@
 /**
 * Waits for Quay to finish building the branch in config
 */
+import org.apache.commons.lang.StringUtils;
+
 def waitForBuild(String repoName, String formattedBranch) {
   echo("Waiting for Quay to build:\n  repoName: ${repoName}\n  branch: '${formattedBranch}'\n  commit: ${env.GIT_COMMIT}\n  previous commit: ${env.GIT_PREVIOUS_COMMIT}")
   def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 3600)
@@ -35,7 +37,8 @@ def waitForBuild(String repoName, String formattedBranch) {
       // that can happen if someone re-runs a Jenkins job interactively or whatever
       //
       if (fields.length > 2) {
-        noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
+        buildPhase = StringUtils.chomp(fields[2]);
+        noPendingQuayBuilds = noPendingQuayBuilds && buildPhase.endsWith("complete")
         if(fields[0].startsWith(formattedBranch)) {
           if(env.GIT_COMMIT.startsWith(fields[1])) {
             quayImageReady = fields[2].endsWith("complete")
