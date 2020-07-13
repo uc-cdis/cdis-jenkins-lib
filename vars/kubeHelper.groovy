@@ -65,7 +65,7 @@ def deploy(String kubectlNamespace) {
 def reset(String kubectlNamespace, String fastK8sReset = false) {
   if (fastK8sReset) {
     kube(kubectlNamespace, {
-      sh "gen3 roll all --fast"
+      sh "bash ${cloudAutomationPath()}/gen3/bin/kube-roll-all.sh --fast"
     })
   } else {
     kube(kubectlNamespace, {
