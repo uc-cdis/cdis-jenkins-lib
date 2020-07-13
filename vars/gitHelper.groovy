@@ -15,6 +15,7 @@ def setGitEnvVars(String currentRepoName) {
 
 /**
 * Pulls common repositories used for testing
+*
 */
 def fetchAllRepos(String currentRepoName) {
   dir('gen3-qa') {
