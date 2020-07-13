@@ -62,11 +62,17 @@ def deploy(String kubectlNamespace) {
 * Reset kubernetes namespace gen3 objects/services
 * Note the reset script is internally acquiring a lock that we should keep track of
 */
-def reset(String kubectlNamespace) {
-  kube(kubectlNamespace, {
-    sh "yes | bash ${cloudAutomationPath()}/gen3/bin/reset.sh"
-    sh "bash ${cloudAutomationPath()}/gen3/bin/kube-setup-spark.sh || true"
-  })
+def reset(String kubectlNamespace, String fastK8sReset = false) {
+  if (fastK8sReset) {
+    kube(kubectlNamespace, {
+      sh "gen3 roll all --fast"
+    })
+  } else {
+    kube(kubectlNamespace, {
+      sh "yes | bash ${cloudAutomationPath()}/gen3/bin/reset.sh"
+      sh "bash ${cloudAutomationPath()}/gen3/bin/kube-setup-spark.sh || true"
+    })
+  }
 }
 
 /**
