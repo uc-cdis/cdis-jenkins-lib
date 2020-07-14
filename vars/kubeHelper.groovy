@@ -65,7 +65,7 @@ def deploy(String kubectlNamespace) {
 def reset(String kubectlNamespace, boolean fastK8sReset = false) {
   if (fastK8sReset) {
     kube(kubectlNamespace, {
-      sh "kubectl delete pods \$(kubectl get pods | grep -E 'Completed|Error' | awk '{ print \$1 }')"
+      sh "kubectl delete pods \$(kubectl get pods | grep -E 'Completed|Error' | awk '{ print \$1 }') || true"
       sh "bash ${cloudAutomationPath()}/gen3/bin/kube-roll-all.sh --fast"
     })
   } else {
