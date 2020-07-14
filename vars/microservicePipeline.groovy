@@ -22,7 +22,7 @@ def call(Map config) {
     pipelineHelper.cancelPreviousRunningBuilds()
     prLabels = githubHelper.fetchLabels()
     isDraft = githubHelper.isDraft()
-    if (isDraft == 'true') {
+    if (isDraft == true) {
       currentBuild.result = 'ABORTED'
       error('This PR is a draft, abort the CI run...')
     }
