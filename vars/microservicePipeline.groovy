@@ -11,6 +11,7 @@ def call(Map config) {
   node('master') {
     def AVAILABLE_NAMESPACES = ['jenkins-blood', 'jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
     List<String> namespaces = []
+    fastK8sReset = false
     doNotRunTests = false
     isGen3Release = "false"
     selectedTest = "all"
