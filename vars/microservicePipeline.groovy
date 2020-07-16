@@ -21,6 +21,12 @@ def call(Map config) {
     pipeConfig = pipelineHelper.setupConfig(config)
     pipelineHelper.cancelPreviousRunningBuilds()
     prLabels = githubHelper.fetchLabels()
+    isDraft = githubHelper.isDraft()
+    if (isDraft == true) {
+      currentBuild.result = 'ABORTED'
+      error('This PR is a draft, abort the CI run...')
+    }
+
     try {
       stage('CleanWorkspace') {
         cleanWs()
