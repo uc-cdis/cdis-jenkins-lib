@@ -11,9 +11,9 @@ def call(Map config) {
   node('master') {
     def AVAILABLE_NAMESPACES = ['jenkins-blood', 'jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
     List<String> namespaces = []
+    List<String> selectedTests = []
     doNotRunTests = false
     isGen3Release = "false"
-    selectedTests = null
     prLabels = null
     kubectlNamespace = null
     kubeLocks = []
