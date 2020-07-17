@@ -188,15 +188,13 @@ def call(Map config) {
       }
       stage('RunTests') {
         if(!doNotRunTests) {
-	  selectedTests.each {selectedTest ->
-            testHelper.runIntegrationTests(
-              kubectlNamespace,
-              pipeConfig.serviceTesting.name,
-              testedEnv,
-              isGen3Release,
-              selectedTest
-            )
-	  }
+          testHelper.runIntegrationTests(
+            kubectlNamespace,
+            pipeConfig.serviceTesting.name,
+            testedEnv,
+            isGen3Release,
+            selectedTests
+          )
         } else {
           Utils.markStageSkippedForConditional(STAGE_NAME)
         }
