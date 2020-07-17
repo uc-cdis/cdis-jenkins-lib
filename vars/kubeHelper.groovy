@@ -11,7 +11,8 @@ def cloudAutomationPath() {
 */
 def kube(String kubectlNamespace, Closure body) {
   def vpc_name = sh(script: "kubectl get cm --namespace ${kubectlNamespace} global -o jsonpath=\"{.data.environment}\"", returnStdout: true);
-  withEnv(['GEN3_NOPROXY=true', "vpc_name=${vpc_name}", "GEN3_HOME=${cloudAutomationPath()}", "KUBECTL_NAMESPACE=${kubectlNamespace}"]) {
+  def repo_name = env.JOB_NAME.split('/')[1]
+  withEnv(['GEN3_NOPROXY=true', "vpc_name=${vpc_name}",  "repo_name=${repo_name}", "GEN3_HOME=${cloudAutomationPath()}", "KUBECTL_NAMESPACE=${kubectlNamespace}"]) {
     echo "GEN3_HOME is $env.GEN3_HOME"
     echo "BRANCH_NAME is $env.BRANCH_NAME"
     echo "CHANGE_BRANCH is $env.CHANGE_BRANCH"
@@ -62,11 +63,18 @@ def deploy(String kubectlNamespace) {
 * Reset kubernetes namespace gen3 objects/services
 * Note the reset script is internally acquiring a lock that we should keep track of
 */
-def reset(String kubectlNamespace) {
-  kube(kubectlNamespace, {
-    sh "yes | bash ${cloudAutomationPath()}/gen3/bin/reset.sh"
-    sh "bash ${cloudAutomationPath()}/gen3/bin/kube-setup-spark.sh || true"
-  })
+def reset(String kubectlNamespace, boolean fastK8sReset = false) {
+  if (fastK8sReset) {
+    kube(kubectlNamespace, {
+      sh "kubectl delete pods \$(kubectl get pods | grep -E 'Completed|Error' | awk '{ print \$1 }') || true"
+      sh "bash ${cloudAutomationPath()}/gen3/bin/roll.sh ${repo_name} || true"
+    })
+  } else {
+    kube(kubectlNamespace, {
+      sh "yes | bash ${cloudAutomationPath()}/gen3/bin/reset.sh"
+      sh "bash ${cloudAutomationPath()}/gen3/bin/kube-setup-spark.sh || true"
+    })
+  }
 }
 
 /**

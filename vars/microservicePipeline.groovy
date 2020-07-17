@@ -11,6 +11,7 @@ def call(Map config) {
   node('master') {
     def AVAILABLE_NAMESPACES = ['jenkins-blood', 'jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
     List<String> namespaces = []
+    fastK8sReset = false
     doNotRunTests = false
     isGen3Release = "false"
     selectedTest = "all"
@@ -43,6 +44,10 @@ def call(Map config) {
               selectedTestLabel = label['name'].split("-")
               println "selected test: suites/" + selectedTestLabel[1] + "/" + selectedTestLabel[2] + ".js"
               selectedTest = "suites/" + selectedTestLabel[1] + "/" + selectedTestLabel[2] + ".js"
+              break
+            case "fast-reset":
+              println('Trigger gen3 roll all --fast instead of resetting the whole k8s namespace')
+              fastK8sReset = true
               break
             case "doc-only":
               println('Skip tests if git diff matches expected criteria')
@@ -147,7 +152,7 @@ def call(Map config) {
         if(!doNotRunTests) {
           // adding the reset-lock lock in case reset fails before unlocking
           kubeLocks << kubeHelper.newKubeLock(kubectlNamespace, "gen3-reset", "reset-lock")
-          kubeHelper.reset(kubectlNamespace)
+          kubeHelper.reset(kubectlNamespace, fastK8sReset)
         } else {
           Utils.markStageSkippedForConditional(STAGE_NAME)
         }
