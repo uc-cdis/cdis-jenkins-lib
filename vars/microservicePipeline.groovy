@@ -11,9 +11,9 @@ def call(Map config) {
   node('master') {
     def AVAILABLE_NAMESPACES = ['jenkins-blood', 'jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
     List<String> namespaces = []
+    List<String> selectedTests = []
     doNotRunTests = false
     isGen3Release = "false"
-    selectedTest = "all"
     prLabels = null
     kubectlNamespace = null
     kubeLocks = []
@@ -43,6 +43,7 @@ def call(Map config) {
               selectedTestLabel = label['name'].split("-")
               println "selected test: suites/" + selectedTestLabel[1] + "/" + selectedTestLabel[2] + ".js"
               selectedTest = "suites/" + selectedTestLabel[1] + "/" + selectedTestLabel[2] + ".js"
+              selectedTests.add(selectedTest)
               break
             case "doc-only":
               println('Skip tests if git diff matches expected criteria')
@@ -75,6 +76,10 @@ def call(Map config) {
         // If none of the jenkins envs. have been selected pick one at random
         if (namespaces.size == 0) {
           namespaces = AVAILABLE_NAMESPACES
+        }
+        // If a specific test suite is not specified, run them all
+        if (selectedTests.size == 0) {
+	  selectedTests.add("all")
         }
       }      
       if (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST == false || pipeConfig.MANIFEST != "True") {
@@ -188,7 +193,7 @@ def call(Map config) {
             pipeConfig.serviceTesting.name,
             testedEnv,
             isGen3Release,
-            selectedTest
+            selectedTests
           )
         } else {
           Utils.markStageSkippedForConditional(STAGE_NAME)
