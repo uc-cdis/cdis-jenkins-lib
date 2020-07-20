@@ -29,15 +29,25 @@ def call(Map config) {
         yaml '''
 apiVersion: v1
 kind: Pod
+metadata:
+  labels:
+    app: gen3-qa-worker
+    netnolimit: "yes"
 spec:
   containers:
   - name: shell
-    image: quay.io/cdis/jenkins:master
+    image: quay.io/cdis/gen3-qa-worker:master
     command:
     - sleep
     args:
     - infinity
     env:
+    - name: http_proxy
+      value: "http://cloud-proxy.internal.io:3128"
+    - name: https_proxy
+      value: "http://cloud-proxy.internal.io:3128"
+    - name: no_proxy
+      value: "localhost,127.0.0.1,localaddress,169.254.169.254,.internal.io,logs.us-east-1.amazonaws.com"
     - name: AWS_DEFAULT_REGION
       value: us-east-1
     - name: JAVA_OPTS

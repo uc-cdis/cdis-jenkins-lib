@@ -1,3 +1,6 @@
+import org.jenkinsci.plugins.workflow.cps.replay.ReplayAction;
+import io.jenkins.blueocean.rest.model.BlueQueueItem;
+
 /**
 * Updates config by adding some missing and new values to the map
 *
@@ -60,6 +63,18 @@ def cancelPreviousRunningBuilds() {
     rawBuild = null // make null to keep pipeline serializable
   }
   b = null // make null to keep pipeline serializable
+}
+
+/**
+* Replay a build
+*/
+def replayBuild() {
+  ReplayAction replayAction = run.getAction(ReplayAction.class);
+  if (replayAction == null) {
+    throw new ServiceException.BadRequestExpception("This run does not support replay");
+  }
+  Queue.Item item = replayAction.run2(replayAction.getOriginalScript(), replayAction.getOriginalLoadedScripts());
+  BlueQueueItem queueItem = QueueContainerImpl.getQueuedItem(item, run.getParent());
 }
 
 /**

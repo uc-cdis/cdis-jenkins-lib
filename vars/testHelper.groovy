@@ -6,8 +6,12 @@
 */
 def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) {
   def vpc_name = sh(script: "kubectl get cm --namespace ${namespace} global -o jsonpath=\"{.data.environment}\"", returnStdout: true);
+  def repo_name = env.JOB_NAME.split('/')[1]
+  def PR_NUMBER = env.BRANCH_NAME.split('-')[1];
   env_variables = ["GEN3_NOPROXY=true",
     "vpc_name=${vpc_name}",
+    "repo_name=${repo_name}",
+    "PR_NUMBER=${PR_NUMBER}",
     "GEN3_HOME=$env.WORKSPACE/cloud-automation",
     "KUBECTL_NAMESPACE=${namespace}",
     "NAMESPACE=${namespace}",
@@ -30,13 +34,44 @@ def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) 
 * @param service - name of service the test is being run for
 * @param testedEnv - environment the test is being run for (for manifest PRs)
 */
-def runIntegrationTests(String namespace, String service, String testedEnv, String isGen3Release, String selectedTest="all") {
+def runIntegrationTests(String namespace, String service, String testedEnv, String isGen3Release,  List<String> selectedTests = ['all'], boolean autoRetry = false) {
   dir('gen3-qa') {
     gen3Qa(namespace, {
       // clean up old test artifacts in the workspace
       sh "/bin/rm -rf output/ || true"
       sh "mkdir output"
-      testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --selectedTest=${selectedTest}", returnStatus: true);
+      testResult = null
+      List<String> testsToBeRetried = []
+
+      selectedTests.each {selectedTest ->
+
+        // run selected test suite
+        testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --selectedTest=${selectedTest}", returnStatus: true);
+
+        // Find the latest test suite XML
+	def latestXMLReport = sh(script: "cat \$(ls -Art output/*\.xml | tail -n1)", returnStdout: true);
+        // filter failed tests and retrieve its labels
+        failedTests = xmlHelper.filterTags(xmlReport, 'test-cases', 'status', 'failed', 'labels', 'value')
+
+        if (failedTests.size > 0) {
+	  if (selectedTest == "all") {
+            greppedTestSuiteScripts.each {greppedTestSuite ->
+	      // turn the file path back into a PR label
+              testScriptInfo = greppedTestSuite.split("/")
+              testScriptInLabelFormat = "test-" + testScriptInfo[0] + "-" + testScriptInfo[1]
+              println("testScriptInLabelFormat: ${testScriptInLabelFormat}")
+              testsToBeRetried.add(testScriptInLabelFormat)
+	    }
+          } else {
+            failedTests.each {selectedTest ->
+              testsToBeRetried.add(selectedTest)
+	    }
+          }
+        } else {
+          autoRetry = false
+        }
+	println("testsToBeRetried: ${testsToBeRetried}")
+      }
       if (testResult == 0) {
         // if the test succeeds, then verify that we got some test results ...
         testResult = sh(script: "ls output/ | grep '.*\\.xml'", returnStatus: true)
@@ -47,6 +82,12 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         sh(script: "bash ${env.WORKSPACE}/cloud-automation/gen3/bin/logs.sh snapshot", returnStatus: true)
       }
       if (testResult != 0) {
+        if (autoRetry) {
+          // TODO: finish this
+	  println("autoretry is enabled!")
+          // githubHelper.applyLabelToAPR(repo_name, PR_NUMBER);
+	  // pipelineHelper.replayBuild()
+        }
         currentBuild.result = 'ABORTED'
         error("aborting build - testsuite failed")
       }

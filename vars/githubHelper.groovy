@@ -23,6 +23,24 @@ def fetchLabels() {
   return null;
 }
 
+def applyLabelToAPR(repo_name, prNum, labelToApply) {
+  withCredentials([file(credentialsId: 'PlanXCyborgUser', variable: 'GITHUB_TOKEN')]) {
+    try{
+      pr_url="https://api.github.com/repos/uc-cdis/${REPO_NAME}/issues/${PR_NUMBER}/labels"
+      println("Shooting a request to: " + labels_url);
+//      def get = new URL(labels_url).openConnection();
+//      def getRC = get.getResponseCode();
+//      println(getRC);
+//      if(getRC.equals(200)) {
+        println("Label ${labelToApply} successfully applied against ${prNum} on the ${repo_name} repo!");
+//        }
+    } catch (e) {
+      pipelineHelper.handleError(e)
+    }
+    return null;
+  }
+}
+
 def isDraft() {
   try{
     def PR_NUMBER = env.BRANCH_NAME.split('-')[1];
