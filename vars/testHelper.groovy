@@ -54,7 +54,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         sh(script: "bash ${env.WORKSPACE}/cloud-automation/gen3/bin/logs.sh snapshot", returnStatus: true)
       }
       if (testResult != 0) {
-        slackSend color: 'bad', channel: "#gen3-qa-notifications", message: "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER"
+        slackSend(color: 'bad', channel: "#gen3-qa-notifications", message: "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER")
         currentBuild.result = 'ABORTED'
         error("aborting build - testsuite failed")
       }
