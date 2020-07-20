@@ -5,8 +5,12 @@
 * @param body - command(s) to run
 */
 def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) {
+  def PR_NUMBER = env.BRANCH_NAME.split('-')[1];
+  def REPO_NAME = env.JOB_NAME.split('/')[1];
   def vpc_name = sh(script: "kubectl get cm --namespace ${namespace} global -o jsonpath=\"{.data.environment}\"", returnStdout: true);
   env_variables = ["GEN3_NOPROXY=true",
+    "PR_NUMBER=${PR_NUMBER}",
+    "REPO_NAME=${REPO_NAME}",
     "vpc_name=${vpc_name}",
     "GEN3_HOME=$env.WORKSPACE/cloud-automation",
     "KUBECTL_NAMESPACE=${namespace}",
@@ -50,6 +54,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         sh(script: "bash ${env.WORKSPACE}/cloud-automation/gen3/bin/logs.sh snapshot", returnStatus: true)
       }
       if (testResult != 0) {
+        slackSend(color: 'bad', channel: "#gen3-qa-notifications", message: "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER")
         currentBuild.result = 'ABORTED'
         error("aborting build - testsuite failed")
       }
