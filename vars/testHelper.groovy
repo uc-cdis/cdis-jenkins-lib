@@ -41,37 +41,18 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
       sh "/bin/rm -rf output/ || true"
       sh "mkdir output"
       testResult = null
-      List<String> testsToBeRetried = []
+      List<String> failedTestSuites = []
 
       selectedTests.each {selectedTest ->
 
         // run selected test suite
         testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --selectedTest=${selectedTest}", returnStatus: true);
 
-        // Find the latest test suite XML
-	def latestXMLReport = sh(script: "cat \$(ls -Art output/*\.xml | tail -n1)", returnStdout: true);
-        // filter failed tests and retrieve its labels
-        failedTests = xmlHelper.filterTags(xmlReport, 'test-cases', 'status', 'failed', 'labels', 'value')
-
-        if (failedTests.size > 0) {
-	  if (selectedTest == "all") {
-            greppedTestSuiteScripts.each {greppedTestSuite ->
-	      // turn the file path back into a PR label
-              testScriptInfo = greppedTestSuite.split("/")
-              testScriptInLabelFormat = "test-" + testScriptInfo[0] + "-" + testScriptInfo[1]
-              println("testScriptInLabelFormat: ${testScriptInLabelFormat}")
-              testsToBeRetried.add(testScriptInLabelFormat)
-	    }
-          } else {
-            failedTests.each {selectedTest ->
-              testsToBeRetried.add(selectedTest)
-	    }
-          }
-        } else {
-          autoRetry = false
-        }
-	println("testsToBeRetried: ${testsToBeRetried}")
       }
+      // check XMLs inside the output folder
+      failedTestSuites = xmlHelper.identifyFailedTestSuites()
+      def featureLabelMap = assembleFeatureLabelMap(failedTestSuites)
+      
       if (testResult == 0) {
         // if the test succeeds, then verify that we got some test results ...
         testResult = sh(script: "ls output/ | grep '.*\\.xml'", returnStatus: true)

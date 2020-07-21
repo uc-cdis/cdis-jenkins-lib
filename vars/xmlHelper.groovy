@@ -1,24 +1,32 @@
-import groovy.util.XmlSlurper
-import groovy.xml.XmlUtil
-
-def assembleFeatureLabelMap(String theXML) {
+def assembleFeatureLabelMap(failedTestSuites) {
   def featureLabelMap = [:]
   try {
-    def doc = new XmlSlurper().parseText(theXML)
+    // correlate failed test suites with the script file path from result xmls
+    def xmlResultFilesRaw = sh(returnStdout: true, script: "ls output/result*.xml")
+    def xmlResultFiles = xmlResultFilesRaw.split('\n')
+    println(xmlResultFiles)
 
-    doc.children().each{ test_case->
-      if (test_case.@'name' != 'Root Suite') {
-        // println(test_case.@'name'.text().split(' ')[0]) 
-        // println(test_case.@'file'.text()) 
-    
-        f = test_case.@'file'.text().split("/")
-        testScriptInLabelFormat = "test-" + f[f.size()-2] + "-" + f[f.size()-1]
-    
-        // println("testScriptInLabelFormat: ${testScriptInLabelFormat}")
-    
-        featureLabelMap[test_case.@'name'.text().split(' ')[0]] = testScriptInLabelFormat
+    xmlResultFiles.each{ xmlResultFile->
+      failedTestSuites.each{ failedTestSuite->
+        println('reading result file... ' + xmlResultFile)
+        String xmlResultReport = sh(returnStdout: true, script: "cat ${xmlResultFile} | tr \"\\\"\" \"'\"")
+
+        println('obtaining file path from test suite...')
+        def filePathFromFailedTestSuiteRaw = sh(
+          returnStdout: true,
+          script: "python -c \"import lxml.etree; print(''.join(lxml.etree.fromstring(\\\"\\\"\\\"${xmlResultReport}\\\"\\\"\\\").xpath('//testsuites/testsuite[@name=\\\"${failedTestSuite}\\\"]/@file')))\""
+        )
+
+        // split file path from failed test suite
+        def j = filePathFromFailedTestSuiteRaw.split("/")
+
+        def testSelectorlabel = "test-" + j[j.length-2] + "-" + j[j.length-1].substring(0, j[j.length-1].indexOf("."))
+
+        println("test selection label: " + testSelectorlabel)
+	featureLabelMap[failedTestSuite] = testSelectorlabel
       }
-    };
+    }
+
     return featureLabelMap;
   } catch (e) {
     pipelineHelper.handleError(e)
@@ -26,24 +34,36 @@ def assembleFeatureLabelMap(String theXML) {
   return null;
 }
 
-def filterTags(String theXML, String tagToIterate, String paramToVerify, String condition, String tagToRetrieve) {
-  List<String> filteredValues = []
-  try{
-    def doc = new XmlSlurper().parseText(theXML)
-    def suiteName = doc.name.text().replaceAll(':', '')
-    doc[tagToIterate].children().each{ tag->
-      println("verifying the ${paramToVerify} of one of the test cases from suite [${suiteName}] (${tag.name})...")
-      println("${paramToVerify}: " + tag.@"${paramToVerify}")
-      theValue = tag.@"${paramToVerify}"
-      if (theValue == condition) {
-        if (tag[tagToRetrieve].size() > 0) {
-          filteredValues.add(suiteName)
-        }
-      }
+def identifyFailedTestSuites()
+  def xmlTestSuiteFilesRaw = sh(returnStdout: true, script: "ls output/*-testsuite.xml")
+  def xmlTestSuiteFiles = xmlTestSuiteFilesRaw.split('\n')
+  println(xmlTestSuiteFiles)
+
+  xmlTestSuiteFiles.each{ xmlFile->
+    println('reading test suite file... ' + xmlFile)
+    String xmlTestSuiteReport = sh(returnStdout: true, script: "cat ${xmlFile} | tr \"\\\"\" \"'\"")
+                  
+    def testSuiteName = sh(
+      returnStdout: true,
+      script: "python -c \"import lxml.etree; print(lxml.etree.fromstring(\\\"\\\"\\\"${xmlTestSuiteReport}\\\"\\\"\\\").xpath('//ns2:test-suite/name/text()', namespaces={'ns2': 'urn:model.allure.qatools.yandex.ru'})[0].split(':')[0])\""
+    )
+
+    println(testSuiteName)
+
+    def testSuiteResultsRaw = sh(
+      returnStdout: true,
+      script: "python -c \"import lxml.etree; print(','.join(lxml.etree.fromstring(\\\"\\\"\\\"${xmlTestSuiteReport}\\\"\\\"\\\").xpath('//ns2:test-suite/test-cases/test-case/@status', namespaces={'ns2': 'urn:model.allure.qatools.yandex.ru'})))\""
+    )
+
+    println('### ##' + StringUtils.chomp(testSuiteResultsRaw).split(","))
+
+    def testSuiteResults = StringUtils.chomp(testSuiteResultsRaw).split(",")
+    println(testSuiteResults)
+                  
+    if ('failed' in testSuiteResults) {
+      failedTestSuites.add( StringUtils.chomp(testSuiteName) )
     }
-    return filteredValues.unique()
-  } catch (e) {
-    pipelineHelper.handleError(e)
   }
-  return null;
+  println("full list of failedTestSuites: ${failedTestSuites}")
+  return failedTestSuites
 }
