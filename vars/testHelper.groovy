@@ -44,6 +44,10 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
       selectedTests.each {selectedTest ->
         testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --selectedTest=${selectedTest}", returnStatus: true);
       }
+      // check XMLs inside the output folder
+      failedTestSuites = xmlHelper.identifyFailedTestSuites()
+      def featureLabelMap = assembleFeatureLabelMap(failedTestSuites)
+
       if (testResult == 0) {
         // if the test succeeds, then verify that we got some test results ...
         testResult = sh(script: "ls output/ | grep '.*\\.xml'", returnStatus: true)
@@ -54,7 +58,13 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         sh(script: "bash ${env.WORKSPACE}/cloud-automation/gen3/bin/logs.sh snapshot", returnStatus: true)
       }
       if (testResult != 0) {
-        slackSend(color: 'bad', channel: "#gen3-qa-notifications", message: "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER")
+
+        def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: "
+        featureLabelMap.each { testSuite, retryLabel ->
+          failureMsg += " - Test Suite *${testSuite}* failed :red_circle:, label your PR with *${retryLabel}* to retry :label: "
+        }
+
+        slackSend(color: 'bad', channel: "#gen3-qa-notifications", message: failureMsg)
         currentBuild.result = 'ABORTED'
         error("aborting build - testsuite failed")
       }
