@@ -10,13 +10,10 @@ def assembleFeatureLabelMap(failedTestSuites) {
 
     xmlResultFiles.each{ xmlResultFile->
       failedTestSuites.each{ failedTestSuite->
-        println('reading result file... ' + xmlResultFile)
-        String xmlResultReport = sh(returnStdout: true, script: "cat ${xmlResultFile} | tr \"\\\"\" \"'\"")
-
         println('obtaining file path from test suite...')
         def filePathFromFailedTestSuiteRaw = sh(
           returnStdout: true,
-          script: "python -c \"import lxml.etree; print(''.join(lxml.etree.fromstring(\\\"\\\"\\\"${xmlResultReport}\\\"\\\"\\\").xpath('//testsuites/testsuite[@name=\\\"${failedTestSuite}\\\"]/@file')))\""
+          script: "python -c \"import lxml.etree; print(''.join(lxml.etree.parse(\\\"${xmlFile}\\\").xpath('//testsuites/testsuite[@name=\\\"${failedTestSuite}\\\"]/@file')))\""
         )
 
         // split file path from failed test suite
@@ -44,18 +41,17 @@ def identifyFailedTestSuites() {
 
   xmlTestSuiteFiles.each{ xmlFile->
     println('reading test suite file... ' + xmlFile)
-    String xmlTestSuiteReport = sh(returnStdout: true, script: "cat ${xmlFile} | tr \"\\\"\" \"'\"")
                   
     def testSuiteName = sh(
       returnStdout: true,
-      script: "python -c \"import lxml.etree; print(lxml.etree.fromstring(\\\"\\\"\\\"${xmlTestSuiteReport}\\\"\\\"\\\").xpath('//ns2:test-suite/name/text()', namespaces={'ns2': 'urn:model.allure.qatools.yandex.ru'})[0].split(':')[0])\""
+      script: "python -c \"import lxml.etree; print(lxml.etree.parse(\\\"${xmlFile}\\\").xpath('//ns2:test-suite/name/text()', namespaces={'ns2': 'urn:model.allure.qatools.yandex.ru'})[0].split(':')[0])\""
     )
 
     println(testSuiteName)
 
     def testSuiteResultsRaw = sh(
       returnStdout: true,
-      script: "python -c \"import lxml.etree; print(','.join(lxml.etree.fromstring(\\\"\\\"\\\"${xmlTestSuiteReport}\\\"\\\"\\\").xpath('//ns2:test-suite/test-cases/test-case/@status', namespaces={'ns2': 'urn:model.allure.qatools.yandex.ru'})))\""
+      script: "python -c \"import lxml.etree; print(','.join(lxml.etree.parse(\\\"${xmlFile}\\\").xpath('//ns2:test-suite/test-cases/test-case/@status', namespaces={'ns2': 'urn:model.allure.qatools.yandex.ru'})))\""
     )
 
     println('### ##' + StringUtils.chomp(testSuiteResultsRaw).split(","))
