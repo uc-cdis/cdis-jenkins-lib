@@ -34,7 +34,7 @@ def assembleFeatureLabelMap(failedTestSuites) {
   return null;
 }
 
-def identifyFailedTestSuites()
+def identifyFailedTestSuites() {
   def xmlTestSuiteFilesRaw = sh(returnStdout: true, script: "ls output/*-testsuite.xml")
   def xmlTestSuiteFiles = xmlTestSuiteFilesRaw.split('\n')
   println(xmlTestSuiteFiles)
