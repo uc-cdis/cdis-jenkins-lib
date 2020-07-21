@@ -1,3 +1,5 @@
+import org.apache.commons.lang.StringUtils;
+
 def assembleFeatureLabelMap(failedTestSuites) {
   def featureLabelMap = [:]
   try {
