@@ -41,6 +41,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
       sh "/bin/rm -rf output/ || true"
       sh "mkdir output"
       testResult = null
+      List<String> failedTestSuites = [];
       selectedTests.each {selectedTest ->
         testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --selectedTest=${selectedTest}", returnStatus: true);
       }
