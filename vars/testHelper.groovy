@@ -47,7 +47,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
       }
       // check XMLs inside the output folder
       failedTestSuites = xmlHelper.identifyFailedTestSuites()
-      def featureLabelMap = assembleFeatureLabelMap(failedTestSuites)
+      def featureLabelMap = xmlHelper.assembleFeatureLabelMap(failedTestSuites)
 
       if (testResult == 0) {
         // if the test succeeds, then verify that we got some test results ...
