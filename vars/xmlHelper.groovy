@@ -15,6 +15,9 @@ def assembleFeatureLabelMap(failedTestSuites) {
           returnStdout: true,
           script: "python -c \"import lxml.etree; print(''.join(lxml.etree.parse(\\\"${xmlResultFile}\\\").xpath('//testsuites/testsuite[@name=\\\"${failedTestSuite}\\\"]/@file')))\""
         )
+        if (filePathFromFailedTestSuiteRaw == "") {
+          continue;
+        }
 
         println("filePathFromFailedTestSuiteRaw: ${filePathFromFailedTestSuiteRaw}")
 
