@@ -60,7 +60,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
       }
       if (testResult != 0) {
         def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
-        if (failedTestSuites.size() > 10) {
+        if (failedTestSuites.size() < 10) {
           featureLabelMap.each { testSuite, retryLabel ->
             failureMsg += " - Test Suite *${testSuite}* failed :red_circle: \n To retry, label :label: your PR with *${retryLabel}* \n"
           }
