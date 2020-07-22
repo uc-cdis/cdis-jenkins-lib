@@ -62,7 +62,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
 
         def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
         featureLabelMap.each { testSuite, retryLabel ->
-          failureMsg += " - Test Suite *${testSuite}* failed :red_circle: To retry label :label: your PR with *${retryLabel}* \n"
+          failureMsg += " - Test Suite *${testSuite}* failed :red_circle: \n To retry, label :label: your PR with *${retryLabel}* \n"
         }
 
         slackSend(color: 'bad', channel: "#gen3-qa-notifications", message: failureMsg)
