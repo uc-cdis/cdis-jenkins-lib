@@ -15,19 +15,18 @@ def assembleFeatureLabelMap(failedTestSuites) {
           returnStdout: true,
           script: "python -c \"import lxml.etree; print(''.join(lxml.etree.parse(\\\"${xmlResultFile}\\\").xpath('//testsuites/testsuite[@name=\\\"${failedTestSuite}\\\"]/@file')))\""
         )
-        if (filePathFromFailedTestSuiteRaw == "") {
-          continue;
+
+        if (filePathFromFailedTestSuiteRaw.trim().length() > 0) {
+          // split file path from failed test suite
+          def j = filePathFromFailedTestSuiteRaw.split("/")
+
+          def testSelectorlabel = "test-" + j[j.length-2] + "-" + j[j.length-1].substring(0, j[j.length-1].indexOf("."))
+
+          println("test selection label: " + testSelectorlabel)
+          featureLabelMap[failedTestSuite] = testSelectorlabel
+        } else {
+          println("The test suite named [${failedTestSuite}] was not found in [${xmlResultFile}], checking the next one..")   
         }
-
-        println("filePathFromFailedTestSuiteRaw: ${filePathFromFailedTestSuiteRaw}")
-
-        // split file path from failed test suite
-        def j = filePathFromFailedTestSuiteRaw.split("/")
-
-        def testSelectorlabel = "test-" + j[j.length-2] + "-" + j[j.length-1].substring(0, j[j.length-1].indexOf("."))
-
-        println("test selection label: " + testSelectorlabel)
-	featureLabelMap[failedTestSuite] = testSelectorlabel
       }
     }
 
