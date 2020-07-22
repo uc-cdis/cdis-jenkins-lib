@@ -16,6 +16,8 @@ def assembleFeatureLabelMap(failedTestSuites) {
           script: "python -c \"import lxml.etree; print(''.join(lxml.etree.parse(\\\"${xmlResultFile}\\\").xpath('//testsuites/testsuite[@name=\\\"${failedTestSuite}\\\"]/@file')))\""
         )
 
+        println("filePathFromFailedTestSuiteRaw: ${filePathFromFailedTestSuiteRaw}")
+
         // split file path from failed test suite
         def j = filePathFromFailedTestSuiteRaw.split("/")
 
