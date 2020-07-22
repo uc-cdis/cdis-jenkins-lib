@@ -41,9 +41,14 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
       sh "/bin/rm -rf output/ || true"
       sh "mkdir output"
       testResult = null
+      List<String> failedTestSuites = [];
       selectedTests.each {selectedTest ->
         testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --selectedTest=${selectedTest}", returnStatus: true);
       }
+      // check XMLs inside the output folder
+      failedTestSuites = xmlHelper.identifyFailedTestSuites()
+      def featureLabelMap = xmlHelper.assembleFeatureLabelMap(failedTestSuites)
+
       if (testResult == 0) {
         // if the test succeeds, then verify that we got some test results ...
         testResult = sh(script: "ls output/ | grep '.*\\.xml'", returnStatus: true)
@@ -54,7 +59,16 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         sh(script: "bash ${env.WORKSPACE}/cloud-automation/gen3/bin/logs.sh snapshot", returnStatus: true)
       }
       if (testResult != 0) {
-        slackSend(color: 'bad', channel: "#gen3-qa-notifications", message: "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER")
+        def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
+        if (failedTestSuites.size() < 10) {
+          featureLabelMap.each { testSuite, retryLabel ->
+            failureMsg += " - Test Suite *${testSuite}* failed :red_circle: \n To retry, label :label: your PR with *${retryLabel}* \n"
+          }
+        } else {
+          failureMsg += " >10 test suites failed on this PR check :rotating_light:. This might indicate an environmental/config issue. cc: @planxqa :allthethings: :allthethings: :allthethings:"
+        }
+
+        slackSend(color: 'bad', channel: "#gen3-qa-notifications", message: failureMsg)
         currentBuild.result = 'ABORTED'
         error("aborting build - testsuite failed")
       }
