@@ -11,6 +11,7 @@ def call(Map config) {
 
   def AVAILABLE_NAMESPACES = ['jenkins-blood', 'jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
   List<String> namespaces = []
+  List<String> selectedTests = []
   doNotRunTests = false
   doNotModifyManifest = false
   isGen3Release = "false"
@@ -98,46 +99,51 @@ spec:
 	        println(label['name']);
 	        switch(label['name']) {
 	          case ~/^test-.*/:
-	     	println('Select a specific test suite and feature')
-	     	selectedTestLabel = label['name'].split("-")
-	     	println "selected test: suites/" + selectedTestLabel[1] + "/" + selectedTestLabel[2] + ".js"
-	     	selectedTest = "suites/" + selectedTestLabel[1] + "/" + selectedTestLabel[2] + ".js"
-	     	break
+	     	    println('Select a specific test suite and feature')
+	     	    selectedTestLabel = label['name'].split("-")
+	     	    println "selected test: suites/" + selectedTestLabel[1] + "/" + selectedTestLabel[2] + ".js"
+	     	    selectedTest = "suites/" + selectedTestLabel[1] + "/" + selectedTestLabel[2] + ".js"
+                    selectedTests.add(selectedTest)
+	     	    break
 	          case "doc-only":
-	     	println('Skip tests if git diff matches expected criteria')
-	     	doNotRunTests = docOnlyHelper.checkTestSkippingCriteria()
-	     	break
+	     	    println('Skip tests if git diff matches expected criteria')
+	     	    doNotRunTests = docOnlyHelper.checkTestSkippingCriteria()
+	     	    break
 	          case "decommission-environment":
-	     	println('Skip tests if an environment folder is deleted')
-	     	doNotRunTests = decommissionEnvHelper.checkDecommissioningEnvironment()
+	     	    println('Skip tests if an environment folder is deleted')
+	     	    doNotRunTests = decommissionEnvHelper.checkDecommissioningEnvironment()
 	          case "commission-environment":
-	     	println('Skip ModifyManifest step to introduce a new CI environment')
-	     	doNotModifyManifest = true
+	     	    println('Skip ModifyManifest step to introduce a new CI environment')
+	     	    doNotModifyManifest = true
 	          case "gen3-release":
-	     	println('Enable additional tests and automation')
-	     	isGen3Release = "true"
-	     	break
+	     	    println('Enable additional tests and automation')
+	     	    isGen3Release = "true"
+	     	    break
 	          case "debug":
-	     	println("Call npm test with --debug")
-	     	println("leverage CodecepJS feature require('codeceptjs').output.debug feature")
-	     	break
+	     	    println("Call npm test with --debug")
+	     	    println("leverage CodecepJS feature require('codeceptjs').output.debug feature")
+	     	    break
 	          case AVAILABLE_NAMESPACES:
-	     	println('found this namespace label! ' + label['name']);
-	     	namespaces.add(label['name'])
-	     	break
+	     	    println('found this namespace label! ' + label['name']);
+	     	    namespaces.add(label['name'])
+	     	    break
 	          case "qaplanetv2":
-	     	  println('This PR check will run in a qaplanetv2 environment! ');
-	     	  namespaces.add('ci-env-1')
-	     	break
+	     	    println('This PR check will run in a qaplanetv2 environment! ');
+	     	    namespaces.add('ci-env-1')
+	     	    break
 	          default:
-	     	println('no-effect label')
-	     	break
+	     	    println('no-effect label')
+	     	    break
 	        }
 	      }
 	      // If none of the jenkins envs. have been selected pick one at random
 	      if (namespaces.size == 0) {
 	        namespaces = AVAILABLE_NAMESPACES
 	      }
+              // If a specific test suite is not specified, run them all
+              if (selectedTests.size == 0) {
+	        selectedTests.add("all")
+              }
 	    } catch (e) {
 	      pipelineHelper.handleError(e)
 	    }
@@ -286,7 +292,7 @@ spec:
 	          pipeConfig.serviceTesting.name,
 	          testedEnv,
 	          isGen3Release,
-	          selectedTest
+	          selectedTests
 	        )
 	      } else {
 	        Utils.markStageSkippedForConditional(STAGE_NAME)
