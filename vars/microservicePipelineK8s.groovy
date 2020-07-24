@@ -36,7 +36,7 @@ metadata:
 spec:
   containers:
   - name: shell
-    image: quay.io/cdis/jenkins:master
+    image: quay.io/cdis/jenkins:fix_venv
     command:
     - sleep
     args:
