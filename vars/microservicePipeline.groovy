@@ -35,6 +35,8 @@ def call(Map config) {
         gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
       }
       stage('CheckPRLabels') {
+        // giving a chance for auto-label gh actions to catch up
+        sleep(10)
         for(label in prLabels) {
           println(label['name']);
           switch(label['name']) {
