@@ -36,7 +36,7 @@ def call(Map config) {
       }
       stage('CheckPRLabels') {
         // giving a chance for auto-label gh actions to catch up
-        sleep(6660)
+        sleep(10)
         for(label in prLabels) {
           println(label['name']);
           switch(label['name']) {
