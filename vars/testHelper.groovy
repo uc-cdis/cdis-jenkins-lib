@@ -5,8 +5,12 @@
 * @param body - command(s) to run
 */
 def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) {
+  def PR_NUMBER = env.BRANCH_NAME.split('-')[1];
+  def REPO_NAME = env.JOB_NAME.split('/')[1];
   def vpc_name = sh(script: "kubectl get cm --namespace ${namespace} global -o jsonpath=\"{.data.environment}\"", returnStdout: true);
   env_variables = ["GEN3_NOPROXY=true",
+    "PR_NUMBER=${PR_NUMBER}",
+    "REPO_NAME=${REPO_NAME}",
     "vpc_name=${vpc_name}",
     "GEN3_HOME=$env.WORKSPACE/cloud-automation",
     "KUBECTL_NAMESPACE=${namespace}",
@@ -30,13 +34,21 @@ def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) 
 * @param service - name of service the test is being run for
 * @param testedEnv - environment the test is being run for (for manifest PRs)
 */
-def runIntegrationTests(String namespace, String service, String testedEnv, String isGen3Release, String selectedTest="all") {
+def runIntegrationTests(String namespace, String service, String testedEnv, String isGen3Release,  List<String> selectedTests = ['all']) {
   dir('gen3-qa') {
     gen3Qa(namespace, {
       // clean up old test artifacts in the workspace
       sh "/bin/rm -rf output/ || true"
       sh "mkdir output"
-      testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --selectedTest=${selectedTest}", returnStatus: true);
+      testResult = null
+      List<String> failedTestSuites = [];
+      selectedTests.each {selectedTest ->
+        testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --selectedTest=${selectedTest}", returnStatus: true);
+      }
+      // check XMLs inside the output folder
+      failedTestSuites = xmlHelper.identifyFailedTestSuites()
+      def featureLabelMap = xmlHelper.assembleFeatureLabelMap(failedTestSuites)
+
       if (testResult == 0) {
         // if the test succeeds, then verify that we got some test results ...
         testResult = sh(script: "ls output/ | grep '.*\\.xml'", returnStatus: true)
@@ -47,6 +59,16 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         sh(script: "bash ${env.WORKSPACE}/cloud-automation/gen3/bin/logs.sh snapshot", returnStatus: true)
       }
       if (testResult != 0) {
+        def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
+        if (failedTestSuites.size() < 10) {
+          featureLabelMap.each { testSuite, retryLabel ->
+            failureMsg += " - Test Suite *${testSuite}* failed :red_circle: \n To retry, label :label: your PR with *${retryLabel}* \n"
+          }
+        } else {
+          failureMsg += " >10 test suites failed on this PR check :rotating_light:. This might indicate an environmental/config issue. cc: @planxqa :allthethings: :allthethings: :allthethings:"
+        }
+
+        slackSend(color: 'bad', channel: "#gen3-qa-notifications", message: failureMsg)
         currentBuild.result = 'ABORTED'
         error("aborting build - testsuite failed")
       }

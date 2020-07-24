@@ -29,6 +29,10 @@ def call(Map config) {
         yaml '''
 apiVersion: v1
 kind: Pod
+metadata:
+  labels:
+    app: ephemeral-ci-run
+    netnolimit: "yes"
 spec:
   containers:
   - name: shell

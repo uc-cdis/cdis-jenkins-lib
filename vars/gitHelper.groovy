@@ -42,10 +42,17 @@ def fetchAllRepos(String currentRepoName) {
     }
   }
   dir('cdis-manifest') {
-    git(
-      url: 'https://github.com/uc-cdis/gitops-qa.git',
-      branch: 'master'
-    )
+    if (currentRepoName.endsWith("v2")) {
+      git(
+        url: 'https://github.com/uc-cdis/gitops-qa-v2.git',
+        branch: 'master'
+      )
+    } else {
+      git(
+        url: 'https://github.com/uc-cdis/gitops-qa.git',
+        branch: 'master'
+      )
+    }
   }
   dir('cloud-automation') {
     if (currentRepoName == "cloud-automation") {
