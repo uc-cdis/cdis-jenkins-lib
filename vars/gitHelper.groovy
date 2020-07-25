@@ -36,8 +36,8 @@ def fetchAllRepos(String currentRepoName) {
       checkout scm;
     } else {
       git(
-        url: 'https://github.com/uc-cdis/data-simulator.git',
-        branch: 'feat/poetry'
+        url: 'https://github.com/uc-cdis/data-simulator-v2.git',
+        branch: 'test'
       );
     }
   }
