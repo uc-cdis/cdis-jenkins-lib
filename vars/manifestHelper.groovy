@@ -1,6 +1,24 @@
 /**
+* Jenkins environments are used for continuous integration, therefore, they should 
+* always run the latest-latest code for all components 
+* (that is why all Jenkins CI environments, by default, have every service set to the "master" version).
+* Except in two cases:
+*   - When the PR belongs to a service-specific repo, the service that is being tested
+*     must have its version modified in the manifest to deploy the feature-branch-docker-image
+*     to the target Jenkins CI environment so the PR change can be tested.
+*   or
+*   - When the PR belongs to a Manifest Repo, all the versions declared in the manifest
+*     corresponding to the environment folder in the git diff should be injected into
+*     the manifest of the selected Jenkins CI env. 
+*
+* TL;DR
 * Edits manifest of a service to provided branch
 * Makes the edit in the cdis-manifest directory
+**/
+
+/**
+* Replaces one specific service version according to the git diff from the service-specific repo PR.
+* Only one service from the `versions` block of the selected Jenkins CI environment's manifest is modified.
 *
 * @param commonsHostname - hostname of commons to edit (e.g. qa-bloodpac.planx-pla.net)
 * @param serviceName - defaults to conf.service
@@ -21,7 +39,10 @@ def editService(String commonsHostname, String serviceName, String quayBranchNam
 }
 
 /**
-* TODO: ask Thanh to document this function
+* This function merges manifest changes. It checks if the environment's manifest found in manifest-repo PR
+* contains certain blocks and replaces the same blocks in the Jenkins CI manifest.
+* It also deletes blocks from the Jenkins CI environment to match the environment manifest that is
+* being subjected to the PR check / testing.
 */
 def mergeManifest(String changedDir, String selectedNamespace) {
   String od = sh(returnStdout: true, script: "jq -r .global.dictionary_url < tmpGitClone/$changedDir/manifest.json").trim()
@@ -65,7 +86,7 @@ def mergeManifest(String changedDir, String selectedNamespace) {
 }
 
 /**
-* TODO: ask Thanh to document
+* Replaces the contents of environment-specific artifacts and config folders, e.g., etlMapping.yaml, portal/gitops.json, etc.
 */
 def overwriteConfigFolders(String changedDir, String selectedNamespace) {
     List<String> folders = sh(returnStdout: true, script: "ls tmpGitClone/$changedDir").split()
@@ -87,7 +108,8 @@ def overwriteConfigFolders(String changedDir, String selectedNamespace) {
   }
 
 /**
-* TODO: ask Thanh to document
+* Iterates through the files listed in the PR change so they can be processed by the mergeManifest function.
+* Its params and config blocks should be modified/removed to prepare the selected Jenkins CI environment for testing.
 * @returns name of the changed cdis-manifest directory (=environment which is being tested)
 */
 def manifestDiff(String selectedNamespace) {
