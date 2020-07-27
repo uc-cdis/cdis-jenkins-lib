@@ -84,9 +84,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
 def simulateData(String namespace) {
   dir('gen3-qa') {
     gen3Qa(namespace, {
-      echo 'I\'m sleeping now you can test'
-      sleep 30000
-      // sh "bash ./jenkins-simulate-data.sh ${namespace}"
+      sh "bash ./jenkins-simulate-data.sh ${namespace}"
     })
   }
 }
