@@ -140,6 +140,8 @@ spec:
               // A CI env hardcoded in the Jenkinsfile takes precedence
               if (pipeConfig['ciEnv']) {
                 namespaces.add(pipeConfig['ciEnv'])
+                // no need to modify the manifest
+                doNotModifyManifest = true 
               }
 	      // If none of the jenkins envs. have been selected pick one at random
 	      if (namespaces.size == 0) {
