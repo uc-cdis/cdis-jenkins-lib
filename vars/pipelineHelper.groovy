@@ -16,11 +16,15 @@ def setupConfig(Map config) {
     config.currentBranchFormatted = "${env.CHANGE_BRANCH}".replaceAll("[/()]", "_")
   }
 
-  config.currentRepoName = "$env.JOB_NAME"
-  if ("$env.JOB_NAME".contains("perf")) {
-    config.currentRepoName = "$env.JOB_NAME".split('-')[1].split('/')[0]
+  if (env.JOB_NAME.split('/').size > 1) {
+    config.currentRepoName = "$env.JOB_NAME"
+    if ("$env.JOB_NAME".contains("perf")) {
+      config.currentRepoName = "$env.JOB_NAME".split('-')[1].split('/')[0]
+    } else {
+      config.currentRepoName = "$env.JOB_NAME".split('/')[1]
+    }
   } else {
-    config.currentRepoName = "$env.JOB_NAME".split('/')[1]
+    config.currentRepoName = "$env.JOB_NAME"
   }
 
   if (!config.containsKey('quayRegistry')) {
