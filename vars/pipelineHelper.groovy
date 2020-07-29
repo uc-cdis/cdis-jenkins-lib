@@ -16,7 +16,7 @@ def setupConfig(Map config) {
     config.currentBranchFormatted = "${env.CHANGE_BRANCH}".replaceAll("[/()]", "_")
   }
 
-  if (env.JOB_NAME.split('/').size > 1) {
+  if ("$env.JOB_NAME".split('/').size > 1) {
     config.currentRepoName = "$env.JOB_NAME"
     if ("$env.JOB_NAME".contains("perf")) {
       config.currentRepoName = "$env.JOB_NAME".split('-')[1].split('/')[0]
