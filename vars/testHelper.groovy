@@ -66,7 +66,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         def failureMsg = "Test failures on "
         if (!pipeConfig['ciEnv']) {
           failureMsg += "https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
-        else {
+        } else {
           failureMsg += "our daily Gen3 Continuous Integration run (https://jenkins2.planx-pla.net/job/gen3-continuous-integration/$BUILD_NUMBER/console) :facepalm: \n"
         }
         if (failedTestSuites.size() < 10) {
