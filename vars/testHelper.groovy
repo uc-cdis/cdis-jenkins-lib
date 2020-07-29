@@ -5,8 +5,12 @@
 * @param body - command(s) to run
 */
 def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) {
-  def PR_NUMBER = env.BRANCH_NAME.split('-')[1];
-  def REPO_NAME = env.JOB_NAME.split('/')[1];
+  def PR_NUMBER = "";
+  def REPO_NAME = "";
+  if (!pipeConfig['ciEnv']) {
+    PR_NUMBER = env.BRANCH_NAME.split('-')[1];
+    REPO_NAME = env.JOB_NAME.split('/')[1];
+  }
   def vpc_name = sh(script: "kubectl get cm --namespace ${namespace} global -o jsonpath=\"{.data.environment}\"", returnStdout: true);
   env_variables = ["GEN3_NOPROXY=true",
     "PR_NUMBER=${PR_NUMBER}",
@@ -59,13 +63,18 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         sh(script: "bash ${env.WORKSPACE}/cloud-automation/gen3/bin/logs.sh snapshot", returnStatus: true)
       }
       if (testResult != 0) {
-        def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
+        def failureMsg = "Test failures on "
+        if (!pipeConfig['ciEnv']) {
+          failureMsg += "https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
+        else {
+          failureMsg += "our daily Gen3 Continuous Integration run (https://jenkins2.planx-pla.net/job/gen3-continuous-integration/$BUILD_NUMBER/console) :facepalm: \n"
+        }
         if (failedTestSuites.size() < 10) {
           featureLabelMap.each { testSuite, retryLabel ->
             failureMsg += " - Test Suite *${testSuite}* failed :red_circle: \n To retry, label :label: your PR with *${retryLabel}* \n"
           }
         } else {
-          failureMsg += " >10 test suites failed on this PR check :rotating_light:. This might indicate an environmental/config issue. cc: @planxqa :allthethings: :allthethings: :allthethings:"
+          failureMsg += " >10 test suites failed on this run :rotating_light:. This might indicate an environmental/config issue. cc: @planxqa :allthethings: :allthethings: :allthethings:"
         }
 
         slackSend(color: 'bad', channel: "#gen3-qa-notifications", message: failureMsg)
