@@ -7,7 +7,7 @@
 def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) {
   def PR_NUMBER = "";
   def REPO_NAME = "";
-  if (!pipeConfig['ciEnv']) {
+  if (namespace != "ci-env-1") {
     PR_NUMBER = env.BRANCH_NAME.split('-')[1];
     REPO_NAME = env.JOB_NAME.split('/')[1];
   }
@@ -64,7 +64,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
       }
       if (testResult != 0) {
         def failureMsg = "Test failures on "
-        if (!pipeConfig['ciEnv']) {
+        if (namespace != "ci-env-1") {
           failureMsg += "https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
         } else {
           failureMsg += "our daily Gen3 Continuous Integration run (https://jenkins2.planx-pla.net/job/gen3-continuous-integration/$BUILD_NUMBER/console) :facepalm: \n"
