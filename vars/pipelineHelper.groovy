@@ -24,7 +24,8 @@ def setupConfig(Map config) {
       config.currentRepoName = "$env.JOB_NAME".split('/')[1]
     }
   } else {
-    config.currentRepoName = "$env.JOB_NAME"
+    // set repo that hosts qaplanetv2 CI envs
+    config.currentRepoName = "gitops-qa-v2"
   }
 
   if (!config.containsKey('quayRegistry')) {
