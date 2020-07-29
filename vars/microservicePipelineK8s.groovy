@@ -22,8 +22,9 @@ def call(Map config) {
   testedEnv = "" // for manifest pipeline
   pipeConfig = pipelineHelper.setupConfig(config)
   pipelineHelper.cancelPreviousRunningBuilds()
-  prLabels = githubHelper.fetchLabels()
-
+  if (!pipeConfig['ciEnv']) {
+    prLabels = githubHelper.fetchLabels()
+  }
   pipeline {
     agent {
       kubernetes {
