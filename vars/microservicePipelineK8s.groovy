@@ -136,6 +136,10 @@ spec:
 	     	    break
 	        }
 	      }
+              // A CI env hardcoded in the Jenkinsfile takes precedence
+              if (pipeConfig['ciEnv']) {
+                namespaces.add(pipeConfig['ciEnv'])
+              }
 	      // If none of the jenkins envs. have been selected pick one at random
 	      if (namespaces.size == 0) {
 	        namespaces = AVAILABLE_NAMESPACES

@@ -6,4 +6,5 @@ library identifier: "cdis-jenkins-lib@chore/continuous_integration_in_jenkins2"
 testPipeline {
   MANIFEST = false
   quayRegistry = "jenkins-lib"
+  ciEnv = "ci-env-1"
 }
