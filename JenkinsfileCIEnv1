@@ -1,9 +1,8 @@
 #!groovy
 
-// See 'Loading libraries dynamically' here: https://jenkins.io/doc/book/pipeline/shared-libraries/
 library identifier: "cdis-jenkins-lib@chore/continuous_integration_in_jenkins2"
 
-testPipeline {
+testPipelineK8s {
   MANIFEST = false
   quayRegistry = "jenkins-lib"
   ciEnv = "ci-env-1"
