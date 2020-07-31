@@ -21,11 +21,6 @@ def call(Map config) {
     pipeConfig = pipelineHelper.setupConfig(config)
     pipelineHelper.cancelPreviousRunningBuilds()
     prLabels = githubHelper.fetchLabels()
-    isDraft = githubHelper.isDraft()
-    if (isDraft == true) {
-      currentBuild.result = 'ABORTED'
-      error('This PR is a draft, abort the CI run...')
-    }
 
     try {
       stage('CleanWorkspace') {
@@ -61,6 +56,10 @@ def call(Map config) {
             case "debug":
               println("Call npm test with --debug")
               println("leverage CodecepJS feature require('codeceptjs').output.debug feature")
+              break
+            case "not-ready-for-ci":
+              currentBuild.result = 'ABORTED'
+              error('This PR is not ready for CI yet, aborting...')
               break
             case AVAILABLE_NAMESPACES:
               println('found this namespace label! ' + label['name']);
