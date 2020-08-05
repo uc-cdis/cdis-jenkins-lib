@@ -36,8 +36,8 @@ def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) 
 */
 def runIntegrationTests(String namespace, String service, String testedEnv, String isGen3Release,  List<String> selectedTests = ['all']) {
   withCredentials(
-    [[$class: 'UsernamePasswordMultiBinding', credentialsId: 'ras-test-user1-for-ci-tests', usernameVariable: 'RAS_TEST_USER_1_USERNAME', passwordVariable: 'RAS_TEST_USER_1_PASSWORD']],
-    [[$class: 'UsernamePasswordMultiBinding', credentialsId: 'ras-test-user2-for-ci-tests', usernameVariable: 'RAS_TEST_USER_2_USERNAME', passwordVariable: 'RAS_TEST_USER_2_PASSWORD']]
+    [usernamePassword(credentialsId: 'ras-test-user1-for-ci-tests', usernameVariable: 'RAS_TEST_USER_1_USERNAME', passwordVariable: 'RAS_TEST_USER_1_PASSWORD')],
+    [usernamePassword(credentialsId: 'ras-test-user2-for-ci-tests', usernameVariable: 'RAS_TEST_USER_2_USERNAME', passwordVariable: 'RAS_TEST_USER_2_PASSWORD')]
   ) {
     dir('gen3-qa') {
       gen3Qa(namespace, {
