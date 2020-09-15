@@ -30,7 +30,8 @@ def call(Map config) {
         gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
       }
       stage('CheckPRLabels') {
-        // giving a chance for auto-label gh actions to catch up
+       try {
+          // giving a chance for auto-label gh actions to catch up
         sleep(10)
         for(label in prLabels) {
           println(label['name']);
@@ -54,6 +55,7 @@ def call(Map config) {
               isGen3Release = "true"
               break
             case "debug":
+              throw new Error('testing just testing');
               println("Call npm test with --debug")
               println("leverage CodecepJS feature require('codeceptjs').output.debug feature")
               break
@@ -82,7 +84,11 @@ def call(Map config) {
         if (selectedTests.size == 0) {
 	  selectedTests.add("all")
         }
-      }      
+       } catch (ex) {
+        metricsHelper.writeMetricWithResult(STAGE_NAME, false)  
+       }
+       metricsHelper.writeMetricWithResult(STAGE_NAME, true)
+      }
       if (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST == false || pipeConfig.MANIFEST != "True") {
         // Setup stages for NON manifest builds
         stage('WaitForQuayBuild') {
