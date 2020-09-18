@@ -55,7 +55,7 @@ def call(Map config) {
               isGen3Release = "true"
               break
             case "debug":
-              throw new Error('testing just testing');
+              throw new Exception('testing just testing');
               println("Call npm test with --debug")
               println("leverage CodecepJS feature require('codeceptjs').output.debug feature")
               break
