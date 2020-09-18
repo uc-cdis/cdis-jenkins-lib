@@ -70,7 +70,7 @@ def identifyFailedTestSuites() {
     }
     println("full list of failedTestSuites: ${failedTestSuites}")
   } catch (e) {
-    println("Something wrong happened: $e")
+    println("Something wrong happened: ${e}")
     println("Ignore and return empty list")
     return [];
   }
