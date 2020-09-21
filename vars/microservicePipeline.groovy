@@ -248,6 +248,7 @@ def call(Map config) {
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
       stage('RunTests') {
+       try {
         if(!doNotRunTests) {
           testHelper.runIntegrationTests(
             kubectlNamespace,
@@ -259,6 +260,9 @@ def call(Map config) {
         } else {
           Utils.markStageSkippedForConditional(STAGE_NAME)
         }
+       } catch (ex) {
+         metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+       }
       }
       stage('CleanS3') {
        try {
