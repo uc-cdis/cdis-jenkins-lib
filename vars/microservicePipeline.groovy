@@ -30,8 +30,7 @@ def call(Map config) {
         gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
       }
       stage('CheckPRLabels') {
-       try {
-          // giving a chance for auto-label gh actions to catch up
+        // giving a chance for auto-label gh actions to catch up
         sleep(10)
         for(label in prLabels) {
           println(label['name']);
@@ -83,15 +82,10 @@ def call(Map config) {
         if (selectedTests.size == 0) {
 	  selectedTests.add("all")
         }
-       } catch (ex) {
-        metricsHelper.writeMetricWithResult(STAGE_NAME, false)  
-       }
-       metricsHelper.writeMetricWithResult(STAGE_NAME, true)
-      }
+      }      
       if (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST == false || pipeConfig.MANIFEST != "True") {
         // Setup stages for NON manifest builds
         stage('WaitForQuayBuild') {
-         try {
           if(!doNotRunTests) {
             quayHelper.waitForBuild(
               pipeConfig['quayRegistry'],
@@ -100,39 +94,24 @@ def call(Map config) {
 	  } else {
 	    Utils.markStageSkippedForConditional(STAGE_NAME)
           }
-         } catch (ex) {
-           metricsHelper.writeMetricWithResult(STAGE_NAME, false)
-         }
-         metricsHelper.writeMetricWithResult(STAGE_NAME, true)
         }
         stage('SelectNamespace') {
-         try {
           if(!doNotRunTests) {
             (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'], namespaces)
             kubeLocks << lock
 	  } else {
 	    Utils.markStageSkippedForConditional(STAGE_NAME)
           }
-         } catch (ex) {
-           metricsHelper.writeMetricWithResult(STAGE_NAME, false)
-         }
-         metricsHelper.writeMetricWithResult(STAGE_NAME, true)
         }
         stage('CleanUp3rdPartyResources') {
-         try {
           if(!doNotRunTests) {
             testHelper.deleteGCPServiceAccounts(kubectlNamespace)
           } else {
             Utils.markStageSkippedForConditional(STAGE_NAME)
           }
-         } catch (ex) {
-           metricsHelper.writeMetricWithResult(STAGE_NAME, false)
-         }
-         metricsHelper.writeMetricWithResult(STAGE_NAME, true)
         }
         stage('ModifyManifest') {
-         try {
-           if(!doNotRunTests) {
+          if(!doNotRunTests) {
             manifestHelper.editService(
               kubeHelper.getHostname(kubectlNamespace),
               pipeConfig.serviceTesting.name,
@@ -141,56 +120,36 @@ def call(Map config) {
 	  } else {
 	    Utils.markStageSkippedForConditional(STAGE_NAME)
           }
-         } catch (ex) {
-           metricsHelper.writeMetricWithResult(STAGE_NAME, false)
-         }
-         metricsHelper.writeMetricWithResult(STAGE_NAME, true)
         }
       }
 
       if (pipeConfig.MANIFEST != null && (pipeConfig.MANIFEST == true || pipeConfig.MANIFEST == "True")) {
         // Setup stages for MANIFEST builds
         stage('SelectNamespace') {
-         try {
           if(!doNotRunTests) {
             (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'], namespaces)
             kubeLocks << lock
           } else {
             Utils.markStageSkippedForConditional(STAGE_NAME)
           }
-         } catch (ex) {
-           metricsHelper.writeMetricWithResult(STAGE_NAME, false)
-         }
-         metricsHelper.writeMetricWithResult(STAGE_NAME, true)
         }
         stage('CleanUp3rdPartyResources') {
-         try {
           if(!doNotRunTests) {
             testHelper.deleteGCPServiceAccounts(kubectlNamespace)
           } else {
             Utils.markStageSkippedForConditional(STAGE_NAME)
           }
-         } catch (ex) {
-           metricsHelper.writeMetricWithResult(STAGE_NAME, false)
-         }
-         metricsHelper.writeMetricWithResult(STAGE_NAME, true)
         }
         stage('ModifyManifest') {
-         try {
           if(!doNotRunTests) {
             testedEnv = manifestHelper.manifestDiff(kubectlNamespace)
 	  } else {
 	    Utils.markStageSkippedForConditional(STAGE_NAME)
           }
-         } catch (ex) {
-           metricsHelper.writeMetricWithResult(STAGE_NAME, false)
-         }
-         metricsHelper.writeMetricWithResult(STAGE_NAME, true)
 	}
       }
 
       stage('K8sReset') {
-       try {
         if(!doNotRunTests) {
           // adding the reset-lock lock in case reset fails before unlocking
           kubeLocks << kubeHelper.newKubeLock(kubectlNamespace, "gen3-reset", "reset-lock")
@@ -198,39 +157,24 @@ def call(Map config) {
         } else {
           Utils.markStageSkippedForConditional(STAGE_NAME)
         }
-       } catch (ex) {
-         metricsHelper.writeMetricWithResult(STAGE_NAME, false)
-       }
-       metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
       stage('VerifyClusterHealth') {
-       try {
         if(!doNotRunTests) {
           kubeHelper.waitForPods(kubectlNamespace)
           testHelper.checkPodHealth(kubectlNamespace, testedEnv)
         } else {
           Utils.markStageSkippedForConditional(STAGE_NAME)
         }
-       } catch (ex) {
-         metricsHelper.writeMetricWithResult(STAGE_NAME, false)
-       }
-       metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
       stage('GenerateData') {
-       try {
         if(!doNotRunTests) {
           testHelper.simulateData(kubectlNamespace)
         } else {
           Utils.markStageSkippedForConditional(STAGE_NAME)
         }
-       } catch (ex) {
-         metricsHelper.writeMetricWithResult(STAGE_NAME, false)
-       }
-       metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
       stage('FetchDataClient') {
-       try {
-         if(!doNotRunTests) {
+        if(!doNotRunTests) {
           // we get the data client from master, unless the service being
           // tested is the data client itself, in which case we get the
           // executable for the current branch
@@ -242,13 +186,8 @@ def call(Map config) {
         } else {
           Utils.markStageSkippedForConditional(STAGE_NAME)
         }
-       } catch (ex) {
-         metricsHelper.writeMetricWithResult(STAGE_NAME, false)
-       }
-       metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
       stage('RunTests') {
-       try {
         if(!doNotRunTests) {
           testHelper.runIntegrationTests(
             kubectlNamespace,
@@ -260,21 +199,13 @@ def call(Map config) {
         } else {
           Utils.markStageSkippedForConditional(STAGE_NAME)
         }
-       } catch (ex) {
-         metricsHelper.writeMetricWithResult(STAGE_NAME, false)
-       }
       }
       stage('CleanS3') {
-       try {
         if(!doNotRunTests) {
           testHelper.cleanS3()
 	} else {
 	  Utils.markStageSkippedForConditional(STAGE_NAME)
         }
-       } catch (ex) {
-         metricsHelper.writeMetricWithResult(STAGE_NAME, false)
-       }
-       metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
     }
     catch (e) {
