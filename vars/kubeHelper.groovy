@@ -73,9 +73,16 @@ def reset(String kubectlNamespace) {
 * Wait for all pods to roll and check health
 */
 def waitForPods(String kubectlNamespace) {
+  def rc = 0;
   kube(kubectlNamespace, {
-    sh "bash ${cloudAutomationPath()}/gen3/bin/kube-wait4-pods.sh"
+    rc = sh(script: "${cloudAutomationPath()}/gen3/bin/kube-wait4-pods.sh", returnStatus: true)
   })
+  if (rc != 0) { 
+    println("One or more pods did not come up ok, saving logs...")
+    kube(kubectlNamespace, {
+      sh("${cloudAutomationPath()}/gen3/bin/save-failed-pod-logs.sh")
+    })
+  }
 }
 
 /**
