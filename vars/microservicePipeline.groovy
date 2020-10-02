@@ -24,6 +24,8 @@ def call(Map config) {
 
     try {
       stage('CleanWorkspace') {
+        // Set up new workspace
+        env.WORKSPACE = env.WORKSPACE.replaceAll(" ", "_");
         cleanWs()
       }
       stage('FetchCode') {
