@@ -25,6 +25,7 @@
 * @param quayBranchName - defaults to branch's name formatted
 */
 def editService(String commonsHostname, String serviceName, String quayBranchName) {
+  println('workspace: '+ env.WORKSPACE)
   if (null == commonsHostname || null == serviceName || null == quayBranchName) {
     error("Mising parameter for editing manifest service:\n  commonsHostname: ${commonsHostname}\n  serviceName: ${serviceName}\n  quayBranchName: ${quayBranchName}")
   }
