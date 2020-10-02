@@ -1,4 +1,5 @@
 def cloudAutomationPath() {
+  def sanitized_workspace = env.WORKSPACE.replaceAll(" ", "\\\\ ");
   return "${env.WORKSPACE}/cloud-automation"
 }
 
@@ -18,8 +19,10 @@ def kube(String kubectlNamespace, Closure body) {
     echo "GIT_COMMIT is $env.GIT_COMMIT"
     echo "KUBECTL_NAMESPACE is $env.KUBECTL_NAMESPACE"
     echo "WORKSPACE is $env.WORKSPACE"
-    env.WORKSPACE = env.WORKSPACE.replaceAll(" ", "\\\\ ");
-    echo "sanitized WORKSPACE is $env.WORKSPACE"
+    if (env.WORKSPACE.indexOf("\\") = -1) {
+      env.WORKSPACE = env.WORKSPACE.replaceAll(" ", "\\\\ ");
+      echo "sanitized WORKSPACE is $env.WORKSPACE"
+    }
     echo "vpc_name is $env.vpc_name"
     return body()
   }
