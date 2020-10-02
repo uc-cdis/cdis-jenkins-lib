@@ -69,8 +69,8 @@ def deploy(String kubectlNamespace) {
 */
 def reset(String kubectlNamespace) {
   kube(kubectlNamespace, {
-    sh "yes | bash ${cloudAutomationPath()}/gen3/bin/reset.sh"
-    sh "bash ${cloudAutomationPath()}/gen3/bin/kube-setup-spark.sh || true"
+    sh "yes | bash $GEN3_HOME/gen3/bin/reset.sh"
+    sh "bash $GEN3_HOME/gen3/bin/kube-setup-spark.sh || true"
   })
 }
 
