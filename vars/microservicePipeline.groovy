@@ -40,7 +40,7 @@ def call(Map config) {
         sh(script: "mv ${newWS} ${newWS}_bkp || exit 0");
         sh(script: "mkdir -p ${newWs} && mv * ${newWS}/");
         env.WORKSPACE = newWS
-        sh(script: "ls -ilha");
+        sh(script: "cd ${newWS} && ls -ilha");
       }
       stage('CheckPRLabels') {
         // giving a chance for auto-label gh actions to catch up
