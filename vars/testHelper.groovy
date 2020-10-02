@@ -164,7 +164,7 @@ def cleanS3() {
 def deleteGCPServiceAccounts(jenkinsNamespace) {
   withCredentials([file(credentialsId: 'fence-google-app-creds-secret', variable: 'MY_SECRET_GCLOUD_APP_CREDENTIALS_FILE')]) {
     sh '''
-      mv $MY_SECRET_GCLOUD_APP_CREDENTIALS_FILE fence_google_app_creds_secret.json
+      mv "$MY_SECRET_GCLOUD_APP_CREDENTIALS_FILE" fence_google_app_creds_secret.json
       gcloud auth activate-service-account --key-file fence_google_app_creds_secret.json
     '''
     def SELECTED_JENKINS_NAMESPACE = jenkinsNamespace;
