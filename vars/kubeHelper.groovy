@@ -1,5 +1,5 @@
 def cloudAutomationPath() {
-  def sanitized_workspace = env.WORKSPACE.replaceAll(" ", "\\\\ ");
+  def sanitized_workspace = env.WORKSPACE.replaceAll(" ", "\\ ");
   return "${sanitized_workspace}/cloud-automation"
 }
 
