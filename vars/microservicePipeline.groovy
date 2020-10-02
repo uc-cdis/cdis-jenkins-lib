@@ -22,6 +22,8 @@ def call(Map config) {
     pipelineHelper.cancelPreviousRunningBuilds()
     prLabels = githubHelper.fetchLabels()
 
+    customWorkspace "${env.JENKINS_HOME}/workspace/CDIS_GitHub_Org/${REPO_NAME}/${PR_NUMBER}"
+
     try {
       stage('CleanWorkspace') {
         cleanWs()
