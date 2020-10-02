@@ -9,13 +9,13 @@ def kube(String kubectlNamespace, Closure body) {
   echo "WORKSPACE is $env.WORKSPACE"
   if (env.WORKSPACE.indexOf("\\") == -1) {
     echo "the WORKSPACE does not contain backslashes."
-    env.WORKSPACE = env.WORKSPACE.replaceAll(" ", "\\\\ ");
-    echo "sanitized WORKSPACE is $env.WORKSPACE"
+    // env.WORKSPACE = env.WORKSPACE.replaceAll(" ", "\\\\ ");
+    // echo "sanitized WORKSPACE is $env.WORKSPACE"
   } else {
     echo "the WORKSPACE already has backslashes."
   }
   def vpc_name = sh(script: "kubectl get cm --namespace ${kubectlNamespace} global -o jsonpath=\"{.data.environment}\"", returnStdout: true);
-  withEnv(['GEN3_NOPROXY=true', "vpc_name=${vpc_name}", "GEN3_HOME=${env.WORKSPACE}/cloud-automation", "KUBECTL_NAMESPACE=${kubectlNamespace}"]) {
+  withEnv(['GEN3_NOPROXY=true', "vpc_name=${vpc_name}", "GEN3_HOME=\"${env.WORKSPACE}\"/cloud-automation", "KUBECTL_NAMESPACE=${kubectlNamespace}"]) {
     echo "GEN3_HOME is $env.GEN3_HOME"
     echo "BRANCH_NAME is $env.BRANCH_NAME"
     echo "CHANGE_BRANCH is $env.CHANGE_BRANCH"
