@@ -44,7 +44,7 @@ def klock(String method, String owner, String lockName, String kubectlNamespace)
     conditionalLockParams = "7200 -w 60"
   }
   kube(kubectlNamespace, {
-    klockResult = sh( script: "bash ${cloudAutomationPath()}/gen3/bin/klock.sh ${method} '${lockName}' '${owner}' ${conditionalLockParams}", returnStatus: true)
+    klockResult = sh( script: "bash $GEN3_HOME/gen3/bin/klock.sh ${method} '${lockName}' '${owner}' ${conditionalLockParams}", returnStatus: true)
     if (klockResult == 0) {
       return true
     } else {
@@ -58,8 +58,8 @@ def klock(String method, String owner, String lockName, String kubectlNamespace)
 */
 def deploy(String kubectlNamespace) {
   kube(kubectlNamespace, {
-    sh "bash ${cloudAutomationPath()}/gen3/bin/kube-roll-all.sh"
-    sh "bash ${cloudAutomationPath()}/gen3/bin/kube-wait4-pods.sh || true"
+    sh "bash $GEN3_HOME/gen3/bin/kube-roll-all.sh"
+    sh "bash $GEN3_HOME/gen3/bin/kube-wait4-pods.sh || true"
   })
 }
 
@@ -79,7 +79,7 @@ def reset(String kubectlNamespace) {
 */
 def waitForPods(String kubectlNamespace) {
   kube(kubectlNamespace, {
-    sh "bash ${cloudAutomationPath()}/gen3/bin/kube-wait4-pods.sh"
+    sh "bash $GEN3_HOME/gen3/bin/kube-wait4-pods.sh"
   })
 }
 
