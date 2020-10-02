@@ -226,7 +226,7 @@ def call(Map config) {
     }
     finally {
       stage('Post') {
-        sh(script: "rm -Rf ../${newWS}_bkp");
+        sh(script: "rm -Rf ${newWS}_bkp");
         kubeHelper.teardown(kubeLocks)
         testHelper.teardown()
         pipelineHelper.teardown(currentBuild.result)
