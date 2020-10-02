@@ -25,7 +25,7 @@ def waitForBuild(String repoName, String formattedBranch) {
       error("aborting build due to timeout")
     }
 
-    sleep(15)
+    // sleep(15)
     println "running time query"
     resList = sh(script: timeQuery, returnStdout: true).trim().split('"\n"')
     for (String res in resList) {
