@@ -9,7 +9,7 @@ def kube(String kubectlNamespace, Closure body) {
   echo "WORKSPACE is $env.WORKSPACE"
   if (env.WORKSPACE.indexOf("\\") == -1) {
     echo "the WORKSPACE does not contain backslashes."
-    env.WORKSPACE = $env.WORKSPACE.replaceAll(" ", "\\\\ ");
+    env.WORKSPACE = env.WORKSPACE.replaceAll(" ", "\\\\ ");
     echo "sanitized WORKSPACE is $env.WORKSPACE"
   } else {
     echo "the WORKSPACE already has backslashes."
