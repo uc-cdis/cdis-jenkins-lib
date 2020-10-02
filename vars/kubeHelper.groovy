@@ -1,3 +1,7 @@
+def cloudAutomationPath() {	
+  return "${env.WORKSPACE}/cloud-automation"	
+}
+
 /**
 * Runs kubectl commands
 * Creates a context of environment variables required for commons commands
@@ -15,7 +19,7 @@ def kube(String kubectlNamespace, Closure body) {
     echo "the WORKSPACE already has backslashes."
   }
   def vpc_name = sh(script: "kubectl get cm --namespace ${kubectlNamespace} global -o jsonpath=\"{.data.environment}\"", returnStdout: true);
-  withEnv(['GEN3_NOPROXY=true', "vpc_name=${vpc_name}", "GEN3_HOME=\"${env.WORKSPACE}\"/cloud-automation", "KUBECTL_NAMESPACE=${kubectlNamespace}"]) {
+  withEnv(['GEN3_NOPROXY=true', "vpc_name=${vpc_name}", "GEN3_HOME=${cloudAutomationPath()}/cloud-automation", "KUBECTL_NAMESPACE=${kubectlNamespace}"]) {
     echo "GEN3_HOME is $env.GEN3_HOME"
     echo "BRANCH_NAME is $env.BRANCH_NAME"
     echo "CHANGE_BRANCH is $env.CHANGE_BRANCH"
@@ -43,7 +47,7 @@ def klock(String method, String owner, String lockName, String kubectlNamespace)
     conditionalLockParams = "7200 -w 60"
   }
   kube(kubectlNamespace, {
-    klockResult = sh( script: "bash \"$GEN3_HOME/gen3/bin/klock.sh\" '${method}' '${lockName}' '${owner}' ${conditionalLockParams}", returnStatus: true)
+    klockResult = sh( script: "bash '${cloudAutomationPath()}/gen3/bin/klock.sh' '${method}' '${lockName}' '${owner}' ${conditionalLockParams}", returnStatus: true)
     if (klockResult == 0) {
       return true
     } else {
@@ -57,8 +61,8 @@ def klock(String method, String owner, String lockName, String kubectlNamespace)
 */
 def deploy(String kubectlNamespace) {
   kube(kubectlNamespace, {
-    sh "bash \"$GEN3_HOME/gen3/bin/kube-roll-all.sh\""
-    sh "bash \"$GEN3_HOME/gen3/bin/kube-wait4-pods.sh\" || true"
+    sh "bash '${cloudAutomationPath()}/gen3/bin/kube-roll-all.sh'"
+    sh "bash '${$cloudAutomationPath()}/gen3/bin/kube-wait4-pods.sh' || true"
   })
 }
 
@@ -68,8 +72,8 @@ def deploy(String kubectlNamespace) {
 */
 def reset(String kubectlNamespace) {
   kube(kubectlNamespace, {
-    sh "yes | bash \"$GEN3_HOME/gen3/bin/reset.sh\""
-    sh "bash \"$GEN3_HOME/gen3/bin/kube-setup-spark.sh\" || true"
+    sh "yes | bash '${cloudAutomationPath()}/gen3/bin/reset.sh'"
+    sh "bash '${cloudAutomationPath()}/gen3/bin/kube-setup-spark.sh' || true"
   })
 }
 
@@ -78,7 +82,7 @@ def reset(String kubectlNamespace) {
 */
 def waitForPods(String kubectlNamespace) {
   kube(kubectlNamespace, {
-    sh "bash \"$GEN3_HOME/gen3/bin/kube-wait4-pods.sh\""
+    sh "bash '${cloudAutomationPath()}/gen3/bin/kube-wait4-pods.sh'"
   })
 }
 
