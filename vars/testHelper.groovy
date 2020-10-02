@@ -39,7 +39,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
     usernamePassword(credentialsId: 'ras-test-user1-for-ci-tests', usernameVariable: 'RAS_TEST_USER_1_USERNAME', passwordVariable: 'RAS_TEST_USER_1_PASSWORD'),
     usernamePassword(credentialsId: 'ras-test-user2-for-ci-tests', usernameVariable: 'RAS_TEST_USER_2_USERNAME', passwordVariable: 'RAS_TEST_USER_2_PASSWORD')
   ]) {
-    dir('gen3-qa') {
+    dir("${env.WORKSPACE}/gen3-qa") {
       gen3Qa(namespace, {
         // clean up old test artifacts in the workspace
         sh "/bin/rm -rf output/ || true"
@@ -57,7 +57,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
           // if the test succeeds, then verify that we got some test results ...
           testResult = sh(script: "ls output/ | grep '.*\\.xml'", returnStatus: true)
         }
-        dir('output') {
+        dir("${env.WORKSPACE}/output") {
           // collect and archive service logs
           echo "Archiving service logs via 'gen3 logs snapshot'"
           sh(script: "bash ${env.WORKSPACE}/cloud-automation/gen3/bin/logs.sh snapshot", returnStatus: true)
@@ -87,7 +87,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
 * @param namespace - namespace to simulate data for
 */
 def simulateData(String namespace) {
-  dir('gen3-qa') {
+  dir("${env.WORKSPACE}/gen3-qa") {
     gen3Qa(namespace, {
       sh "bash ./jenkins-simulate-data.sh ${namespace}"
     })
@@ -98,7 +98,7 @@ def simulateData(String namespace) {
 * Fetches data client
 */
 def fetchDataClient(String dataClientBranch="master") {
-  dir('dataclient') {
+  dir("${env.WORKSPACE}/dataclient") {
     // Note: the data client does not use Jenkins yet (see PXP-2211)
     branch = dataClientBranch
 
@@ -222,7 +222,7 @@ def deleteGCPServiceAccounts(jenkinsNamespace) {
 * Verify pods are health
 */
 def checkPodHealth(String namespace, String testedEnv) {
-  dir('gen3-qa') {
+  dir("${env.WORKSPACE}/gen3-qa") {
     gen3Qa(namespace, {
       sh "bash ./check-pod-health.sh $testedEnv"
     })

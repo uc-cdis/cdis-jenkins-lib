@@ -4,7 +4,7 @@
 * checkout scm does not set env vars.
 */
 def setGitEnvVars(String currentRepoName) {
-  dir('tmpGitClone') {
+  dir("${env.WORKSPACE}/tmpGitClone") {
     (gitCommit, gitPreviousCommit) = sh(script: 'git log --author=Jenkins --invert-grep -10 --pretty="format: %h"', returnStdout: true).split('\n')
     println(gitCommit)
     println(gitPreviousCommit)
@@ -17,7 +17,7 @@ def setGitEnvVars(String currentRepoName) {
 * Pulls common repositories used for testing
 */
 def fetchAllRepos(String currentRepoName) {
-  dir('gen3-qa') {
+  dir("${env.WORKSPACE}/gen3-qa") {
     if (currentRepoName == "gen3-qa") {
       // testing the gen3-qa repo - check out the test branch here
       println("INFO: checkout gen3-qa/ from JOB repo branch ...")
@@ -29,7 +29,7 @@ def fetchAllRepos(String currentRepoName) {
       );
     }
   }
-  dir('data-simulator') {
+  dir("${env.WORKSPACE}/data-simulator") {
     if (currentRepoName == "data-simulator") {
       // testing the data-simulator repo - check out the test branch here
       println("INFO: checkout data-simulator/ from JOB repo branch ...")
@@ -41,7 +41,7 @@ def fetchAllRepos(String currentRepoName) {
       );
     }
   }
-  dir('cdis-manifest') {
+  dir("${env.WORKSPACE}/cdis-manifest") {
     if (currentRepoName.endsWith("v2")) {
       git(
         url: 'https://github.com/uc-cdis/gitops-qa-v2.git',
@@ -54,7 +54,7 @@ def fetchAllRepos(String currentRepoName) {
       )
     }
   }
-  dir('cloud-automation') {
+  dir("${env.WORKSPACE}/cloud-automation") {
     if (currentRepoName == "cloud-automation") {
       // testing the data-simulator repo - check out the test branch here
       println("INFO: checkout cloud-automation/ from JOB repo branch ...")
@@ -66,7 +66,7 @@ def fetchAllRepos(String currentRepoName) {
       );
     }
   }
-  dir('tmpGitClone') {
+  dir("${env.WORKSPACE}/tmpGitClone") {
     checkout(scm: scm, clearWorkspace: true)
   }
 
@@ -77,7 +77,7 @@ def fetchAllRepos(String currentRepoName) {
 * Returns a map of recent changes
 */
 def getLatestChangeOfBranch(String branchName=env.CHANGE_BRANCH) {
-  dir('tmpGitClone') {
+  dir("${env.WORKSPACE}/tmpGitClone") {
     if (null == branchName) {
       error("unable to determine branch");    
     }

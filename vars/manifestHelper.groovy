@@ -29,8 +29,7 @@ def editService(String commonsHostname, String serviceName, String quayBranchNam
   if (null == commonsHostname || null == serviceName || null == quayBranchName) {
     error("Mising parameter for editing manifest service:\n  commonsHostname: ${commonsHostname}\n  serviceName: ${serviceName}\n  quayBranchName: ${quayBranchName}")
   }
-  dir("cdis-manifest/${commonsHostname}") {
-    sh 'ls -ilha'
+  dir("${env.WORKSPACE}/cdis-manifest/${commonsHostname}") {
     currentBranch = "${serviceName}:[a-zA-Z0-9._-]*"
     targetBranch = "${serviceName}:${quayBranchName}"
     echo "Editing cdis-manifest/${commonsHostname} service ${serviceName} to branch ${quayBranchName}"
