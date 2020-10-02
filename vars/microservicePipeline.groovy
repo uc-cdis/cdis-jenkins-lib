@@ -15,6 +15,7 @@ def call(Map config) {
     doNotRunTests = false
     isGen3Release = "false"
     prLabels = null
+    newWS = ""
     kubectlNamespace = null
     kubeLocks = []
     testedEnv = "" // for manifest pipeline
@@ -23,13 +24,18 @@ def call(Map config) {
     prLabels = githubHelper.fetchLabels()
 
     try {
-      stage('CleanWorkspace') {
+      stage('OrganizeWorkspace') {
         // Set up new workspace
-        env.WORKSPACE = env.WORKSPACE.replaceAll(" ", "_");
+        newWS = env.WORKSPACE.replaceAll(" ", "_");
         cleanWs()
       }
       stage('FetchCode') {
         gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
+      }
+      stage('OrganizeWorkspace') {
+        // Set up new workspace
+        sh(script: "mkdir -p ../${newWS} && mv * ../${newWS}");
+        env.WORKSPACE = newWS
       }
       stage('CheckPRLabels') {
         // giving a chance for auto-label gh actions to catch up
