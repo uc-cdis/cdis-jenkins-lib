@@ -8,7 +8,7 @@
 def kube(String kubectlNamespace, Closure body) {
   echo "WORKSPACE is $env.WORKSPACE"
   if (env.WORKSPACE.indexOf("\\") == -1) {
-    env.WORKSPACE = env.WORKSPACE.replaceAll(" ", "\\\\ ");
+    env.WORKSPACE = env.WORKSPACE.replaceAll(" ", "\\ ");
     echo "sanitized WORKSPACE is $env.WORKSPACE"
   }
   def vpc_name = sh(script: "kubectl get cm --namespace ${kubectlNamespace} global -o jsonpath=\"{.data.environment}\"", returnStdout: true);
