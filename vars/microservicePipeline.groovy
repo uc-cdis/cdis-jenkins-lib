@@ -22,6 +22,9 @@ def call(Map config) {
     pipelineHelper.cancelPreviousRunningBuilds()
     prLabels = githubHelper.fetchLabels()
 
+    // Set up new workspace
+    PR_NUMBER = env.BRANCH_NAME;
+    REPO_NAME = env.JOB_NAME.split('/')[1];
     customWorkspace "${env.JENKINS_HOME}/workspace/CDIS_GitHub_Org/${REPO_NAME}/${PR_NUMBER}"
 
     try {
