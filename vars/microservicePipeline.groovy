@@ -24,7 +24,7 @@ def call(Map config) {
     prLabels = githubHelper.fetchLabels()
 
     try {
-      stage('OrganizeWorkspace') {
+      stage('CleanWorkspace') {
         // Set up new workspace
         newWS = env.WORKSPACE.replaceAll(" ", "_");
         cleanWs()
@@ -34,8 +34,12 @@ def call(Map config) {
       }
       stage('OrganizeWorkspace') {
         // Set up new workspace
-        sh(script: "mkdir -p ../${newWS} && mv * ../${newWS}");
+        PR_NUMBER = env.BRANCH_NAME;
+        REPO_NAME = env.JOB_NAME.split('/')[1];
+        newWs = $JENKINS_HOME/workspace/CDIS_GitHub_Org/${REPO_NAME}/${PR_NUMBER}
+        sh(script: "mkdir -p ${newWs} && mv * ../${newWS}");
         env.WORKSPACE = newWS
+        sh(script: "ls -ilha");
       }
       stage('CheckPRLabels') {
         // giving a chance for auto-label gh actions to catch up
