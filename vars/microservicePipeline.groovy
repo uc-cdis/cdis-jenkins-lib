@@ -37,7 +37,7 @@ def call(Map config) {
         PR_NUMBER = env.BRANCH_NAME;
         REPO_NAME = env.JOB_NAME.split('/')[1];
         newWs = "${env.JENKINS_HOME}/workspace/CDIS_GitHub_Org/${REPO_NAME}/${PR_NUMBER}"
-        sh(script: "mkdir -p ${newWs} && mv ..${newWS} ..${newWS}_bkp && mv ./* ..${newWS}/");
+        sh(script: "mkdir -p ${newWs} && mv ../${newWS} ../${newWS}_bkp && mv * ../${newWS}/");
         env.WORKSPACE = newWS
         sh(script: "ls -ilha");
       }
