@@ -4,6 +4,7 @@
 import org.apache.commons.lang.StringUtils;
 
 def waitForBuild(String repoName, String formattedBranch) {
+  if (repoName == "jenkins-lib") { return "skip" }
   echo("Waiting for Quay to build:\n  repoName: ${repoName}\n  branch: '${formattedBranch}'\n  commit: ${env.GIT_COMMIT}\n  previous commit: ${env.GIT_PREVIOUS_COMMIT}")
   def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 3600)
   def timeout = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) + 3600)
