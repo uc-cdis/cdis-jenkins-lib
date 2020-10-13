@@ -86,7 +86,7 @@ def call(Map config) {
       if (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST == false || pipeConfig.MANIFEST != "True") {
         // Setup stages for NON manifest builds
         stage('WaitForQuayBuild') {
-          if(!doNotRunTests) {
+          if(!doNotRunTests && pipeConfig['quayRegistry'] != "jenkins-lib") {
             quayHelper.waitForBuild(
               pipeConfig['quayRegistry'],
               pipeConfig['currentBranchFormatted']
