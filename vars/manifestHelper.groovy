@@ -51,6 +51,7 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   sh "jq -r .sower < tmpGitClone/$changedDir/manifest.json > sower_block.json"
   // fetch portal block from the target environment
   sh "jq -r .portal < tmpGitClone/$changedDir/manifest.json > portal_block.json"
+  sh "less portal_block.json"
   String s = sh(returnStdout: true, script: "jq -r keys < cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   println s
   def keys = new groovy.json.JsonSlurper().parseText(s)
