@@ -51,8 +51,8 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   sh "jq -r .sower < tmpGitClone/$changedDir/manifest.json > sower_block.json"
   // fetch portal block from the target environment
   sh(returnStdout: true, script: "if cat tmpGitClone/$changedDir/manifest.json | jq --exit-status '.portal' >/dev/null; then "
-    + "&& jq -r .portal < tmpGitClone/$changedDir/manifest.json > portal_block.json; "
-    + "&& fi")
+    + "jq -r .portal < tmpGitClone/$changedDir/manifest.json > portal_block.json; "
+    + "fi")
   sh "less portal_block.json"
   String s = sh(returnStdout: true, script: "jq -r keys < cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   println s
@@ -88,8 +88,8 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   }
   // replace Portal block
   sh(returnStdout: true, script: "if [[ -f \"portal_block.json\" ]]; then "
-    + "&& old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sp \"\$(cat portal_block.json)\" '(.portal) = \$sp' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
-    + "&& fi")
+    + "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sp \"\$(cat portal_block.json)\" '(.portal) = \$sp' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
+    + "fi")
   String rs = sh(returnStdout: true, script: "cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   return rs
 }
