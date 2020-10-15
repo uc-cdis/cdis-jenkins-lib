@@ -9,7 +9,7 @@ import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 */
 def call(Map config) {
 
-  def AVAILABLE_NAMESPACES = ['jenkins-blood', 'jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
+  def AVAILABLE_NAMESPACES = ['ci-env-1']
   List<String> namespaces = []
   List<String> selectedTests = []
   doNotRunTests = false
