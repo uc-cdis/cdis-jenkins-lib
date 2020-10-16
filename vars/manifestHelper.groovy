@@ -49,6 +49,10 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   String pa = sh(returnStdout: true, script: "jq -r .global.portal_app < tmpGitClone/$changedDir/manifest.json").trim()
   // fetch sower block from the target environment
   sh "jq -r .sower < tmpGitClone/$changedDir/manifest.json > sower_block.json"
+  // fetch portal block from the target environment
+  sh(returnStdout: true, script: "if cat tmpGitClone/$changedDir/manifest.json | jq --exit-status '.portal' >/dev/null; then "
+    + "jq -r .portal < tmpGitClone/$changedDir/manifest.json > portal_block.json; "
+    + "fi")
   String s = sh(returnStdout: true, script: "jq -r keys < cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   println s
   def keys = new groovy.json.JsonSlurper().parseText(s)
@@ -81,6 +85,10 @@ def mergeManifest(String changedDir, String selectedNamespace) {
     println(sowerBlock3)
     sh(returnStdout: true, script: "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sj \"\$(cat sower_block.json)\" '(.sower) = \$sj' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   }
+  // replace Portal block
+  sh(returnStdout: true, script: "if [ -f \"portal_block.json\" ]; then "
+    + "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sp \"\$(cat portal_block.json)\" '(.portal) = \$sp' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
+    + "fi")
   String rs = sh(returnStdout: true, script: "cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   return rs
 }
