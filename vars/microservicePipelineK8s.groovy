@@ -189,6 +189,17 @@ spec:
 	  }
         }
       }
+      stage('CleanUp3rdPartyResources') {
+        steps {
+          script {
+            if(!doNotRunTests) {
+              testHelper.deleteGCPServiceAccounts(kubectlNamespace)
+            } else {
+              Utils.markStageSkippedForConditional(STAGE_NAME)
+            }
+          }
+        }
+      }
       stage('ModifyManifest') {
         steps {
           script {
