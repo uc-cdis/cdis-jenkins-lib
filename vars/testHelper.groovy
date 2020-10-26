@@ -191,6 +191,10 @@ def deleteGCPServiceAccounts(jenkinsNamespace) {
       println("deleting jniaid svc accounts");
       JPREFIX="jniaid"
       break;
+    case "ci-env-1":
+      println("deleting cienv1 svc accounts");
+      JPREFIX="cienv1"
+      break;
     default:
       println("invalid jenkins namespace: " + SELECTED_JENKINS_NAMESPACE);
       // If the CI environment is not listed here
