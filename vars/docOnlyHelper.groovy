@@ -5,7 +5,7 @@ def checkTestSkippingCriteria() {
     def releasesFolder = fileChange =~ /^(releases\/.*)/
     def openapisFolder = fileChange =~ /^(openapis\/.*\.yaml)/
     def dotFolder = fileChange =~ /^(\..*)/
-    def docFile = fileChange =~ /(.*\.md)|(.*\.png)|(.*\.txt)|(.*\.feature)|(.*\.xlsx)|(CODEOWNERS)/
+    def docFile = fileChange =~ /(.*\.md)|(.*\.png)|(.*\.txt)|(.*\.feature)|(.*\.xlsx)|(.*\.pdf)|(CODEOWNERS)/
     if (releasesFolder) {
       println('Found releases folder: ' + releasesFolder[0][0])
     } else if (openapisFolder) {
