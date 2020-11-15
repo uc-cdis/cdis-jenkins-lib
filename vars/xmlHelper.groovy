@@ -4,8 +4,11 @@ import org.apache.commons.lang.StringUtils;
 def assembleFeatureLabelMap(failedTestSuites) {
   def featureLabelMap = [:]
   try {
-    // always return RC=0 to avoid "No such file or directory" error if runTests fails before CodeceptJS test reports are generated
-    def xmlResultFilesRaw = sh(returnStdout: true, script: "ls output/result*.xml || exit 0")
+    // avoid "No such file or directory" error if runTests fails before CodeceptJS test reports are generated
+    def xmlResultFilesRaw = sh(returnStdout: true, script: "[ -d \"output\" ] && ls output/result*.xml || echo \"Warn: there are no output/result-*.xml files to parse\" ")
+    if (xmlResultFilesRaw.contains('Warn')) {
+      return null;
+    }
     def xmlResultFiles = xmlResultFilesRaw.split('\n')
     println(xmlResultFiles)
 
