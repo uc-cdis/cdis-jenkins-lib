@@ -1,10 +1,11 @@
 import org.apache.commons.lang.StringUtils;
 
+// correlate failed test suites with the script file path from result xmls
 def assembleFeatureLabelMap(failedTestSuites) {
   def featureLabelMap = [:]
   try {
-    // correlate failed test suites with the script file path from result xmls
-    def xmlResultFilesRaw = sh(returnStdout: true, script: "ls output/result*.xml")
+    // always return RC=0 to avoid "No such file or directory" error if runTests fails before CodeceptJS test reports are generated
+    def xmlResultFilesRaw = sh(returnStdout: true, script: "ls output/result*.xml || exit 0")
     def xmlResultFiles = xmlResultFilesRaw.split('\n')
     println(xmlResultFiles)
 
@@ -32,7 +33,9 @@ def assembleFeatureLabelMap(failedTestSuites) {
 
     return featureLabelMap;
   } catch (e) {
-    pipelineHelper.handleError(e)
+    println("Something wrong happened: ${e}")
+    println("Ignore and return null map")
+    return null;
   }
   return null;
 }
