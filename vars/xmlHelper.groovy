@@ -46,7 +46,11 @@ def assembleFeatureLabelMap(failedTestSuites) {
 def identifyFailedTestSuites() {
   List<String> failedTestSuites = [];
   try {
-    def xmlTestSuiteFilesRaw = sh(returnStdout: true, script: "ls output/*-testsuite.xml")
+    // avoid "No such file or directory" error if runTests fails before CodeceptJS test reports are generated
+    def xmlTestSuiteFilesRaw = sh(returnStdout: true, script: "[ \"\$(ls -A output)\" ] && ls output/*-testsuite.xml || echo \"Warn: there are no output/*-testsuite.xml files to parse\" ")
+    if (xmlTestSuiteFilesRaw.contains('Warn')) {
+      return [];
+    }
     def xmlTestSuiteFiles = xmlTestSuiteFilesRaw.split('\n')
     println(xmlTestSuiteFiles)
 
