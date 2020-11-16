@@ -1,10 +1,14 @@
 import org.apache.commons.lang.StringUtils;
 
+// correlate failed test suites with the script file path from result xmls
 def assembleFeatureLabelMap(failedTestSuites) {
   def featureLabelMap = [:]
   try {
-    // correlate failed test suites with the script file path from result xmls
-    def xmlResultFilesRaw = sh(returnStdout: true, script: "ls output/result*.xml")
+    // avoid "No such file or directory" error if runTests fails before CodeceptJS test reports are generated
+    def xmlResultFilesRaw = sh(returnStdout: true, script: "[ \"\$(ls -A output)\" ] && ls output/result*.xml || echo \"Warn: there are no output/result-*.xml files to parse\" ")
+    if (xmlResultFilesRaw.contains('Warn')) {
+      return null;
+    }
     def xmlResultFiles = xmlResultFilesRaw.split('\n')
     println(xmlResultFiles)
 
@@ -32,7 +36,9 @@ def assembleFeatureLabelMap(failedTestSuites) {
 
     return featureLabelMap;
   } catch (e) {
-    pipelineHelper.handleError(e)
+    println("Something wrong happened: ${e}")
+    println("Ignore and return null map")
+    return null;
   }
   return null;
 }
@@ -40,7 +46,11 @@ def assembleFeatureLabelMap(failedTestSuites) {
 def identifyFailedTestSuites() {
   List<String> failedTestSuites = [];
   try {
-    def xmlTestSuiteFilesRaw = sh(returnStdout: true, script: "ls output/*-testsuite.xml")
+    // avoid "No such file or directory" error if runTests fails before CodeceptJS test reports are generated
+    def xmlTestSuiteFilesRaw = sh(returnStdout: true, script: "[ \"\$(ls -A output)\" ] && ls output/*-testsuite.xml || echo \"Warn: there are no output/*-testsuite.xml files to parse\" ")
+    if (xmlTestSuiteFilesRaw.contains('Warn')) {
+      return [];
+    }
     def xmlTestSuiteFiles = xmlTestSuiteFilesRaw.split('\n')
     println(xmlTestSuiteFiles)
 
