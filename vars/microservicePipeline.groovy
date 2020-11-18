@@ -168,7 +168,7 @@ def call(Map config) {
       }
       stage('GenerateData') {
         if(!doNotRunTests) {
-          testHelper.simulateData(kubectlNamespace)
+          testHelper.simulateData(kubectlNamespace, testedEnv)
         } else {
           Utils.markStageSkippedForConditional(STAGE_NAME)
         }
