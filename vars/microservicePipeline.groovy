@@ -61,7 +61,7 @@ def call(Map config) {
               currentBuild.result = 'ABORTED'
               error('This PR is not ready for CI yet, aborting...')
               break
-            case case ~/^jenkins-.*/:
+            case ~/^jenkins-.*/:
               println('found this namespace label! ' + label['name']);
               namespaces.add(label['name'])
               break
