@@ -44,7 +44,7 @@ def editService(String commonsHostname, String serviceName, String quayBranchNam
 * @param commonsHostname - hostname of commons to edit (e.g. jenkins-blood.planx-pla.net)
 */
 def setDictionary(String commonsHostname) {
-  def prBranchName = $env.CHANGE_BRANCH
+  def prBranchName = env.CHANGE_BRANCH
   def prRepoName = env.JOB_NAME.split('/')[1];
 
   // branch dictionary
