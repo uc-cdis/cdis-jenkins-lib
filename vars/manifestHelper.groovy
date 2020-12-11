@@ -48,7 +48,7 @@ def setDictionary(String commonsHostname) {
   def prRepoName = env.JOB_NAME.split('/')[1];
 
   // branch dictionary
-  def branchDictionary = "https://s3.amazonaws.com/dictionary-artifacts/${prRepoName}/$prBranchName/schema.json"
+  def branchDictionary = "https://s3.amazonaws.com/dictionary-artifacts/${prRepoName}/${prBranchName}/schema.json"
 
   echo "Editing cdis-manifest/${commonsHostname} dictionary to set ${prBranchName}"
   
