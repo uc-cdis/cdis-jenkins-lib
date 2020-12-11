@@ -39,6 +39,24 @@ def editService(String commonsHostname, String serviceName, String quayBranchNam
 }
 
 /**
+* Sets the banch-dictionary from the PR against the manifest of the CI environment.
+*
+* @param commonsHostname - hostname of commons to edit (e.g. jenkins-blood.planx-pla.net)
+*/
+def setDictionary(String commonsHostname) {
+  def prBranchName = $env.CHANGE_BRANCH
+  def prRepoName = env.JOB_NAME.split('/')[1];
+
+  // branch dictionary
+  def branchDictionary = "https://s3.amazonaws.com/dictionary-artifacts/${prRepoName}/$prBranchName/schema.json"
+
+  echo "Editing cdis-manifest/${commonsHostname} dictionary to set ${prBranchName}"
+  // swap current dictionary for the target dictionary
+  sh(returnStatus: true, script: "cat tmpGitClone/${commonsHostname}/manifest.json | jq --arg theNewDict ${branchDictionary} '.global.dictionary_url |= \$theNewDict' > cdis-manifest/${commonsHostname}/manifest.json")
+  sh 'cat manifest.json'
+}
+
+/**
 * This function merges manifest changes. It checks if the environment's manifest found in manifest-repo PR
 * contains certain blocks and replaces the same blocks in the Jenkins CI manifest.
 * It also deletes blocks from the Jenkins CI environment to match the environment manifest that is
