@@ -53,7 +53,7 @@ def setDictionary(String commonsHostname) {
   echo "Editing cdis-manifest/${commonsHostname} dictionary to set ${prBranchName}"
   // swap current dictionary for the target dictionary
   sh(returnStatus: true, script: "cat tmpGitClone/${commonsHostname}/manifest.json | jq --arg theNewDict ${branchDictionary} '.global.dictionary_url |= \$theNewDict' > cdis-manifest/${commonsHostname}/manifest.json")
-  sh 'cat manifest.json'
+  sh "cat cdis-manifest/${commonsHostname}/manifest.json"
 }
 
 /**
