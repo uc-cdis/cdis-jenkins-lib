@@ -51,8 +51,12 @@ def setDictionary(String commonsHostname) {
   def branchDictionary = "https://s3.amazonaws.com/dictionary-artifacts/${prRepoName}/$prBranchName/schema.json"
 
   echo "Editing cdis-manifest/${commonsHostname} dictionary to set ${prBranchName}"
+  
+  // keep backup of the original manifest
+  sh "cp cdis-manifest/${commonsHostname}/manifest.json cdis-manifest/${commonsHostname}/manifest.json.old"
   // swap current dictionary for the target dictionary
-  sh(returnStatus: true, script: "cat tmpGitClone/gitops-qa/${commonsHostname}/manifest.json | jq --arg theNewDict ${branchDictionary} '.global.dictionary_url |= \$theNewDict' > cdis-manifest/${commonsHostname}/manifest.json")
+  sh(returnStatus: true, script: "cat cdis-manifest/${commonsHostname}/manifest.json.old | jq --arg theNewDict ${branchDictionary} '.global.dictionary_url |= \$theNewDict' > cdis-manifest/${commonsHostname}/manifest.json")
+  
   sh "cat cdis-manifest/${commonsHostname}/manifest.json"
 }
 

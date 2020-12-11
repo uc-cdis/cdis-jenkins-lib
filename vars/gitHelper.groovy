@@ -68,17 +68,6 @@ def fetchAllRepos(String currentRepoName) {
   }
   dir('tmpGitClone') {
     checkout(scm: scm, clearWorkspace: true)
-    
-    if (currentRepoName.contains("dictionary")) {
-      // keep copy of gitops-qa to extract and transform jenkins environments manifests
-      println("INFO: checkout gitops-qa for a DICTIONARY repo PR ...")
-      dir('tmpGitClone/gitops-qa')
-        git(
-          url: 'https://github.com/uc-cdis/gitops-qa.git',
-          branch: 'master'
-        )
-      }
-    }
   }
 
   setGitEnvVars(currentRepoName)
