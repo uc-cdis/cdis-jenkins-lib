@@ -45,7 +45,7 @@ def editService(String commonsHostname, String serviceName, String quayBranchNam
 */
 def setDictionary(String commonsHostname) {
   def prBranchName = env.CHANGE_BRANCH
-  def prRepoName = env.JOB_NAME.split('/')[1];
+  def prRepoName = env.JOB_NAME.split('/')[1].replaceAll('-','');
 
   // branch dictionary
   def branchDictionary = "https://s3.amazonaws.com/dictionary-artifacts/${prRepoName}/${prBranchName}/schema.json"
