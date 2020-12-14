@@ -112,11 +112,17 @@ def call(Map config) {
         }
         stage('ModifyManifest') {
           if(!doNotRunTests) {
-            manifestHelper.editService(
-              kubeHelper.getHostname(kubectlNamespace),
-              pipeConfig.serviceTesting.name,
-              pipeConfig.serviceTesting.branch
-            )
+           if (pipeConfig.DICTIONARY != null && (pipeConfig.DICTIONARY == true || pipeConfig.DICTIONARY == "True")) {
+              manifestHelper.setDictionary(
+                kubeHelper.getHostname(kubectlNamespace)
+              )
+            } else {
+              manifestHelper.editService(
+                kubeHelper.getHostname(kubectlNamespace),
+                pipeConfig.serviceTesting.name,
+                pipeConfig.serviceTesting.branch
+              )
+            }
 	  } else {
 	    Utils.markStageSkippedForConditional(STAGE_NAME)
           }
