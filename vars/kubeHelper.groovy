@@ -64,7 +64,10 @@ def deploy(String kubectlNamespace) {
 */
 def reset(String kubectlNamespace) {
   kube(kubectlNamespace, {
-    sh "yes | bash ${cloudAutomationPath()}/gen3/bin/reset.sh"
+    resetResult = sh(returnStatus: true, script: "yes | bash ${cloudAutomationPath()}/gen3/bin/reset.sh")
+    if (resetResult != 0) {
+      throw new Exception("The K8s Reset operation failed.")
+    }
     sh "bash ${cloudAutomationPath()}/gen3/bin/kube-setup-spark.sh || true"
   })
 }
