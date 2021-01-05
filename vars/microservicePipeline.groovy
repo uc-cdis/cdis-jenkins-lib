@@ -299,7 +299,7 @@ def call(Map config) {
     }
     catch (e) {
       pipelineHelper.handleError(e)
-      throw ex
+      throw e
     }
     finally {
       stage('Post') {
