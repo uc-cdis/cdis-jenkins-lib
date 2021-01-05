@@ -86,10 +86,10 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
 *
 * @param namespace - namespace to simulate data for
 */
-def simulateData(String namespace) {
+def simulateData(String namespace, String testedEnv="") {
   dir('gen3-qa') {
     gen3Qa(namespace, {
-      sh "bash ./jenkins-simulate-data.sh ${namespace}"
+      sh "bash ./jenkins-simulate-data.sh ${namespace} ${testedEnv}"
     })
   }
 }
@@ -190,6 +190,10 @@ def deleteGCPServiceAccounts(jenkinsNamespace) {
     case "jenkins-niaid":
       println("deleting jniaid svc accounts");
       JPREFIX="jniaid"
+      break;
+    case "ci-env-1":
+      println("deleting cienv1 svc accounts");
+      JPREFIX="cienv1"
       break;
     default:
       println("invalid jenkins namespace: " + SELECTED_JENKINS_NAMESPACE);

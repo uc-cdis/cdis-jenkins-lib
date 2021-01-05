@@ -31,8 +31,8 @@ def call(Map config) {
       }
       stage('CheckPRLabels') {
        try {
-          // giving a chance for auto-label gh actions to catch up
-        sleep(10)
+        // giving a chance for auto-label gh actions to catch up
+        sleep(30)
         for(label in prLabels) {
           println(label['name']);
           switch(label['name']) {
@@ -62,7 +62,7 @@ def call(Map config) {
               currentBuild.result = 'ABORTED'
               error('This PR is not ready for CI yet, aborting...')
               break
-            case AVAILABLE_NAMESPACES:
+            case ~/^jenkins-.*/:
               println('found this namespace label! ' + label['name']);
               namespaces.add(label['name'])
               break
@@ -85,6 +85,7 @@ def call(Map config) {
         }
        } catch (ex) {
         metricsHelper.writeMetricWithResult(STAGE_NAME, false)  
+        throw ex
        }
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
@@ -102,6 +103,7 @@ def call(Map config) {
           }
          } catch (ex) {
            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+           throw ex
          }
          metricsHelper.writeMetricWithResult(STAGE_NAME, true)
         }
@@ -115,6 +117,7 @@ def call(Map config) {
           }
          } catch (ex) {
            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+           throw ex
          }
          metricsHelper.writeMetricWithResult(STAGE_NAME, true)
         }
@@ -127,22 +130,30 @@ def call(Map config) {
           }
          } catch (ex) {
            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+           throw ex
          }
          metricsHelper.writeMetricWithResult(STAGE_NAME, true)
         }
         stage('ModifyManifest') {
          try {
-           if(!doNotRunTests) {
-            manifestHelper.editService(
-              kubeHelper.getHostname(kubectlNamespace),
-              pipeConfig.serviceTesting.name,
-              pipeConfig.serviceTesting.branch
-            )
+          if(!doNotRunTests) {
+           if (pipeConfig.DICTIONARY != null && (pipeConfig.DICTIONARY == true || pipeConfig.DICTIONARY == "True")) {
+              manifestHelper.setDictionary(
+                kubeHelper.getHostname(kubectlNamespace)
+              )
+            } else {
+              manifestHelper.editService(
+                kubeHelper.getHostname(kubectlNamespace),
+                pipeConfig.serviceTesting.name,
+                pipeConfig.serviceTesting.branch
+              )
+            }
 	  } else {
 	    Utils.markStageSkippedForConditional(STAGE_NAME)
           }
          } catch (ex) {
            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+           throw ex
          }
          metricsHelper.writeMetricWithResult(STAGE_NAME, true)
         }
@@ -160,6 +171,7 @@ def call(Map config) {
           }
          } catch (ex) {
            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+           throw ex
          }
          metricsHelper.writeMetricWithResult(STAGE_NAME, true)
         }
@@ -172,6 +184,7 @@ def call(Map config) {
           }
          } catch (ex) {
            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+           throw ex
          }
          metricsHelper.writeMetricWithResult(STAGE_NAME, true)
         }
@@ -184,6 +197,7 @@ def call(Map config) {
           }
          } catch (ex) {
            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+           throw ex
          }
          metricsHelper.writeMetricWithResult(STAGE_NAME, true)
 	}
@@ -200,6 +214,7 @@ def call(Map config) {
         }
        } catch (ex) {
          metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+         throw ex
        }
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
@@ -213,18 +228,20 @@ def call(Map config) {
         }
        } catch (ex) {
          metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+         throw ex
        }
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
       stage('GenerateData') {
        try {
         if(!doNotRunTests) {
-          testHelper.simulateData(kubectlNamespace)
+          testHelper.simulateData(kubectlNamespace, testedEnv)
         } else {
           Utils.markStageSkippedForConditional(STAGE_NAME)
         }
        } catch (ex) {
          metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+         throw ex
        }
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
@@ -244,6 +261,7 @@ def call(Map config) {
         }
        } catch (ex) {
          metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+         throw ex
        }
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
@@ -262,6 +280,7 @@ def call(Map config) {
         }
        } catch (ex) {
          metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+         throw ex
        }
       }
       stage('CleanS3') {
@@ -273,12 +292,14 @@ def call(Map config) {
         }
        } catch (ex) {
          metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+         throw ex
        }
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
     }
     catch (e) {
       pipelineHelper.handleError(e)
+      throw ex
     }
     finally {
       stage('Post') {
