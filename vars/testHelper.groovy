@@ -62,8 +62,8 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
           echo "Archiving service logs via 'gen3 logs snapshot'"
           sh(script: "bash ${env.WORKSPACE}/cloud-automation/gen3/bin/logs.sh snapshot", returnStatus: true)
         }
+        def successMsg = "Successful CI run for https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :tada:"
         if (testResult != 0) {
-          def successMsg = "Successful CI run for https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :tada:"
           def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
           if (failedTestSuites.size() < 10) {
             featureLabelMap.each { testSuite, retryLabel ->
