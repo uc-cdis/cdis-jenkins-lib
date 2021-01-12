@@ -20,6 +20,7 @@ def waitForBuild(String repoName, String formattedBranch) {
     noPendingQuayBuilds = true
     currentTime = new Date().getTime()/1000 as Integer
     println "currentTime is: "+currentTime
+    pritnln "timeout is: "+timeout
 
     if(currentTime > timeout) {
       currentBuild.result = 'ABORTED'
