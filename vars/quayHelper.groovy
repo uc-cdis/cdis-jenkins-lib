@@ -49,7 +49,7 @@ def waitForBuild(String repoName, String formattedBranch) {
             }
             break
           } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1])) {
-            // previous commit is the newest - sleep and try again
+            println "previous commit is the newest - sleep and try again"
             // things get annoying when quay gets slow
             break
           } else {
@@ -81,7 +81,7 @@ def waitForBuild(String repoName, String formattedBranch) {
               }
               break
             } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1])) {
-              // previous commit is the newest - sleep and try again
+              println "previous commit is the newest - sleep and try again"
               // things get annoying when quay gets slow
               break
             } else {
