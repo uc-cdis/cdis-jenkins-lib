@@ -62,6 +62,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
           echo "Archiving service logs via 'gen3 logs snapshot'"
           sh(script: "bash ${env.WORKSPACE}/cloud-automation/gen3/bin/logs.sh snapshot", returnStatus: true)
         }
+        def successMsg = "Successful CI run for https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :tada:"
         if (testResult != 0) {
           def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
           if (failedTestSuites.size() < 10) {
@@ -75,6 +76,8 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
           slackSend(color: 'bad', channel: "#gen3-qa-notifications", message: failureMsg)
           currentBuild.result = 'ABORTED'
           error("aborting build - testsuite failed")
+        } else {
+          slackSend(color: "#439FE0", channel: "#gen3-qa-notifications", message: successMsg)
         }
       })
     }
