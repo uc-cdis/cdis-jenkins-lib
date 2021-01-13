@@ -2,6 +2,8 @@
 * Waits for Quay to finish building the branch in config
 */
 import org.apache.commons.lang.StringUtils;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 def waitForBuild(String repoName, String formattedBranch) {
   if (repoName == "jenkins-lib" || repoName.contains("dictionary")) { return "skip" }
@@ -19,8 +21,12 @@ def waitForBuild(String repoName, String formattedBranch) {
   while(quayImageReady != true && noPendingQuayBuilds != true) {
     noPendingQuayBuilds = true
     currentTime = new Date().getTime()/1000 as Integer
-    println "currentTime is: "+currentTime
-    println "timeout is: "+timeout
+    
+    DateFormat friendlyFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS Z");
+    String timeoutFormatted = friendlyFormat.format(timeout);
+    String currentTimeFormatted = friendlyFormat.format(currentTime);
+    println "currentTime is: " + currentTimeFormatted
+    println "timeout is: " + timeoutFormatted
 
     if(currentTime > timeout) {
       currentBuild.result = 'ABORTED'
