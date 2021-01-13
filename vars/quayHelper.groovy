@@ -7,7 +7,7 @@ def waitForBuild(String repoName, String formattedBranch) {
   if (repoName == "jenkins-lib" || repoName.contains("dictionary")) { return "skip" }
   echo("Waiting for Quay to build:\n  repoName: ${repoName}\n  branch: '${formattedBranch}'\n  commit: ${env.GIT_COMMIT}\n  previous commit: ${env.GIT_PREVIOUS_COMMIT}")
   def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 3600)
-  def timeout = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) + 3600)
+  def timeout = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) + 5400)
   QUAY_API = 'https://quay.io/api/v1/repository/cdis/'
   timeUrl = "$QUAY_API"+repoName+"/build/?since="+timestamp
   timeQuery = "curl -s "+timeUrl+/ | jq '.builds[] | "\(.tags[]),\(.display_name),\(.phase)"'/
