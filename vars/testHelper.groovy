@@ -66,9 +66,16 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         if (testResult != 0) {
           def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
           if (failedTestSuites.size() < 10) {
+            def commaSeparatedListOfLabels = ""
             featureLabelMap.each { testSuite, retryLabel ->
-              failureMsg += " - Test Suite *${testSuite}* failed :red_circle: \n To retry, label :label: your PR with *${retryLabel}* \n"
+              failureMsg += " - Test Suite *${testSuite}* failed :red_circle: (label :label: *${retryLabel}*)\n"
+              commaSeparatedListOfLabels += "${retryLabel}"
+              // add comma except for the last one
+              if(retryLabel != featureLabelMap.last()) {
+                commaSeparatedListOfLabels += ","                
+              }
             }
+            failureMsg += " To label & retry, just send the following message: \n @qa-bot replay-pr ${REPO_NAME} ${PR_NUMBER} ${commaSeparatedListOfLabels}"
           } else {
             failureMsg += " >10 test suites failed on this PR check :rotating_light:. This might indicate an environmental/config issue. cc: @planxqa :allthethings: :allthethings: :allthethings:"
           }
