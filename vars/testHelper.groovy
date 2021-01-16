@@ -71,7 +71,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
               failureMsg += " - Test Suite *${testSuite}* failed :red_circle: (label :label: *${retryLabel}*)\n"
               commaSeparatedListOfLabels += "${retryLabel}"
               // add comma except for the last one
-              if(retryLabel != featureLabelMap.last()) {
+              if(testSuite != featureLabelMap.keySet().last()) {
                 commaSeparatedListOfLabels += ","                
               }
             }
