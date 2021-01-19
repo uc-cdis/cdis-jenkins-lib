@@ -168,7 +168,7 @@ def cleanS3(namespace) {
         // if we can't move it, another session is using it: do nothing
       }
     }
-  }
+  })
 }
 
 /**
