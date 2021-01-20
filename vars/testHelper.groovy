@@ -134,37 +134,41 @@ def fetchDataClient(String dataClientBranch="master") {
 
 /**
 * Clean S3
+*
+* @param namespace - namespace to identify the name of the s3 bucket
 */
-def cleanS3() {
-  qaBucket = "qaplanetv1-data-bucket"
-  cleanUpDir = "~/s3-cleanup"
-  localCopy = "$env.WORKSPACE/cleanup-copy.txt"
+def cleanS3(namespace) {
+  gen3Qa(namespace, {
+    qaBucket = "${KUBECTL_NAMESPACE}-databucket-gen3"
+    cleanUpDir = "~/s3-cleanup"
+    localCopy = "$env.WORKSPACE/cleanup-copy.txt"
 
-  filesList = sh(
-    // no error if the dir does not exist or is empty
-    script: "ls -d $cleanUpDir/* || true",
-    returnStdout: true
-  )
+    filesList = sh(
+      // no error if the dir does not exist or is empty
+      script: "ls -d $cleanUpDir/* || true",
+      returnStdout: true
+    )
 
-  // each file contains a list of GUIDs to delete in s3
-  for (filePath in filesList.readLines()) {
-    // move the file to the current workspace so that other jenkins
-    // sessions will not try to use it to clean up
-    try {
-      sh "mv $filePath $localCopy || true"
-      fileContents = new File(localCopy).text
+    // each file contains a list of GUIDs to delete in s3
+    for (filePath in filesList.readLines()) {
+      // move the file to the current workspace so that other jenkins
+      // sessions will not try to use it to clean up
+      try {
+        sh "mv $filePath $localCopy || true"
+        fileContents = new File(localCopy).text
 
-      for (guid in fileContents.readLines()) {
-        // if the file does not exist, no error is thrown
-        sh "aws s3 rm --recursive s3://$qaBucket/$guid"
+        for (guid in fileContents.readLines()) {
+          // if the file does not exist, no error is thrown
+          sh "aws s3 rm --recursive s3://$qaBucket/$guid"
+        }
+
+        sh "rm $localCopy"
       }
-
-      sh "rm $localCopy"
+      catch (FileNotFoundException e) {
+        // if we can't move it, another session is using it: do nothing
+      }
     }
-    catch (FileNotFoundException e) {
-      // if we can't move it, another session is using it: do nothing
-    }
-  }
+  })
 }
 
 /**
