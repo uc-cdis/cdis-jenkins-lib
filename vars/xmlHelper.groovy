@@ -73,9 +73,11 @@ def identifyFailedTestSuites() {
 
       def testSuiteResults = StringUtils.chomp(testSuiteResultsRaw).split(",")
       println(testSuiteResults)
-                  
-      if ('failed' in testSuiteResults) {
+
+      if ('failed' in testSuiteResults && testSuiteResults.last() != "passed") {
         failedTestSuites.add( StringUtils.chomp(testSuiteName) )
+      } else {
+        println("Test suite succeeded on retries!")
       }
     }
     println("full list of failedTestSuites: ${failedTestSuites}")
