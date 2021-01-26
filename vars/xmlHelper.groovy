@@ -80,7 +80,7 @@ def identifyFailedTestSuites() {
         // it will contain something like [failed,failed,passed]
         if (testSuiteResults.last() == "passed") {
           println("WARN: Test suite succeeded on retries!")
-          continue
+          return
         }
         // if a single test scenario of the suite failed
         // add the suite name to the list of failures
