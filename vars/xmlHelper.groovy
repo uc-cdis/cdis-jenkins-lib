@@ -75,7 +75,7 @@ def identifyFailedTestSuites() {
       println(testSuiteResults)
 
       // if the test contains a result that is not "passed"
-      if ('failed' in testSuiteResults) {
+      if (!testSuiteResults.contains("passed")) {
         // if the test has succeeded on retries
         // it will contain something like [failed,failed,passed]
         if (testSuiteResults.last() == "passed") {
