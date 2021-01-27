@@ -74,12 +74,13 @@ def identifyFailedTestSuites() {
       def testSuiteResults = StringUtils.chomp(testSuiteResultsRaw).split(",")
       println(testSuiteResults)
 
-      // if the test contains a result that is not "passed"
-      if (!testSuiteResults.contains("passed")) {
+      // if the test contains a result that is not "passed" ("pending" or "failed")
+      if ("failed" in testSuiteResults || "pending" in testSuiteResults) {
         // if the test has succeeded on retries
         // it will contain something like [failed,failed,passed]
+        // TODO: If the last scenario passes, this could potentially ignore a failure in the first scenarios
         if (testSuiteResults.last() == "passed") {
-          println("WARN: Test suite succeeded on retries!")
+          println("WARN: Looks like the test suite succeeded on retries!")
           return
         }
         // if a single test scenario of the suite failed
