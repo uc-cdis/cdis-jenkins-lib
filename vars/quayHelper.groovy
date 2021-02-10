@@ -20,7 +20,7 @@ def waitForBuild(String repoName, String formattedBranch) {
   def noPendingQuayBuilds = false
   while(quayImageReady != true && noPendingQuayBuilds != true) {
     noPendingQuayBuilds = true
-    currentTime = new Date().getTime()/1000 as Integer
+    currentTime = new Date().getTime()
     
     DateFormat friendlyFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS Z");
     String timeoutFormatted = friendlyFormat.format(timeout);
