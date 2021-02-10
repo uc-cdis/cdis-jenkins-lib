@@ -79,6 +79,10 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   sh(returnStdout: true, script: "if cat tmpGitClone/$changedDir/manifest.json | jq --exit-status '.ssjdispatcher' >/dev/null; then "
     + "jq -r .ssjdispatcher < tmpGitClone/$changedDir/manifest.json > ssjdispatcher_block.json; "
     + "fi")
+  // fetch indexd block from the target environment
+  sh(returnStdout: true, script: "if cat tmpGitClone/$changedDir/manifest.json | jq --exit-status '.indexd' >/dev/null; then "
+    + "jq -r .indexd < tmpGitClone/$changedDir/manifest.json > indexd_block.json; "
+    + "fi")
   String s = sh(returnStdout: true, script: "jq -r keys < cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   println s
   def keys = new groovy.json.JsonSlurper().parseText(s)
@@ -118,6 +122,10 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   // replace ssjdispatcher block
   sh(returnStdout: true, script: "if [ -f \"ssjdispatcher_block.json\" ]; then "
     + "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sp \"\$(cat ssjdispatcher_block.json)\" '(.ssjdispatcher) = \$sp' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
+    + "fi")
+  // replace indexd block
+  sh(returnStdout: true, script: "if [ -f \"indexd_block.json\" ]; then "
+    + "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sp \"\$(cat indexd_block.json)\" '(.indexd) = \$sp' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
     + "fi")
   String rs = sh(returnStdout: true, script: "cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   return rs
