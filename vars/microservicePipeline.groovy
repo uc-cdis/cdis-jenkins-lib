@@ -284,9 +284,12 @@ def call(Map config) {
       }
 
       def testsToParallelize = [:]
+      List<String> failedTestSuites = [];
 
       selectedTests.each {selectedTest ->
-        testsToParallelize["parallel-${selectedTest}"] = {
+        selectedTestLabelSplit = selectedTest.split("/")
+        selectedTestLabel = "test-" + selectedTestLabelSplit[1] + "-" + selectedTestLabelSplit[2]
+        testsToParallelize["parallel-${selectedTestLabel}"] = {
           stage('RunTest') {
             try {
               if(!doNotRunTests) {
@@ -301,6 +304,7 @@ def call(Map config) {
                 Utils.markStageSkippedForConditional(STAGE_NAME)
               }
             } catch (ex) {
+              failedTestSuites.add(selectedTestLabel);
               metricsHelper.writeMetricWithResult(STAGE_NAME, false)
               throw ex
             }
@@ -309,6 +313,20 @@ def call(Map config) {
       }
 
       parallel testsToParallelize
+
+      stage('ProcessCIResults') {
+       try {
+        if(!doNotRunTests) {
+          testHelper.processCIResults(failedTestSuites)
+        } else {
+          Utils.markStageSkippedForConditional(STAGE_NAME)
+        }
+       } catch (ex) {
+         metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+         throw ex
+       }
+       metricsHelper.writeMetricWithResult(STAGE_NAME, true)
+      }
 
       stage('CleanS3') {
        try {
