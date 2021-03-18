@@ -1,4 +1,4 @@
-#!groovy
+u!groovy
 
 import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 
@@ -265,24 +265,33 @@ def call(Map config) {
        }
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
-      stage('RunTests') {
-       try {
-        if(!doNotRunTests) {
-          testHelper.runIntegrationTests(
-            kubectlNamespace,
-            pipeConfig.serviceTesting.name,
-            testedEnv,
-            isGen3Release,
-            selectedTests
-          )
-        } else {
-          Utils.markStageSkippedForConditional(STAGE_NAME)
+      def testsToParallelize = [:]
+
+      selectedTests.each {selectedTest ->
+        testsToParallelize["parallel-${selectedTest}"] = {
+          stage('RunTest') {
+            try {
+              if(!doNotRunTests) {
+                testHelper.runIntegrationTests(
+                  kubectlNamespace,
+                  pipeConfig.serviceTesting.name,
+                  testedEnv,
+                  isGen3Release,
+                  selectedTest
+                )
+              } else {
+                Utils.markStageSkippedForConditional(STAGE_NAME)
+              }
+            } catch (ex) {
+              metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+              throw ex
+            }
+          }
         }
-       } catch (ex) {
-         metricsHelper.writeMetricWithResult(STAGE_NAME, false)
-         throw ex
-       }
       }
+
+      parallel testsToParallelize
+
       stage('CleanS3') {
        try {
         if(!doNotRunTests) {

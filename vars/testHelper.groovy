@@ -34,7 +34,7 @@ def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) 
 * @param service - name of service the test is being run for
 * @param testedEnv - environment the test is being run for (for manifest PRs)
 */
-def runIntegrationTests(String namespace, String service, String testedEnv, String isGen3Release,  List<String> selectedTests = ['all']) {
+def runIntegrationTests(String namespace, String service, String testedEnv, String isGen3Release,  String selectedTest) {
   withCredentials([
     usernamePassword(credentialsId: 'ras-test-user1-for-ci-tests', usernameVariable: 'RAS_TEST_USER_1_USERNAME', passwordVariable: 'RAS_TEST_USER_1_PASSWORD'),
     usernamePassword(credentialsId: 'ras-test-user2-for-ci-tests', usernameVariable: 'RAS_TEST_USER_2_USERNAME', passwordVariable: 'RAS_TEST_USER_2_PASSWORD')
@@ -46,9 +46,8 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         sh "mkdir output"
         testResult = null
         List<String> failedTestSuites = [];
-        selectedTests.each {selectedTest ->
-          testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --selectedTest=${selectedTest}", returnStatus: true);
-        }
+        testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --selectedTest=${selectedTest}", returnStatus: true);
+        
         // check XMLs inside the output folder
         failedTestSuites = xmlHelper.identifyFailedTestSuites()
         def featureLabelMap = xmlHelper.assembleFeatureLabelMap(failedTestSuites)
@@ -65,19 +64,15 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         def successMsg = "Successful CI run for https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :tada:"
         if (testResult != 0) {
           def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
-          if (failedTestSuites.size() < 10) {
-            def commaSeparatedListOfLabels = ""
-            featureLabelMap.each { testSuite, retryLabel ->
-              failureMsg += " - Test Suite *${testSuite}* failed :red_circle: (label :label: *${retryLabel}*)\n"
-              commaSeparatedListOfLabels += "${retryLabel}"
-              // add comma except for the last one
-              if(testSuite != featureLabelMap.keySet().last()) {
-                commaSeparatedListOfLabels += ","                
-              }
+          def commaSeparatedListOfLabels = ""
+          featureLabelMap.each { testSuite, retryLabel ->
+            failureMsg += " - Test Suite *${testSuite}* failed :red_circle: (label :label: *${retryLabel}*)\n"
+            commaSeparatedListOfLabels += "${retryLabel}"
+            // add comma except for the last one
+            if(testSuite != featureLabelMap.keySet().last()) {
+              commaSeparatedListOfLabels += ","                
             }
             failureMsg += " To label & retry, just send the following message: \n @qa-bot replay-pr ${REPO_NAME} ${PR_NUMBER} ${commaSeparatedListOfLabels}"
-          } else {
-            failureMsg += " >10 test suites failed on this PR check :rotating_light:. This might indicate an environmental/config issue. cc: @planxqa :allthethings: :allthethings: :allthethings:"
           }
 
           slackSend(color: 'bad', channel: "#gen3-qa-notifications", message: failureMsg)
