@@ -267,6 +267,22 @@ def call(Map config) {
        }
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
+      stage('InstallNodeJSDependencies') {
+       try {
+        if(!doNotRunTests) {
+          dir('gen3-qa') {
+            sh "npm ci"
+          }
+        } else {
+          Utils.markStageSkippedForConditional(STAGE_NAME)
+        }
+       } catch (ex) {
+         metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+         throw ex
+       }
+       metricsHelper.writeMetricWithResult(STAGE_NAME, true)
+      }
+
       def testsToParallelize = [:]
 
       selectedTests.each {selectedTest ->
