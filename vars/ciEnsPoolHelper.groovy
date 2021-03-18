@@ -1,6 +1,6 @@
 def fetchCIEnvs() {
   try{
-    jenkins_envs_url="https://gist.githubusercontent.com/themarcelor/35924d625591d6804a1b838f02306819/raw/cc4c80e9562152076efcf811af3cfd175079fbf0/jenkins-envs.txt"
+    jenkins_envs_url="https://cdistest-public-test-bucket.s3.amazonaws.com/jenkins-envs.txt";
     println("Shooting a request to: " + jenkins_envs_url);
     def get = new URL(jenkins_envs_url).openConnection();
     def getRC = get.getResponseCode();
