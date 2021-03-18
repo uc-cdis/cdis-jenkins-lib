@@ -41,9 +41,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
   ]) {
     dir('gen3-qa') {
       gen3Qa(namespace, {
-        // clean up old test artifacts in the workspace
-        sh "/bin/rm -rf output/ || true"
-        sh "mkdir output"
+        sh "mkdir -p output"
         testResult = null
         List<String> failedTestSuites = [];
         testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --selectedTest=${selectedTest}", returnStatus: true);
