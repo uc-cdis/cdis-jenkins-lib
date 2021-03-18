@@ -283,24 +283,6 @@ def call(Map config) {
          throw ex
        }
       }
-stage('RunTests') {
-       try {
-        if(!doNotRunTests) {
-          testHelper.runIntegrationTests(
-            kubectlNamespace,
-            pipeConfig.serviceTesting.name,
-            testedEnv,
-            isGen3Release,
-            selectedTests
-          )
-        } else {
-          Utils.markStageSkippedForConditional(STAGE_NAME)
-        }
-       } catch (ex) {
-         metricsHelper.writeMetricWithResult(STAGE_NAME, false)
-         throw ex
-       }
-      }
       stage('CleanS3') {
        try {
         if(!doNotRunTests) {
