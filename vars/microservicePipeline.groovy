@@ -9,7 +9,7 @@ import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 */
 def call(Map config) {
   node('master') {
-    def AVAILABLE_NAMESPACES = ['jenkins-blood', 'jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
+    def AVAILABLE_NAMESPACES = ciEnsPoolHelper.fetchCIEnvs()
     List<String> namespaces = []
     List<String> selectedTests = []
     doNotRunTests = false
@@ -266,6 +266,24 @@ def call(Map config) {
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
       stage('RunTests') {
+       try {
+        if(!doNotRunTests) {
+          testHelper.runIntegrationTests(
+            kubectlNamespace,
+            pipeConfig.serviceTesting.name,
+            testedEnv,
+            isGen3Release,
+            selectedTests
+          )
+        } else {
+          Utils.markStageSkippedForConditional(STAGE_NAME)
+        }
+       } catch (ex) {
+         metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+         throw ex
+       }
+      }
+stage('RunTests') {
        try {
         if(!doNotRunTests) {
           testHelper.runIntegrationTests(
