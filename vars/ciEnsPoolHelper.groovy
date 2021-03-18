@@ -8,7 +8,7 @@ def fetchCIEnvs() {
     List<String> ciEnvironments = [];    
     if(getRC.equals(200)) {
       ciEnvsRaw = get.getInputStream().getText();
-      ciEnvironments = new String( ciEnvsRaw, 'UTF-8' ).split( '\n' )
+      ciEnvironments = ciEnvsRaw.split('\n')
     }
     return ciEnvironments;
   } catch (e) {
