@@ -9,7 +9,7 @@ import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 */
 def call(Map config) {
   node('master') {
-    def AVAILABLE_NAMESPACES = ['jenkins-blood', 'jenkins-brain', 'jenkins-niaid', 'jenkins-dcp', 'jenkins-genomel']
+    def AVAILABLE_NAMESPACES = ciEnsPoolHelper.fetchCIEnvs()
     List<String> namespaces = []
     List<String> selectedTests = []
     doNotRunTests = false
