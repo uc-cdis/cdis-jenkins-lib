@@ -13,6 +13,7 @@ def call(Map config) {
     List<String> namespaces = []
     List<String> selectedTests = []
     doNotRunTests = false
+    runParallelTests = false
     isGen3Release = "false"
     prLabels = null
     kubectlNamespace = null
@@ -46,6 +47,10 @@ def call(Map config) {
             case "doc-only":
               println('Skip tests if git diff matches expected criteria')
 	      doNotRunTests = docOnlyHelper.checkTestSkippingCriteria()
+              break
+            case "parallel-testing":
+              println('Run labelled test suites in parallel')
+              runParallelTests = true
               break
             case "decommission-environment":
               println('Skip tests if an environment folder is deleted')
@@ -283,49 +288,70 @@ def call(Map config) {
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
 
-      def testsToParallelize = [:]
-      List<String> failedTestSuites = [];
+      if(runParallelTests) {
+        stage('RunTests') {
+          try {
+            if(!doNotRunTests) {
+              testHelper.soonToBeLegacyRunIntegrationTests(
+                kubectlNamespace,
+                pipeConfig.serviceTesting.name,
+                testedEnv,
+                isGen3Release,
+                selectedTests
+              )
+            } else {
+              Utils.markStageSkippedForConditional(STAGE_NAME)
+            }
+          } catch (ex) {
+            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+            throw ex
+          }
+        }
+      } else {
+        def testsToParallelize = [:]
+        List<String> failedTestSuites = [];
 
-      selectedTests.each {selectedTest ->
-        selectedTestLabelSplit = selectedTest.split("/")
-        selectedTestLabel = "test-" + selectedTestLabelSplit[1] + "-" + selectedTestLabelSplit[2]
-        testsToParallelize["parallel-${selectedTestLabel}"] = {
-          stage('RunTest') {
-            try {
-              if(!doNotRunTests) {
-                testHelper.runIntegrationTests(
-                  kubectlNamespace,
-                  pipeConfig.serviceTesting.name,
-                  testedEnv,
-                  isGen3Release,
-                  selectedTest
-                )
-              } else {
-                Utils.markStageSkippedForConditional(STAGE_NAME)
+        selectedTests.each {selectedTest ->
+          selectedTestLabelSplit = selectedTest.split("/")
+          selectedTestLabel = "test-" + selectedTestLabelSplit[1] + "-" + selectedTestLabelSplit[2]
+          testsToParallelize["parallel-${selectedTestLabel}"] = {
+            stage('RunTest') {
+              try {
+                if(!doNotRunTests) {
+                  testHelper.runIntegrationTests(
+                    kubectlNamespace,
+                    pipeConfig.serviceTesting.name,
+                    testedEnv,
+                    isGen3Release,
+                    selectedTest
+                  )
+                } else {
+                  Utils.markStageSkippedForConditional(STAGE_NAME)
+                }
+              } catch (ex) {
+                failedTestSuites.add(selectedTestLabel);
+                metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+                throw ex
               }
-            } catch (ex) {
-              failedTestSuites.add(selectedTestLabel);
-              metricsHelper.writeMetricWithResult(STAGE_NAME, false)
-              throw ex
             }
           }
         }
-      }
 
-      parallel testsToParallelize
+        parallel testsToParallelize
 
-      stage('ProcessCIResults') {
-       try {
-        if(!doNotRunTests) {
-          testHelper.processCIResults(failedTestSuites)
-        } else {
-          Utils.markStageSkippedForConditional(STAGE_NAME)
+        stage('ProcessCIResults') {
+          try {
+            if(!doNotRunTests) {
+              testHelper.processCIResults(failedTestSuites)
+            } else {
+              Utils.markStageSkippedForConditional(STAGE_NAME)
+            }
+          } catch (ex) {
+            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+            throw ex
+          }
+          metricsHelper.writeMetricWithResult(STAGE_NAME, true)
         }
-       } catch (ex) {
-         metricsHelper.writeMetricWithResult(STAGE_NAME, false)
-         throw ex
-       }
-       metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
 
       stage('CleanS3') {
