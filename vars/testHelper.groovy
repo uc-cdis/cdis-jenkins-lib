@@ -160,6 +160,7 @@ def processCIResults(String namespace, List<String> failedTestSuites = []) {
   dir('gen3-qa') {
     gen3Qa(namespace, {
       def successMsg = "Successful CI run for https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :tada:"
+      def commonMsg = "It took ${currentBuild.durationString} :clock1:\n"
       if (failedTestSuites.size() > 0) {
         def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
           def commaSeparatedListOfLabels = ""
@@ -172,11 +173,13 @@ def processCIResults(String namespace, List<String> failedTestSuites = []) {
             }
             failureMsg += " To label :label: & retry :jenkins:, just send the following message: \n @qa-bot replay-pr ${REPO_NAME} ${PR_NUMBER} ${commaSeparatedListOfLabels}"
           }
+          failureMsg += "\n " + commonMsg
 
           slackSend(color: 'bad', channel: "#gen3-qa-notifications", message: failureMsg)
           currentBuild.result = 'ABORTED'
           error("aborting build - testsuite failed")
         } else {
+          successMsg += "\n " + commonMsg
           slackSend(color: "#439FE0", channel: "#gen3-qa-notifications", message: successMsg)
         }
     })
