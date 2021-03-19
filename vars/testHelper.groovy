@@ -83,12 +83,12 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
             failureMsg += " >10 test suites failed on this PR check :rotating_light:. This might indicate an environmental/config issue. cc: @planxqa :allthethings: :allthethings: :allthethings:"
           }
           failureMsg += "\n " + commonMsg
-          successMsg += "\n " + commonMsg
 
           slackSend(color: 'bad', channel: "#gen3-qa-notifications", message: failureMsg)
           currentBuild.result = 'ABORTED'
           error("aborting build - testsuite failed")
         } else {
+          successMsg += "\n " + commonMsg
           slackSend(color: "#439FE0", channel: "#gen3-qa-notifications", message: successMsg)
         }
       })
