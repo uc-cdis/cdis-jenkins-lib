@@ -110,31 +110,40 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         List<String> failedTestSuites = [];
         testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --selectedTest=${selectedTest}", returnStatus: true);
         
-        // check XMLs inside the output folder
-        failedTestSuites = xmlHelper.identifyFailedTestSuites()
-        def featureLabelMap = xmlHelper.assembleFeatureLabelMap(failedTestSuites)
-
-        if (testResult == 0) {
-          // if the test succeeds, then verify that we got some test results ...
-          testResult = sh(script: "ls output/ | grep '.*\\.xml'", returnStatus: true)
-        }
         dir('output') {
           // collect and archive service logs
           echo "Archiving service logs via 'gen3 logs snapshot'"
           sh(script: "bash ${env.WORKSPACE}/cloud-automation/gen3/bin/logs.sh snapshot", returnStatus: true)
         }
-        def successMsg = "Successful CI run for https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :tada:"
+
         if (testResult != 0) {
-          def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
+          error("testsuite ${selectedTest} failed")
+        }
+      })
+    }
+  }
+}
+
+/**
+* Process the results from the parallel testing
+*
+* @param failedTestSuites - list of test suites that failed during parallel execution
+*/
+def processCIResults(List<String> failedTestSuites = []) {
+  dir('gen3-qa') {
+    gen3Qa(namespace, {
+      def successMsg = "Successful CI run for https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :tada:"
+      if (failedTestSuites.size() > 0) {
+        def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
           def commaSeparatedListOfLabels = ""
-          featureLabelMap.each { testSuite, retryLabel ->
-            failureMsg += " - Test Suite *${testSuite}* failed :red_circle: (label :label: *${retryLabel}*)\n"
+          failedTestSuites.each { testSuite ->
+            failureMsg += " - *${testSuite}* failed :red_circle: \n"
             commaSeparatedListOfLabels += "${retryLabel}"
             // add comma except for the last one
             if(testSuite != featureLabelMap.keySet().last()) {
-              commaSeparatedListOfLabels += ","                
+              commaSeparatedListOfLabels += ","
             }
-            failureMsg += " To label & retry, just send the following message: \n @qa-bot replay-pr ${REPO_NAME} ${PR_NUMBER} ${commaSeparatedListOfLabels}"
+            failureMsg += " To label :label: & retry :jenkins:, just send the following message: \n @qa-bot replay-pr ${REPO_NAME} ${PR_NUMBER} ${commaSeparatedListOfLabels}"
           }
 
           slackSend(color: 'bad', channel: "#gen3-qa-notifications", message: failureMsg)
@@ -143,8 +152,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         } else {
           slackSend(color: "#439FE0", channel: "#gen3-qa-notifications", message: successMsg)
         }
-      })
-    }
+    })
   }
 }
 

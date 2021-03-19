@@ -288,7 +288,7 @@ def call(Map config) {
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
 
-      if(runParallelTests) {
+      if(!runParallelTests) {
         stage('RunTests') {
           try {
             if(!doNotRunTests) {
