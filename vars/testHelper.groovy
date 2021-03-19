@@ -120,6 +120,9 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         if (fileExists('gen3-qa-mutext.marker')) {
           echo 'gen3-qa-mutext.marker found!'
           gen3QAEnvVars += "export GEN3_SKIP_PROJ_SETUP=true"
+          // Give a chance for the first thread to create program and project
+          // TODO: Arbitrary sleeps smell like sulfur, we need to look into a callback from gen3-qa/test_setup.js
+          sleep(10000)
         } else {
           echo 'the marker file has not been created yet, creating gen3-qa-mutext.marker now...'
           writeFile(file: 'gen3-qa-mutext.marker', text: "--> ${selectedTest} got here first!")
