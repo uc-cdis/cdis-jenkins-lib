@@ -167,7 +167,7 @@ def processCIResults(String namespace, List<String> failedTestSuites = []) {
           def commaSeparatedListOfLabels = ""
           failedTestSuites.each { testSuite ->
             failureMsg += " - *${testSuite}* failed :red_circle: \n"
-            commaSeparatedListOfLabels += "${retryLabel}"
+            commaSeparatedListOfLabels += "${testSuite}"
             // add comma except for the last one
             if(testSuite != featureLabelMap.keySet().last()) {
               commaSeparatedListOfLabels += ","
