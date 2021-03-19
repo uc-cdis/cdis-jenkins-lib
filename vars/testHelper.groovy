@@ -46,16 +46,25 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
         sh "mkdir output"
         testResult = null
         List<String> failedTestSuites = [];
+        TestSuitesNonZeroStatusCodes = [];
         selectedTests.each {selectedTest ->
           testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --selectedTest=${selectedTest}", returnStatus: true);
+          if (testResult != 0){
+            TestSuitesNonZeroStatusCodes.add(testResult)
+            //TODO: get which test suite is failed
+            //TODO: using test suite and label map to replace XML parsing
+          }
         }
         // check XMLs inside the output folder
         failedTestSuites = xmlHelper.identifyFailedTestSuites()
         def featureLabelMap = xmlHelper.assembleFeatureLabelMap(failedTestSuites)
-
-        if (testResult == 0) {
+        
+        if (TestSuitesNonZeroStatusCodes.size() == 0) {
           // if the test succeeds, then verify that we got some test results ...
           testResult = sh(script: "ls output/ | grep '.*\\.xml'", returnStatus: true)
+          if (testResult != 0){
+            TestSuitesNonZeroStatusCodes.add(testResult)
+          }
         }
         dir('output') {
           // collect and archive service logs
@@ -64,7 +73,7 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
         }
         def successMsg = "Successful CI run for https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :tada:"
         def commonMsg = "Duration: ${currentBuild.durationString} :clock1:\n"
-        if (testResult != 0) {
+        if (TestSuitesNonZeroStatusCodes.size() != 0) {
           def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
           
           if (failedTestSuites.size() < 10) {
