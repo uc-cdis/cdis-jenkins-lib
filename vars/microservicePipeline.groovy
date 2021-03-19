@@ -208,6 +208,7 @@ def call(Map config) {
 	}
       }
 
+/*
       stage('K8sReset') {
        try {
         if(!doNotRunTests) {
@@ -223,6 +224,7 @@ def call(Map config) {
        }
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
+*/
 
       stage('VerifyClusterHealth') {
        try {
