@@ -127,7 +127,10 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
              
         testResult = null
         List<String> failedTestSuites = [];
-        testResult = sh(script: "${gen3QAEnvVars} && bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --selectedTest=${selectedTest}", returnStatus: true);
+        testResult = sh(script: """
+          ${gen3QAEnvVars}
+          bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --selectedTest=${selectedTest}
+        """, returnStatus: true);
         
         dir('output') {
           // collect and archive service logs
