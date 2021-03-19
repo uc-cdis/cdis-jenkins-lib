@@ -63,8 +63,11 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
           sh(script: "bash ${env.WORKSPACE}/cloud-automation/gen3/bin/logs.sh snapshot", returnStatus: true)
         }
         def successMsg = "Successful CI run for https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :tada:"
+        def commonMsg = "It took ${currentBuild.durationString} :clock1:\n"
         if (testResult != 0) {
           def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
+          failureMsg += " It took ${currentBuild.durationString} :clock1:\n"
+          
           if (failedTestSuites.size() < 10) {
             def commaSeparatedListOfLabels = ""
             featureLabelMap.each { testSuite, retryLabel ->
@@ -79,6 +82,8 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
           } else {
             failureMsg += " >10 test suites failed on this PR check :rotating_light:. This might indicate an environmental/config issue. cc: @planxqa :allthethings: :allthethings: :allthethings:"
           }
+          failureMsg += "\n " + commonMsg
+          successMsg += "\n " + commonMsg
 
           slackSend(color: 'bad', channel: "#gen3-qa-notifications", message: failureMsg)
           currentBuild.result = 'ABORTED'
