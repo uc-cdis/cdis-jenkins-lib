@@ -111,9 +111,23 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
     dir('gen3-qa') {
       gen3Qa(namespace, {
         sh "mkdir -p output"
+
+        // Need a mutex so only one parallel test runs the GEN3 PROJ SETUP
+        // We must run the gcp setup from https://github.com/uc-cdis/gen3-qa/blob/master/test_setup.js only once
+        // otherwise we will face "There were concurrent policy changes" errors
+        // The first thread to reach this stage must drop a marker file
+        def gen3QAEnvVars = ""
+        if (fileExists('gen3-qa-mutext.marker')) {
+          echo 'gen3-qa-mutext.marker found!'
+          gen3QAEnvVars += "export GEN3_SKIP_PROJ_SETUP=true"
+        } else {
+          echo 'the marker file has not been created yet, creating gen3-qa-mutext.marker now...'
+          writeFile(file: 'gen3-qa-mutext.marker', text: "--> ${selectedTest} got here first!")
+        }
+             
         testResult = null
         List<String> failedTestSuites = [];
-        testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --selectedTest=${selectedTest}", returnStatus: true);
+        testResult = sh(script: "${gen3QAEnvVars} && bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --selectedTest=${selectedTest}", returnStatus: true);
         
         dir('output') {
           // collect and archive service logs
