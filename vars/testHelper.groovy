@@ -63,7 +63,7 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
           sh(script: "bash ${env.WORKSPACE}/cloud-automation/gen3/bin/logs.sh snapshot", returnStatus: true)
         }
         def successMsg = "Successful CI run for https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :tada:"
-        def commonMsg = "It took ${currentBuild.durationString} :clock1:\n"
+        def commonMsg = "Duration: ${currentBuild.durationString} :clock1:\n"
         if (testResult != 0) {
           def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
           
@@ -161,7 +161,7 @@ def processCIResults(String namespace, List<String> failedTestSuites = []) {
   dir('gen3-qa') {
     gen3Qa(namespace, {
       def successMsg = "Successful CI run for https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :tada:"
-      def commonMsg = "It took ${currentBuild.durationString} :clock1:\n"
+      def commonMsg = "Duration ${currentBuild.durationString} :clock1:\n"
       if (failedTestSuites.size() > 0) {
         def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
           def commaSeparatedListOfLabels = ""
