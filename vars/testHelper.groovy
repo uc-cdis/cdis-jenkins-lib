@@ -7,7 +7,7 @@
 def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) {
   def PR_NUMBER = env.BRANCH_NAME.split('-')[1];
   def REPO_NAME = env.JOB_NAME.split('/')[1];
-  def vpc_name = sh(script: "kubectl get cm --namespace ${namespace} global -o jsonpath=\"{.data.environment}\"", returnStdout: true);
+  def vpc_name = sh(script: "kubectl get cm --namespace ${namespace} global -o jsonpath=\"{.data.environment}\"", returntdout: true);
   env_variables = ["GEN3_NOPROXY=true",
     "PR_NUMBER=${PR_NUMBER}",
     "REPO_NAME=${REPO_NAME}",
@@ -111,23 +111,23 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
       gen3Qa(namespace, {
         sh "mkdir -p output"
 
-        // Need a mutex so only one parallel test runs the GEN3 PROJ SETUP
+        // Need a mutex so only one parallel test can execute the codeceptjs bootstrap script
         // We must run the gcp setup from https://github.com/uc-cdis/gen3-qa/blob/master/test_setup.js only once
         // otherwise we will face "There were concurrent policy changes" errors
         // The first thread to reach this stage must drop a marker file
-        def gen3QAEnvVars = ""
         if (fileExists('gen3-qa-mutext.marker')) {
           echo 'gen3-qa-mutext.marker found!'
-          gen3QAEnvVars += "export GEN3_SKIP_PROJ_SETUP=true"
-          
-          // Give a chance for the first thread to create program and project
           // TODO: Arbitrary sleeps smell like sulfur, we need to look into a callback from gen3-qa/test_setup.js
-          // sleep(10000)
-          // commenting this out for now since it seems to be working without the sleep :)
-       
+          sleep(10000)
+          sh(script: """
+            #!/bin/bash +x
+            # disable bootstrap script from codeceptjs
+            sed -i '/bootstrap\:/d' codecept.conf.js
+          """, returntdout: true);
         } else {
           echo 'the marker file has not been created yet, creating gen3-qa-mutext.marker now...'
           writeFile(file: 'gen3-qa-mutext.marker', text: "--> ${selectedTest} got here first!")
+          // Give a chance for the first thread to create program and project
         }
              
         testResult = null
