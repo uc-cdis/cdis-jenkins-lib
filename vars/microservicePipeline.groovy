@@ -332,7 +332,6 @@ def call(Map config) {
               } catch (ex) {
                 failedTestSuites.add(selectedTestLabel);
                 metricsHelper.writeMetricWithResult(STAGE_NAME, false)
-                throw ex
               }
             }
           }
