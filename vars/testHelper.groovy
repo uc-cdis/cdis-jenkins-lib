@@ -66,7 +66,6 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
         def commonMsg = "It took ${currentBuild.durationString} :clock1:\n"
         if (testResult != 0) {
           def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
-          failureMsg += " It took ${currentBuild.durationString} :clock1:\n"
           
           if (failedTestSuites.size() < 10) {
             def commaSeparatedListOfLabels = ""
