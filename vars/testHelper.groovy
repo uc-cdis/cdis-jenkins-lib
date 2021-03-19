@@ -122,7 +122,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
           sh(script: """
             #!/bin/bash +x
             # disable bootstrap script from codeceptjs
-            sed -i '/bootstrap\:/d' codecept.conf.js
+            sed -i '/bootstrap:/d' codecept.conf.js
           """, returntdout: true);
         } else {
           echo 'the marker file has not been created yet, creating gen3-qa-mutext.marker now...'
