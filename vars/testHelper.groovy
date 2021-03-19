@@ -173,25 +173,23 @@ def processCIResults(String namespace, List<String> failedTestSuites = []) {
       def commonMsg = "Duration ${currentBuild.durationString} :clock1:\n"
       if (failedTestSuites.size() > 0) {
         def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
-          def commaSeparatedListOfLabels = ""
-          failedTestSuites.each { testSuite ->
-            failureMsg += " - *${testSuite}* failed :red_circle: \n"
-            commaSeparatedListOfLabels += "${testSuite}"
-            // add comma except for the last one
-            if(testSuite != featureLabelMap.keySet().last()) {
-              commaSeparatedListOfLabels += ","
-            }
-            failureMsg += " To label :label: & retry :jenkins:, just send the following message: \n @qa-bot replay-pr ${REPO_NAME} ${PR_NUMBER} ${commaSeparatedListOfLabels}"
-          }
-          failureMsg += "\n " + commonMsg
-
-          slackSend(color: 'bad', channel: "#gen3-qa-notifications", message: failureMsg)
-          currentBuild.result = 'ABORTED'
-          error("aborting build - testsuite failed")
-        } else {
-          successMsg += "\n " + commonMsg
-          slackSend(color: "#439FE0", channel: "#gen3-qa-notifications", message: successMsg)
+        def commaSeparatedListOfLabels = ""
+        failedTestSuites.each { testSuite ->
+          failureMsg += " - *${testSuite}* failed :red_circle: \n"
+          commaSeparatedListOfLabels += "${testSuite},"
         }
+        commaSeparatedListOfLabels = commaSeparatedListOfLabels.substring(0, commaSeparatedListOfLabels.length() - 1)
+        failureMsg += " To label :label: & retry :jenkins:, just send the following message: \n @qa-bot replay-pr ${REPO_NAME} ${PR_NUMBER} ${commaSeparatedListOfLabels}"
+      
+        failureMsg += "\n " + commonMsg
+
+        slackSend(color: 'bad', channel: "#gen3-qa-notifications", message: failureMsg)
+        currentBuild.result = 'ABORTED'
+        error("aborting build - testsuite failed")
+      } else {
+        successMsg += "\n " + commonMsg
+        slackSend(color: "#439FE0", channel: "#gen3-qa-notifications", message: successMsg)
+      }
     })
   }
 }
