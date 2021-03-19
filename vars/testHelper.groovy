@@ -117,8 +117,10 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         // The first thread to reach this stage must drop a marker file
         if (fileExists('gen3-qa-mutext.marker')) {
           echo 'gen3-qa-mutext.marker found!'
-          // TODO: Arbitrary sleeps smell like sulfur, we need to look into a callback from gen3-qa/test_setup.js
-          sleep(10000)
+          // TODO: Initiate polling and only resume other parallel tests once
+          // the program project and all GCP dependencies are properly set
+          // we need to look into a callback from gen3-qa/test_setup.js
+          sleep(10)
           sh(script: """
             #!/bin/bash +x
             # disable bootstrap script from codeceptjs
