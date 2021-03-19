@@ -342,7 +342,7 @@ def call(Map config) {
         stage('ProcessCIResults') {
           try {
             if(!doNotRunTests) {
-              testHelper.processCIResults(failedTestSuites)
+              testHelper.processCIResults(kubectlNamespace, failedTestSuites)
             } else {
               Utils.markStageSkippedForConditional(STAGE_NAME)
             }
