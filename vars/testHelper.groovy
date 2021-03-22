@@ -129,7 +129,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
           // TODO: Initiate polling and only resume other parallel tests once
           // the program project and all GCP dependencies are properly set
           // we need to look into a callback from gen3-qa/test_setup.js
-          sleep(10)
+          sleep(20)
           sh(script: """
             #!/bin/bash +x
             # disable bootstrap script from codeceptjs
