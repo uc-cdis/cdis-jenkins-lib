@@ -105,7 +105,7 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
 }
 
 /**
-* Runs gen3-qa integration tests IN PARALLEL ヽ(ಠ_ಠ)ノ
+* Awesomely runs gen3-qa integration tests IN PARALLEL ヽ(ಠ_ಠ)ノ
 *
 * @param namespace - namespace to run integration tests in
 * @param service - name of service the test is being run for
@@ -176,12 +176,9 @@ def processCIResults(String namespace, List<String> failedTestSuites = []) {
       def commonMsg = "Duration ${currentBuild.durationString} :clock1:\n"
       if (failedTestSuites.size() > 0) {
         def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
-        def commaSeparatedListOfLabels = ""
-        failedTestSuites.each { testSuite ->
-          failureMsg += " - *${testSuite}* failed :red_circle: \n"
-          commaSeparatedListOfLabels += "${testSuite},"
-        }
-        commaSeparatedListOfLabels = commaSeparatedListOfLabels.substring(0, commaSeparatedListOfLabels.length() - 1)
+        failureMsg += failedTestSuites.collect { " - *${it}* failed :red_circle:" }.join "\n"         
+        commaSeparatedListOfLabels = failedTestSuites.join ","
+
         failureMsg += " To label :label: & retry :jenkins:, just send the following message: \n @qa-bot replay-pr ${REPO_NAME} ${PR_NUMBER} ${commaSeparatedListOfLabels}"
       
         failureMsg += "\n " + commonMsg
