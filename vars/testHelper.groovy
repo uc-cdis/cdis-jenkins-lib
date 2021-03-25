@@ -156,8 +156,10 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         if (testResult != 0) {
           // Mark as unstable for proper visual feedback in blue ocean
           // but let the ProcessCIResults stage deal with the error handling
-          currentBuild.result = 'UNSTABLE' 
-          error("testsuite ${selectedTest} failed")
+          currentBuild.result = 'UNSTABLE'
+          unstableMsg = "testsuite ${selectedTest} failed" 
+          unstable(unstableMsg)
+          throw new Exception(unstableMsg)
         }
       })
     }
