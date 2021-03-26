@@ -298,6 +298,7 @@ spec:
 	  script {
 	    try {
 	      if(!doNotRunTests) {
+			// selectedTests = ['suites/SheepdogAndPeregrine/submitAndQueryNodesTest.js']
 	        testHelper.runIntegrationTests(
 	          kubectlNamespace,
 	          pipeConfig.serviceTesting.name,
