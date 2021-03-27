@@ -134,7 +134,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
           def access_token = sh(script: "gen3 api access-token cdis.autotest@gmail.com || exit 0", returnStdout: true);
 
           // Query sheepdog for programs and projects
-          def sheepdogQueryOutput = sh(script: "curl -s -H \"Content-Type: application/json\"  -H \"Authorization: Bearer ${access_token}\" -X POST https://${testedEnv}/api/v0/submission/graphql/ --data-raw \"{\\\\"query\\\\":\\\\"{ project { project_id } }\\\\",\\\\"variables\\\\":null}\" || exit 0", returnStdout: true);
+          def sheepdogQueryOutput = sh(script: "curl -s -H \"Content-Type: application/json\"  -H \"Authorization: Bearer ${access_token}\" -X POST https://${testedEnv}/api/v0/submission/graphql/ --data-raw \"{\\\"query\\\":\\\"{ project { project_id } }\\\",\\\"variables\\\":null}\" || exit 0", returnStdout: true);
           println("sheepdogQueryOutput: ${sheepdogQueryOutput}");
 
           sleep(20)
