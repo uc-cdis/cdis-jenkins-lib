@@ -129,12 +129,13 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
           
           // Only let the other threads proceed if the program / projects are created successfully
           // TODO: Implement polling here
-          /*
-            QUERY PROGRAM/PROJECT
-            % curl -s -H "Content-Type: application/json"  -H "Authorization: Bearer ${ACCESS_TOKEN}" -X POST https://qa-dcp.planx-pla.net/api/v0/submission/graphql/ --data-raw "{\"query\":\"{ project { project_id } }\",\"variables\":null}"
-            SAMPLE OUTPUT
-            {"data":{"project":[{"project_id":"jnkns-jenkins2"},{"project_id":"DEV-test"},{"project_id":"jnkns-jenkins"}]}}
-          */
+          
+          // obtain an access token
+          def access_token = sh(script: "gen3 api access-token cdis.autotest@gmail.com || exit 0", returnStdout: true);
+
+          // Query sheepdog for programs and projects
+          def sheepdogQueryOutput = sh(script: "curl -s -H \"Content-Type: application/json\"  -H \"Authorization: Bearer ${access_token}" -X POST https://${testedEnv}/api/v0/submission/graphql/ --data-raw \"{\\"query\\":\\"{ project { project_id } }\\",\\"variables\\":null}\" || exit 0", returnStdout: true);
+          println("sheepdogQueryOutput: ${sheepdogQueryOutput}");
 
           sleep(20)
           sh(script: """

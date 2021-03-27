@@ -9,7 +9,7 @@ import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 */
 def call(Map config) {
   node('master') {
-    def AVAILABLE_NAMESPACES = ciEnsPoolHelper.fetchCIEnvs()
+    def AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs()
     List<String> namespaces = []
     List<String> selectedTests = []
     doNotRunTests = false
