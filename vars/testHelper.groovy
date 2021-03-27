@@ -137,7 +137,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
           def sheepdogQueryOutput = sh(script: """
             #!/bin/bash +x
             curl -s -H \"Content-Type: application/json\"  -H \"Authorization: Bearer ${access_token}\" -X POST https://${testedEnv}/api/v0/submission/graphql/ --data-raw \"{\\\"query\\\":\\\"{ project { project_id } }\\\",\\\"variables\\\":null}\"
-            echo $?
+            echo \$?
           """, returnStdout: true);
           println("sheepdogQueryOutput: ${sheepdogQueryOutput}");
 
