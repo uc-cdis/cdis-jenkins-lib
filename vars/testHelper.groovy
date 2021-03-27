@@ -126,9 +126,16 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         // The first thread to reach this stage must drop a marker file
         if (fileExists('gen3-qa-mutext.marker')) {
           echo 'gen3-qa-mutext.marker found!'
-          // TODO: Initiate polling and only resume other parallel tests once
-          // the program project and all GCP dependencies are properly set
-          // we need to look into a callback from gen3-qa/test_setup.js
+          
+          // Only let the other threads proceed if the program / projects are created successfully
+          // TODO: Implement polling here
+          /*
+            QUERY PROGRAM/PROJECT
+            % curl -s -H "Content-Type: application/json"  -H "Authorization: Bearer ${ACCESS_TOKEN}" -X POST https://qa-dcp.planx-pla.net/api/v0/submission/graphql/ --data-raw "{\"query\":\"{ project { project_id } }\",\"variables\":null}"
+            SAMPLE OUTPUT
+            {"data":{"project":[{"project_id":"jnkns-jenkins2"},{"project_id":"DEV-test"},{"project_id":"jnkns-jenkins"}]}}
+          */
+
           sleep(20)
           sh(script: """
             #!/bin/bash +x
