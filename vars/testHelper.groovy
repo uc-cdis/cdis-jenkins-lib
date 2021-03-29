@@ -131,7 +131,11 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
           // TODO: Implement polling here
           
           // obtain an access token
-          def access_token = sh(script: "gen3 api access-token cdis.autotest@gmail.com || exit 0", returnStdout: true);
+          def access_token = sh(script: """
+            #!/bin/bash +x
+            source \${GEN3_HOME}/gen3/lib/utils.sh
+            gen3 api access-token cdis.autotest@gmail.com || exit 0
+          """, returnStdout: true);
 
           // Query sheepdog for programs and projects
           def sheepdogQueryOutput = sh(script: """
