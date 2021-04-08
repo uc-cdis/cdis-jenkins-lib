@@ -124,7 +124,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         // We must run the gcp setup from https://github.com/uc-cdis/gen3-qa/blob/master/test_setup.js only once
         // otherwise we will face "There were concurrent policy changes" errors
         // The first thread to reach this stage must drop a marker file
-        if (fileExists('gen3-qa-mutext.marker')) {
+        if (fileExists('gen3-qa-mutex.marker')) {
           echo 'gen3-qa-mutext.marker found!'
           
           // Only let the other threads proceed if the program / projects are created successfully
