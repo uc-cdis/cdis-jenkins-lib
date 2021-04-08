@@ -125,7 +125,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         // otherwise we will face "There were concurrent policy changes" errors
         // The first thread to reach this stage must drop a marker file
         if (fileExists('gen3-qa-mutex.marker')) {
-          echo 'gen3-qa-mutext.marker found!'
+          echo 'gen3-qa-mutex.marker found!'
           
           // Only let the other threads proceed if the program / projects are created successfully
           // TODO: Implement polling here
@@ -152,8 +152,8 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
             sed -i '/bootstrap:/d' codecept.conf.js
           """, returntdout: true);
         } else {
-          echo 'the marker file has not been created yet, creating gen3-qa-mutext.marker now...'
-          writeFile(file: 'gen3-qa-mutext.marker', text: "--> ${selectedTest} got here first!")
+          echo 'the marker file has not been created yet, creating gen3-qa-mutex.marker now...'
+          writeFile(file: 'gen3-qa-mutex.marker', text: "--> ${selectedTest} got here first!")
           // Give a chance for the first thread to create program and project
         }
              
