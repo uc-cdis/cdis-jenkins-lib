@@ -275,21 +275,6 @@ def call(Map config) {
        }
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
-      stage('InstallNodeJSDependencies') {
-       try {
-        if(!doNotRunTests) {
-          dir('gen3-qa') {
-            sh "npm ci"
-          }
-        } else {
-          Utils.markStageSkippedForConditional(STAGE_NAME)
-        }
-       } catch (ex) {
-         metricsHelper.writeMetricWithResult(STAGE_NAME, false)
-         throw ex
-       }
-       metricsHelper.writeMetricWithResult(STAGE_NAME, true)
-      }
 
       if(!runParallelTests) {
         stage('RunTests') {
@@ -311,6 +296,31 @@ def call(Map config) {
           }
         }
       } else {
+        stage('runNonConcurrentStuff') {
+          try {
+            if(!doNotRunTests) {
+              dir('gen3-qa') {
+
+                def access_token = sh(script: """
+                  #!/bin/bash -x
+                  . \${GEN3_HOME}/gen3/lib/utils.sh
+                """, returnStdout: true);
+
+                sh "npm ci"
+                env.GEN3_SKIP_PROJ_SETUP = "true"
+                // TODO: Create program & project
+                
+              }
+            } else {
+              Utils.markStageSkippedForConditional(STAGE_NAME)
+            }
+          }  catch (ex) {
+            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+            throw ex
+          }
+          metricsHelper.writeMetricWithResult(STAGE_NAME, true)
+        }
+
         def testsToParallelize = [:]
         List<String> failedTestSuites = [];
 
