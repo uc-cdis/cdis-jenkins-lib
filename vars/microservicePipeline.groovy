@@ -300,16 +300,12 @@ def call(Map config) {
           try {
             if(!doNotRunTests) {
               dir('gen3-qa') {
-
                 def access_token = sh(script: """
                   #!/bin/bash -x
-                  . \${GEN3_HOME}/gen3/lib/utils.sh
+                  npm ci
+                  node files/createProgramAndProjectsForTesting.js
                 """, returnStdout: true);
-
-                sh "npm ci"
                 env.GEN3_SKIP_PROJ_SETUP = "true"
-                // TODO: Create program & project
-                
               }
             } else {
               Utils.markStageSkippedForConditional(STAGE_NAME)
