@@ -105,6 +105,23 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
 }
 
 /**
+* Runs utility script to create programs and projects
+*
+* @param namespace - namespace where programs and projects will be created
+*/
+def runScriptToCreateProgramsAndProjects(String namespace) {
+  dir('gen3-qa') {
+    gen3Qa(namespace, {
+      sh(script: """
+         #!/bin/bash -x
+         npm ci
+         node files/createProgramAndProjectsForTesting.js
+      """, returnStdout: true);
+    })
+  }
+}
+
+/**
 * Awesomely runs gen3-qa integration tests IN PARALLEL ヽ(ಠ_ಠ)ノ
 *
 * @param namespace - namespace to run integration tests in

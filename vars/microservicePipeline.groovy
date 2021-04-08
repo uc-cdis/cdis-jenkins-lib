@@ -299,18 +299,12 @@ def call(Map config) {
         stage('runNonConcurrentStuff') {
           try {
             if(!doNotRunTests) {
-              dir('gen3-qa') {
-                def access_token = sh(script: """
-                  #!/bin/bash -x
-                  npm ci
-                  node files/createProgramAndProjectsForTesting.js
-                """, returnStdout: true);
-                env.GEN3_SKIP_PROJ_SETUP = "true"
-              }
+              testHelper.runScriptToCreateProgramsAndProjects(kubectlNamespace)
+              env.GEN3_SKIP_PROJ_SETUP = "true"
             } else {
               Utils.markStageSkippedForConditional(STAGE_NAME)
             }
-          }  catch (ex) {
+          } catch (ex) {
             metricsHelper.writeMetricWithResult(STAGE_NAME, false)
             throw ex
           }
