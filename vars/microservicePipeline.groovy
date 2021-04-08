@@ -242,6 +242,7 @@ def call(Map config) {
        }
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
+/*
       stage('GenerateData') {
        try {
         if(!doNotRunTests) {
@@ -275,7 +276,7 @@ def call(Map config) {
        }
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
-
+*/
       if(!runParallelTests) {
         stage('RunTests') {
           try {

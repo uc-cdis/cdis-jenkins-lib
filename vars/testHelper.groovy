@@ -115,6 +115,7 @@ def runScriptToCreateProgramsAndProjects(String namespace) {
       sh(script: """
          #!/bin/bash -x
          npm ci
+         export KUBECTL_NAMESPACE="${namespace}"
          node files/createProgramAndProjectsForTesting.js
       """, returnStdout: true);
     })
