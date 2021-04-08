@@ -59,6 +59,10 @@ def call(Map config) {
               println('Enable additional tests and automation')
               isGen3Release = "true"
               break
+            case "nightly-run":
+              println('Enable additional tests and automation for our nightly-release')
+              isGen3Release = "true"
+              break
             case "debug":
               println("Call npm test with --debug")
               println("leverage CodecepJS feature require('codeceptjs').output.debug feature")
