@@ -7,7 +7,7 @@
 def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) {
   def PR_NUMBER = env.BRANCH_NAME.split('-')[1];
   def REPO_NAME = env.JOB_NAME.split('/')[1];
-  def vpc_name = sh(script: "kubectl get cm --namespace ${namespace} global -o jsonpath=\"{.data.environment}\"", returntdout: true);
+  def vpc_name = sh(script: "kubectl get cm --namespace ${namespace} global -o jsonpath=\"{.data.environment}\"", returnStdout: true);
   env_variables = ["GEN3_NOPROXY=true",
     "PR_NUMBER=${PR_NUMBER}",
     "REPO_NAME=${REPO_NAME}",

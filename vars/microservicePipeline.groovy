@@ -1,4 +1,4 @@
-u!groovy
+#!groovy
 
 import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 
