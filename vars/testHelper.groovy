@@ -116,6 +116,7 @@ def runScriptToCreateProgramsAndProjects(String namespace) {
          #!/bin/bash -x
          npm ci
          export KUBECTL_NAMESPACE="${namespace}"
+         export HOSTNAME="${namespace}.planx-pla.net"
          node files/createProgramAndProjectsForTesting.js
       """, returnStdout: true);
       println("#### createProgramAndProjectsOutput: ${createProgramAndProjectsOutput}");
