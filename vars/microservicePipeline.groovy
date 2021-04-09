@@ -318,6 +318,7 @@ def call(Map config) {
             stage('RunTest') {
               try {
                 if(!doNotRunTests) {
+                  println("### ## selectedTestLabel: ${selectedTestLabel}");
                   testHelper.runIntegrationTests(
                     kubectlNamespace,
                     pipeConfig.serviceTesting.name,
@@ -329,6 +330,7 @@ def call(Map config) {
                   Utils.markStageSkippedForConditional(STAGE_NAME)
                 }
               } catch (ex) {
+                println("### ## adding to list of failedTestSuites: ${selectedTestLabel}");
                 failedTestSuites.add(selectedTestLabel);
                 metricsHelper.writeMetricWithResult(STAGE_NAME, false)
               }
