@@ -34,7 +34,7 @@ def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) 
 * @param service - name of service the test is being run for
 * @param testedEnv - environment the test is being run for (for manifest PRs)
 */
-def runIntegrationTests(String namespace, String service, String testedEnv, String isGen3Release,  List<String> selectedTests = ['all']) {
+def runIntegrationTests(String namespace, String service, String testedEnv, String isGen3Release, String isParallelTesting, List<String> selectedTests = ['all']) {
   withCredentials([
     usernamePassword(credentialsId: 'ras-test-user1-for-ci-tests', usernameVariable: 'RAS_TEST_USER_1_USERNAME', passwordVariable: 'RAS_TEST_USER_1_PASSWORD'),
     usernamePassword(credentialsId: 'ras-test-user2-for-ci-tests', usernameVariable: 'RAS_TEST_USER_2_USERNAME', passwordVariable: 'RAS_TEST_USER_2_PASSWORD')
@@ -48,7 +48,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         List<String> failedTestSuites = [];
         TestSuitesNonZeroStatusCodes = [];
         selectedTests.each {selectedTest ->
-          testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --selectedTest=${selectedTest}", returnStatus: true);
+          testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --isParallelTesting=${isParallelTesting} --selectedTest=${selectedTest}", returnStatus: true);
           if (testResult != 0){
             TestSuitesNonZeroStatusCodes.add(testResult)
             //TODO: get which test suite is failed

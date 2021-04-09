@@ -14,6 +14,7 @@ def call(Map config) {
     List<String> selectedTests = []
     doNotRunTests = false
     isGen3Release = "false"
+    isParallelTesting = "false"
     prLabels = null
     kubectlNamespace = null
     kubeLocks = []
@@ -42,6 +43,10 @@ def call(Map config) {
               println "selected test: suites/" + selectedTestLabel[1] + "/" + selectedTestLabel[2] + ".js"
               selectedTest = "suites/" + selectedTestLabel[1] + "/" + selectedTestLabel[2] + ".js"
               selectedTests.add(selectedTest)
+              break
+            case "parallel-testing":
+              println('Run labelled test suites in parallel')
+              isParallelTesting = "true"
               break
             case "doc-only":
               println('Skip tests if git diff matches expected criteria')
@@ -277,6 +282,7 @@ def call(Map config) {
             pipeConfig.serviceTesting.name,
             testedEnv,
             isGen3Release,
+            isParallelTesting,
             selectedTests
           )
         } else {
