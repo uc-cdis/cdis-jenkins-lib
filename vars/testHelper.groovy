@@ -34,7 +34,7 @@ def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) 
 * @param service - name of service the test is being run for
 * @param testedEnv - environment the test is being run for (for manifest PRs)
 */
-def runIntegrationTests(String namespace, String service, String testedEnv, String isGen3Release,  List<String> selectedTests = ['all']) {
+def runIntegrationTests(String namespace, String service, String testedEnv, String isGen3Release, String isNightlyBuild = "false",  List<String> selectedTests = ['all']) {
   withCredentials([
     usernamePassword(credentialsId: 'ras-test-user1-for-ci-tests', usernameVariable: 'RAS_TEST_USER_1_USERNAME', passwordVariable: 'RAS_TEST_USER_1_PASSWORD'),
     usernamePassword(credentialsId: 'ras-test-user2-for-ci-tests', usernameVariable: 'RAS_TEST_USER_2_USERNAME', passwordVariable: 'RAS_TEST_USER_2_PASSWORD')
@@ -89,11 +89,11 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
             failureMsg += " >10 test suites failed on this PR check :rotating_light:. This might indicate an environmental/config issue. cc: @planxqa :allthethings: :allthethings: :allthethings:"
           }
 
-          slackSend(color: 'bad', channel: "#gen3-qa-notifications", message: failureMsg)
+          slackSend(color: 'bad', channel: isNightlyBuild == "true" ? "#nightly-builds" : "#gen3-qa-notifications", message: failureMsg)
           currentBuild.result = 'ABORTED'
           error("aborting build - testsuite failed")
         } else {
-          slackSend(color: "#439FE0", channel: "#gen3-qa-notifications", message: successMsg)
+          slackSend(color: "#439FE0", channel: isNightlyBuild == "true" ? "#nightly-builds" : "#gen3-qa-notifications", message: successMsg)
         }
       })
     }

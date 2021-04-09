@@ -14,6 +14,7 @@ def call(Map config) {
     List<String> selectedTests = []
     doNotRunTests = false
     isGen3Release = "false"
+    isNightlyBuild = "false"
     prLabels = null
     kubectlNamespace = null
     kubeLocks = []
@@ -56,7 +57,9 @@ def call(Map config) {
               break
             case "nightly-run":
               println('Enable additional tests and automation for our nightly-release')
+              // Treat nightly build as a gen3-release labelled PR
               isGen3Release = "true"
+              isNightlyBuild = "true"
               break
             case "debug":
               println("Call npm test with --debug")
@@ -277,6 +280,7 @@ def call(Map config) {
             pipeConfig.serviceTesting.name,
             testedEnv,
             isGen3Release,
+            isNightlyBuild,
             selectedTests
           )
         } else {
