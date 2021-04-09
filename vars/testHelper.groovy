@@ -112,12 +112,13 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
 def runScriptToCreateProgramsAndProjects(String namespace) {
   dir('gen3-qa') {
     gen3Qa(namespace, {
-      sh(script: """
+      def createProgramAndProjectsOutput = sh(script: """
          #!/bin/bash -x
          npm ci
          export KUBECTL_NAMESPACE="${namespace}"
          node files/createProgramAndProjectsForTesting.js
       """, returnStdout: true);
+      println("#### createProgramAndProjectsOutput: ${createProgramAndProjectsOutput}");
     })
   }
 }
@@ -145,25 +146,6 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         if (fileExists('gen3-qa-mutex.marker')) {
           echo 'gen3-qa-mutex.marker found!'
           
-          // Only let the other threads proceed if the program / projects are created successfully
-          // TODO: Implement polling here
-          
-          // obtain an access token
-          def access_token = sh(script: """
-            #!/bin/bash +x
-            . \${GEN3_HOME}/gen3/lib/utils.sh
-            gen3 api access-token cdis.autotest@gmail.com || exit 0
-          """, returnStdout: true);
-
-          // Query sheepdog for programs and projects
-          def sheepdogQueryOutput = sh(script: """
-            #!/bin/bash +x
-            curl -s -H \"Content-Type: application/json\"  -H \"Authorization: Bearer ${access_token}\" -X POST https://${testedEnv}/api/v0/submission/graphql/ --data-raw \"{\\\"query\\\":\\\"{ project { project_id } }\\\",\\\"variables\\\":null}\"
-            echo \$?
-          """, returnStdout: true);
-          println("sheepdogQueryOutput: ${sheepdogQueryOutput}");
-
-          sleep(20)
           sh(script: """
             #!/bin/bash +x
             # disable bootstrap script from codeceptjs
@@ -172,7 +154,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         } else {
           echo 'the marker file has not been created yet, creating gen3-qa-mutex.marker now...'
           writeFile(file: 'gen3-qa-mutex.marker', text: "--> ${selectedTest} got here first!")
-          // Give a chance for the first thread to create program and project
+          // Give a chance for the first thread to run the codeceptjs bootstrapping script
         }
              
         testResult = null
