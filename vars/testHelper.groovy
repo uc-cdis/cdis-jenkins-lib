@@ -192,6 +192,7 @@ def processCIResults(String namespace, List<String> failedTestSuites = []) {
     gen3Qa(namespace, {
       def successMsg = "Successful CI run for https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :tada:"
       def commonMsg = "Duration ${currentBuild.durationString} :clock1:\n"
+      failedTestSuites = failedTestSuites.toSet()
       if (failedTestSuites.size() > 0) {
         def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
         failureMsg += failedTestSuites.collect { " - *${it}* failed :red_circle:" }.join "\n"         
