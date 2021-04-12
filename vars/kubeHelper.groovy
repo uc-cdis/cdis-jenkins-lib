@@ -82,6 +82,22 @@ def waitForPods(String kubectlNamespace) {
 }
 
 /**
+* Save logs and store them in our Jenkins archiving folder to help people debug issues with K8sReset
+*/
+def saveLogs(String kubectlNamespace) {
+  kube(kubectlNamespace, {
+    saveLogsResult = sh(returnStatus: true, script: """
+      #!/bin/bash
+      gen3 save-failed-pod-logs
+      mv *.log gen3-qa/output/
+    """)
+    if (saveLogsResult != 0) {
+      throw new Exception("The Gen3 save logs operation failed.")
+    }
+  })
+}
+
+/**
 * Map for storing locks
 */
 def newKubeLock(String kubectlNamespace, String lockOwner, String lockName) {

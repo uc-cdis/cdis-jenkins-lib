@@ -218,6 +218,7 @@ def call(Map config) {
         }
        } catch (ex) {
          metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+         kubeHelper.saveLogs(kubectlNamespace)
          throw ex
        }
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
