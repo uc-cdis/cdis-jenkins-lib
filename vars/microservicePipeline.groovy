@@ -102,7 +102,9 @@ def call(Map config) {
             println("### ## REPO_NAME: ${REPO_NAME}")
             def GIT_REPO = ""
             dir(REPO_NAME) {
-              FULL_PATH_BRANCH = "${sh(script:'git name-rev --name-only HEAD', returnStdout: true)}"
+              out = sh(script:'pwd', returnStdout: true)
+              println("## out: ${out}")
+              FULL_PATH_BRANCH = sh(script:'git name-rev --name-only HEAD', returnStdout: true)
               GIT_REPO = FULL_PATH_BRANCH.substring(0, FULL_PATH_BRANCH.lastIndexOf('/'))
               println("### ## GIT_REPO: ${GIT_REPO}");
             }
