@@ -98,10 +98,13 @@ def call(Map config) {
         stage('WaitForQuayBuild') {
          try {
           if(!doNotRunTests) {
-            FULL_PATH_BRANCH = "${sh(script:'git name-rev --name-only HEAD', returnStdout: true)}"
-            GIT_REPO = FULL_PATH_BRANCH.substring(0, FULL_PATH_BRANCH.lastIndexOf('/'))
-            println("### ## GIT_REPO: ${GIT_REPO}");
-
+            def REPO_NAME = env.JOB_NAME.split('/')[1]
+            def GIT_REPO = ""
+            dir(REPO_NAME) {
+              FULL_PATH_BRANCH = "${sh(script:'git name-rev --name-only HEAD', returnStdout: true)}"
+              GIT_REPO = FULL_PATH_BRANCH.substring(0, FULL_PATH_BRANCH.lastIndexOf('/'))
+              println("### ## GIT_REPO: ${GIT_REPO}");
+            }
             quayHelper.waitForBuild(
               pipeConfig['quayRegistry'],
               pipeConfig['currentBranchFormatted']
