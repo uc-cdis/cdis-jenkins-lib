@@ -99,6 +99,7 @@ def call(Map config) {
          try {
           if(!doNotRunTests) {
             def REPO_NAME = env.JOB_NAME.split('/')[1]
+            println("### ## REPO_NAME: ${REPO_NAME}")
             def GIT_REPO = ""
             dir(REPO_NAME) {
               FULL_PATH_BRANCH = "${sh(script:'git name-rev --name-only HEAD', returnStdout: true)}"
