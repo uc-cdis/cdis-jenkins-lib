@@ -94,13 +94,20 @@ def call(Map config) {
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
       if (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST == false || pipeConfig.MANIFEST != "True") {
-        // Setup stages for NON manifest builds
-        stage('WaitForQuayBuild') {
+       // Setup stages for NON manifest builds
+       def REPO_NAME = env.JOB_NAME.split('/')[1]
+       def repoFromPR = githubHelper.fetchRepoURL()
+       def regexMatchRepoOwner = (repoFromPR =~ /.*api.github.com\/repos\/(.*)\/${REPO_NAME}/)[0];
+       println("### ## regexMatchRepoOwner: ${regexMatchRepoOwner}")
+
+       stage('WaitForQuayBuild') {
          try {
           if(!doNotRunTests) {
+            def currentBranchFormatted = regexMatchRepoOwner[1] == "uc-cdis" ? pipeConfig['currentBranchFormatted'] : "automatedCopy-${pipeConfig['currentBranchFormatted']}";
+            println("### ## currentBranchFormatted: ${currentBranchFormatted}")
             quayHelper.waitForBuild(
               pipeConfig['quayRegistry'],
-              pipeConfig['currentBranchFormatted']
+              currentBranchFormatted
             )
 	  } else {
 	    Utils.markStageSkippedForConditional(STAGE_NAME)
@@ -146,10 +153,12 @@ def call(Map config) {
                 kubeHelper.getHostname(kubectlNamespace)
               )
             } else {
+              def quayBranchName = regexMatchRepoOwner[1] == "uc-cdis" ? pipeConfig.serviceTesting.branch : "automatedCopy-${pipeConfig.serviceTesting.branch}";
+              println("### ## quayBranchName: ${quayBranchName}")            
               manifestHelper.editService(
                 kubeHelper.getHostname(kubectlNamespace),
                 pipeConfig.serviceTesting.name,
-                pipeConfig.serviceTesting.branch
+                quayBranchName
               )
             }
 	  } else {
