@@ -98,12 +98,7 @@ def call(Map config) {
         stage('WaitForQuayBuild') {
          try {
           if(!doNotRunTests) {
-            def REPO_NAME = env.JOB_NAME.split('/')[1]
-            println("### ## REPO_NAME: ${REPO_NAME}")
-            def GIT_REPO = ""
-            dir(REPO_NAME) {
-              out = sh(script:'pwd', returnStdout: true)
-              println("## out: ${out}")
+            dir('tmpGitClone') {
               FULL_PATH_BRANCH = sh(script:'git name-rev --name-only HEAD', returnStdout: true)
               GIT_REPO = FULL_PATH_BRANCH.substring(0, FULL_PATH_BRANCH.lastIndexOf('/'))
               println("### ## GIT_REPO: ${GIT_REPO}");
