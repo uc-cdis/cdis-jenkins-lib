@@ -100,9 +100,9 @@ def call(Map config) {
           if(!doNotRunTests) {
             def REPO_NAME = env.JOB_NAME.split('/')[1]
             def repoFromPR = githubHelper.fetchRepoURL()
-            def regexMatchRepoOwner = repoFromPR =~ /.*api.github.com\/repos\/(.*)\/${REPO_NAME}/;
+            def regexMatchRepoOwner = (repoFromPR =~ /.*api.github.com\/repos\/(.*)\/${REPO_NAME}/)[0];
             println("### ## regexMatchRepoOwner: ${regexMatchRepoOwner}")
-            def nameOfTheImage = regexMatchRepoOwner[0][1] == "uc-cdis" ? pipeConfig['currentBranchFormatted'] : "automatedCopy-${pipeConfig['currentBranchFormatted']}";
+            def nameOfTheImage = regexMatchRepoOwner[1] == "uc-cdis" ? pipeConfig['currentBranchFormatted'] : "automatedCopy-${pipeConfig['currentBranchFormatted']}";
             println("### ## nameOfTheImage: ${nameOfTheImage}")
 
             quayHelper.waitForBuild(
