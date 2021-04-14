@@ -98,12 +98,14 @@ def call(Map config) {
         stage('WaitForQuayBuild') {
          try {
           if(!doNotRunTests) {
-            dir('tmpGitClone') {
-              println("### ## GIT_BRANCH: ${GIT_BRANCH}");
-            }
+            def REPO_NAME = env.JOB_NAME.split('/')[1]
+            def repoFromPR = githubHelper.fetchRepoURL()
+            def regexMatchRepoOwner =~ /.*api.github.com\/repos\/(.*)\/${REPO_NAME}/;
+            def nameOfTheImage = regexMatchRepoOwner[0][1] == "uc-cdis" ? pipeConfig['currentBranchFormatted'] : "automatedCopy-${pipeConfig['currentBranchFormatted']}";
+
             quayHelper.waitForBuild(
               pipeConfig['quayRegistry'],
-              pipeConfig['currentBranchFormatted']
+              nameOfTheImage
             )
 	  } else {
 	    Utils.markStageSkippedForConditional(STAGE_NAME)
