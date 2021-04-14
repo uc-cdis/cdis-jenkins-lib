@@ -5,7 +5,7 @@ def httpApiRequest(String urlPath) {
     def PR_NUMBER = env.BRANCH_NAME.split('-')[1];
     def REPO_NAME = env.JOB_NAME.split('/')[1];
     println('REPO_NAME: ' + REPO_NAME);
-    pr_url="https://api.github.com/repos/uc-cdis/${REPO_NAME}/pulls/${PR_NUMBER}"
+    pr_url="https://api.github.com/repos/uc-cdis/${REPO_NAME}/pulls/${PR_NUMBER}" + ${urlPath}
     println("Shooting a request to: " + pr_url);
     def get = new URL(pr_url).openConnection();
     def getRC = get.getResponseCode();
