@@ -102,6 +102,7 @@ def call(Map config) {
             def repoFromPR = githubHelper.fetchRepoURL()
             def regexMatchRepoOwner = repoFromPR =~ /.*api.github.com\/repos\/(.*)\/${REPO_NAME}/;
             def nameOfTheImage = regexMatchRepoOwner[0][1] == "uc-cdis" ? pipeConfig['currentBranchFormatted'] : "automatedCopy-${pipeConfig['currentBranchFormatted']}";
+            println("### ## nameOfTheImage: ${nameOfTheImage}")
 
             quayHelper.waitForBuild(
               pipeConfig['quayRegistry'],
