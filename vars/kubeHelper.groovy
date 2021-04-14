@@ -88,7 +88,7 @@ def saveLogs(String kubectlNamespace) {
   kube(kubectlNamespace, {
     saveLogsResult = sh(returnStatus: true, script: """
       #!/bin/bash
-      gen3 save-failed-pod-logs
+      bash ${cloudAutomationPath()}/gen3/bin/save-failed-pod-logs.sh
       mv *.log gen3-qa/output/
     """)
     if (saveLogsResult != 0) {
