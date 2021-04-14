@@ -5,7 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-def waitForBuild(String repoName, String formattedBranch) {
+def waitForBuild(String repoName, String formattedBranch, def isOpenSourceContribution = false) {
   if (repoName == "jenkins-lib" || repoName.contains("dictionary")) { return "skip" }
   echo("Waiting for Quay to build:\n  repoName: ${repoName}\n  branch: '${formattedBranch}'\n  commit: ${env.GIT_COMMIT}\n  previous commit: ${env.GIT_PREVIOUS_COMMIT}")
   def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 3600)
@@ -59,8 +59,12 @@ def waitForBuild(String repoName, String formattedBranch) {
             // things get annoying when quay gets slow
             break
           } else {
-            currentBuild.result = 'ABORTED'
-            error("aborting build due to out of date git hash\npipeline commit: $env.GIT_COMMIT\nquay: "+fields[1])
+            if (!isOpenSourceContribution) {
+              currentBuild.result = 'ABORTED'
+              error("aborting build due to out of date git hash\npipeline commit: $env.GIT_COMMIT\nquay: "+fields[1])
+            } else {
+              println("Open source contribution. Ignore out of date git hash...")
+            }
           }
         }
       }
@@ -94,8 +98,12 @@ def waitForBuild(String repoName, String formattedBranch) {
               // if previous commit is the newest one in quay, then maybe
               // the job's commit hasn't appeared yet. 
               // otherwise assume some other newer commit is in the process of building in quay
-              currentBuild.result = 'ABORTED'
-              error("aborting build due to out of date git hash\ntag: $formattedBranch\npipeline: $env.GIT_COMMIT\nquay: "+fields[1])
+              if (!isOpenSourceContribution) {
+                currentBuild.result = 'ABORTED'
+                error("aborting build due to out of date git hash\ntag: $formattedBranch\npipeline: $env.GIT_COMMIT\nquay: "+fields[1])
+              } else {
+                println("Open source contribution. Ignore out of date git hash...")
+              }
             }
           }
         }
