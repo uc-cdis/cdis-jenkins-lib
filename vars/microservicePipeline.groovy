@@ -99,9 +99,7 @@ def call(Map config) {
          try {
           if(!doNotRunTests) {
             dir('tmpGitClone') {
-              FULL_PATH_BRANCH = sh(script:'git remote get-url origin', returnStdout: true)
-              GIT_REPO = FULL_PATH_BRANCH.substring(0, FULL_PATH_BRANCH.lastIndexOf('/'))
-              println("### ## GIT_REPO: ${GIT_REPO}");
+              println("### ## GIT_BRANCH: ${GIT_BRANCH}");
             }
             quayHelper.waitForBuild(
               pipeConfig['quayRegistry'],
