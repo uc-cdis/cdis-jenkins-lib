@@ -14,7 +14,7 @@ def httpApiRequest(String urlPath) {
     prMetadata = null;
     if(getRC.equals(200)) {
       prMetadataJson = get.getInputStream().getText();
-      println(prMetadataJson);
+      //println(prMetadataJson);
       prMetadata = jsonSlurper.parseText(prMetadataJson);
     }
     return prMetadata;
