@@ -103,11 +103,13 @@ def call(Map config) {
        stage('WaitForQuayBuild') {
          try {
           if(!doNotRunTests) {
-            def currentBranchFormatted = regexMatchRepoOwner[1] == "uc-cdis" ? pipeConfig['currentBranchFormatted'] : "automatedCopy-${pipeConfig['currentBranchFormatted']}";
+            def isOpenSourceContribution = regexMatchRepoOwner[1] != "uc-cdis"
+            def currentBranchFormatted = isOpenSourceContribution ? "automatedCopy-${pipeConfig['currentBranchFormatted']}" : pipeConfig['currentBranchFormatted'];
             println("### ## currentBranchFormatted: ${currentBranchFormatted}")
             quayHelper.waitForBuild(
               pipeConfig['quayRegistry'],
-              currentBranchFormatted
+              currentBranchFormatted,
+              isOpenSourceContribution
             )
 	  } else {
 	    Utils.markStageSkippedForConditional(STAGE_NAME)
