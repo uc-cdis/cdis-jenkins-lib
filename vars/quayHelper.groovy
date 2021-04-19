@@ -45,7 +45,6 @@ def waitForBuild(String repoName, String formattedBranch, def isOpenSourceContri
       // that can happen if someone re-runs a Jenkins job interactively or whatever
       //
       if (fields.length > 2) {
-        if (!isOpenSourceContribution) {
         buildPhase = StringUtils.chomp(fields[2]);
         noPendingQuayBuilds = noPendingQuayBuilds && buildPhase.endsWith("complete")
         if(fields[0].startsWith(formattedBranch)) {
