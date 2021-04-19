@@ -46,9 +46,10 @@ def waitForBuild(String repoName, String formattedBranch, def isOpenSourceContri
       //
       if (fields.length > 2) {
         if (!isOpenSourceContribution) {
-          buildPhase = StringUtils.chomp(fields[2]);
-          noPendingQuayBuilds = noPendingQuayBuilds && buildPhase.endsWith("complete")
-          if(fields[0].startsWith(formattedBranch)) {
+        buildPhase = StringUtils.chomp(fields[2]);
+        noPendingQuayBuilds = noPendingQuayBuilds && buildPhase.endsWith("complete")
+        if(fields[0].startsWith(formattedBranch)) {
+          if (!isOpenSourceContribution) {
             if(env.GIT_COMMIT.startsWith(fields[1])) {
               quayImageReady = fields[2].endsWith("complete")
               if (quayImageReady) {
@@ -60,21 +61,17 @@ def waitForBuild(String repoName, String formattedBranch, def isOpenSourceContri
               // things get annoying when quay gets slow
               break
             } else {
-              if (!isOpenSourceContribution) {
-                currentBuild.result = 'ABORTED'
-                error("aborting build due to out of date git hash\npipeline commit: $env.GIT_COMMIT\nquay: "+fields[1])
-              } else {
-                println("Open source contribution. Ignore out of date git hash...")
-              }
+              currentBuild.result = 'ABORTED'
+              error("aborting build due to out of date git hash\npipeline commit: $env.GIT_COMMIT\nquay: "+fields[1])
             }
+          } else {
+            println("## Open Source contribution. Check if the automatedCopy img is ready / fully built.")
+            quayImageReady = fields[2].endsWith("complete")
+            if (quayImageReady) {
+              println("## found quay build from automatedCopy img: ${res}")
+            }
+            break
           }
-        } else {
-          println("## Open Source contribution. Check if the automatedCopy img is ready / fully built.")
-          quayImageReady = fields[2].endsWith("complete")
-          if (quayImageReady) {
-            println("## found quay build from automatedCopy img: ${res}")
-          }
-          break
         }
       }
     }
