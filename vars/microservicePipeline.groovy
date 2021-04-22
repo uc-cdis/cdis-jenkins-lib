@@ -312,10 +312,11 @@ def call(Map config) {
         List<String> failedTestSuites = [];
 
         selectedTests.each {selectedTest ->
-          selectedTestLabelSplit = selectedTest.split("/")
-          selectedTestLabel = "test-" + selectedTestLabelSplit[1] + "-" + selectedTestLabelSplit[2]
-          testsToParallelize["parallel-${selectedTestLabel}"] = {
+          parallelStageName = selectedTest.replace("/", "-")
+          testsToParallelize["parallel-${parallelStageName}"] = {
             stage('RunTest') {
+              selectedTestLabelSplit = selectedTest.split("/")
+              selectedTestLabel = "test-" + selectedTestLabelSplit[1] + "-" + selectedTestLabelSplit[2]
               try {
                 if(!doNotRunTests) {
                   println("### ## selectedTestLabel: ${selectedTestLabel}");
