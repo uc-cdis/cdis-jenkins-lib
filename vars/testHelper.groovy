@@ -34,7 +34,7 @@ def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) 
 * @param service - name of service the test is being run for
 * @param testedEnv - environment the test is being run for (for manifest PRs)
 */
-def soonToBeLegacyRunIntegrationTests(String namespace, String service, String testedEnv, String isGen3Release,  List<String> selectedTests = ['all']) {
+def soonToBeLegacyRunIntegrationTests(String namespace, String service, String testedEnv, String isGen3Release, String isNightlyBuild = "false", List<String> selectedTests = ['all']) {
   withCredentials([
     usernamePassword(credentialsId: 'ras-test-user1-for-ci-tests', usernameVariable: 'RAS_TEST_USER_1_USERNAME', passwordVariable: 'RAS_TEST_USER_1_PASSWORD'),
     usernamePassword(credentialsId: 'ras-test-user2-for-ci-tests', usernameVariable: 'RAS_TEST_USER_2_USERNAME', passwordVariable: 'RAS_TEST_USER_2_PASSWORD')
@@ -92,12 +92,11 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
           }
           failureMsg += "\n " + commonMsg
 
-          slackSend(color: 'bad', channel: "#gen3-qa-notifications", message: failureMsg)
+          slackSend(color: 'bad', channel: isNightlyBuild == "true" ? "#nightly-builds" : "#gen3-qa-notifications", message: failureMsg)
           currentBuild.result = 'ABORTED'
           error("aborting build - testsuite failed")
         } else {
-          successMsg += "\n " + commonMsg
-          slackSend(color: "#439FE0", channel: "#gen3-qa-notifications", message: successMsg)
+          slackSend(color: "#439FE0", channel: isNightlyBuild == "true" ? "#nightly-builds" : "#gen3-qa-notifications", message: successMsg)
         }
       })
     }
@@ -131,7 +130,7 @@ def runScriptToCreateProgramsAndProjects(String namespace) {
 * @param service - name of service the test is being run for
 * @param testedEnv - environment the test is being run for (for manifest PRs)
 */
-def runIntegrationTests(String namespace, String service, String testedEnv, String isGen3Release,  String selectedTest) {
+def runIntegrationTests(String namespace, String service, String testedEnv, String selectedTest) {
   withCredentials([
     usernamePassword(credentialsId: 'ras-test-user1-for-ci-tests', usernameVariable: 'RAS_TEST_USER_1_USERNAME', passwordVariable: 'RAS_TEST_USER_1_PASSWORD'),
     usernamePassword(credentialsId: 'ras-test-user2-for-ci-tests', usernameVariable: 'RAS_TEST_USER_2_USERNAME', passwordVariable: 'RAS_TEST_USER_2_PASSWORD')
@@ -204,12 +203,12 @@ def processCIResults(String namespace, List<String> failedTestSuites = []) {
       
         failureMsg += "\n " + commonMsg
 
-        slackSend(color: 'bad', channel: "#gen3-qa-notifications", message: failureMsg)
+        slackSend(color: 'bad', channel: isNightlyBuild == "true" ? "#nightly-builds" : "#gen3-qa-notifications", message: failureMsg)
         currentBuild.result = 'ABORTED'
         error("aborting build - testsuite failed")
       } else {
         successMsg += "\n " + commonMsg
-        slackSend(color: "#439FE0", channel: "#gen3-qa-notifications", message: successMsg)
+        slackSend(color: "#439FE0", channel: isNightlyBuild == "true" ? "#nightly-builds" : "#gen3-qa-notifications", message: successMsg)
       }
     })
   }

@@ -15,6 +15,7 @@ def call(Map config) {
     doNotRunTests = false
     runParallelTests = false
     isGen3Release = "false"
+    isNightlyBuild = "false"
     prLabels = null
     kubectlNamespace = null
     kubeLocks = []
@@ -61,7 +62,9 @@ def call(Map config) {
               break
             case "nightly-run":
               println('Enable additional tests and automation for our nightly-release')
+              // Treat nightly build as a gen3-release labelled PR
               isGen3Release = "true"
+              isNightlyBuild = "true"
               break
             case "debug":
               println("Call npm test with --debug")
@@ -99,13 +102,22 @@ def call(Map config) {
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
       if (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST == false || pipeConfig.MANIFEST != "True") {
-        // Setup stages for NON manifest builds
-        stage('WaitForQuayBuild') {
+       // Setup stages for NON manifest builds
+       def REPO_NAME = env.JOB_NAME.split('/')[1]
+       def repoFromPR = githubHelper.fetchRepoURL()
+       def regexMatchRepoOwner = (repoFromPR =~ /.*api.github.com\/repos\/(.*)\/${REPO_NAME}/)[0];
+       println("### ## regexMatchRepoOwner: ${regexMatchRepoOwner}")
+
+       stage('WaitForQuayBuild') {
          try {
           if(!doNotRunTests) {
+            def isOpenSourceContribution = regexMatchRepoOwner[1] != "uc-cdis"
+            def currentBranchFormatted = isOpenSourceContribution ? "automatedCopy-${pipeConfig['currentBranchFormatted']}" : pipeConfig['currentBranchFormatted'];
+            println("### ## currentBranchFormatted: ${currentBranchFormatted}")
             quayHelper.waitForBuild(
               pipeConfig['quayRegistry'],
-              pipeConfig['currentBranchFormatted']
+              currentBranchFormatted,
+              isOpenSourceContribution
             )
 	  } else {
 	    Utils.markStageSkippedForConditional(STAGE_NAME)
@@ -151,10 +163,12 @@ def call(Map config) {
                 kubeHelper.getHostname(kubectlNamespace)
               )
             } else {
+              def quayBranchName = regexMatchRepoOwner[1] == "uc-cdis" ? pipeConfig.serviceTesting.branch : "automatedCopy-${pipeConfig.serviceTesting.branch}";
+              println("### ## quayBranchName: ${quayBranchName}")            
               manifestHelper.editService(
                 kubeHelper.getHostname(kubectlNamespace),
                 pipeConfig.serviceTesting.name,
-                pipeConfig.serviceTesting.branch
+                quayBranchName
               )
             }
 	  } else {
@@ -222,6 +236,7 @@ def call(Map config) {
         }
        } catch (ex) {
          metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+         kubeHelper.saveLogs(kubectlNamespace)
          throw ex
        }
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
@@ -282,6 +297,7 @@ def call(Map config) {
                 pipeConfig.serviceTesting.name,
                 testedEnv,
                 isGen3Release,
+                isNightlyBuild,
                 selectedTests
               )
             } else {
@@ -324,7 +340,6 @@ def call(Map config) {
                     kubectlNamespace,
                     pipeConfig.serviceTesting.name,
                     testedEnv,
-                    isGen3Release,
                     selectedTest
                   )
                 } else {
@@ -344,7 +359,7 @@ def call(Map config) {
         stage('ProcessCIResults') {
           try {
             if(!doNotRunTests) {
-              testHelper.processCIResults(kubectlNamespace, failedTestSuites)
+              testHelper.processCIResults(kubectlNamespace, isNightlyBuild, failedTestSuites)
             } else {
               Utils.markStageSkippedForConditional(STAGE_NAME)
             }

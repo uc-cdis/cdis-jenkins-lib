@@ -5,7 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-def waitForBuild(String repoName, String formattedBranch) {
+def waitForBuild(String repoName, String formattedBranch, def isOpenSourceContribution = false) {
   if (repoName == "jenkins-lib" || repoName.contains("dictionary")) { return "skip" }
   echo("Waiting for Quay to build:\n  repoName: ${repoName}\n  branch: '${formattedBranch}'\n  commit: ${env.GIT_COMMIT}\n  previous commit: ${env.GIT_PREVIOUS_COMMIT}")
   def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 3600)
@@ -48,19 +48,28 @@ def waitForBuild(String repoName, String formattedBranch) {
         buildPhase = StringUtils.chomp(fields[2]);
         noPendingQuayBuilds = noPendingQuayBuilds && buildPhase.endsWith("complete")
         if(fields[0].startsWith(formattedBranch)) {
-          if(env.GIT_COMMIT.startsWith(fields[1])) {
+          if (!isOpenSourceContribution) {
+            if(env.GIT_COMMIT.startsWith(fields[1])) {
+              quayImageReady = fields[2].endsWith("complete")
+              if (quayImageReady) {
+                println "found quay build: "+res
+              }
+              break
+            } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1])) {
+              println "previous commit is the newest - sleep and try again"
+              // things get annoying when quay gets slow
+              break
+            } else {
+              currentBuild.result = 'ABORTED'
+              error("aborting build due to out of date git hash\npipeline commit: $env.GIT_COMMIT\nquay: "+fields[1])
+            }
+          } else {
+            println("## Open Source contribution. Check if the automatedCopy img is ready / fully built.")
             quayImageReady = fields[2].endsWith("complete")
             if (quayImageReady) {
-              println "found quay build: "+res
+              println("## found quay build from automatedCopy img: ${res}")
             }
             break
-          } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1])) {
-            println "previous commit is the newest - sleep and try again"
-            // things get annoying when quay gets slow
-            break
-          } else {
-            currentBuild.result = 'ABORTED'
-            error("aborting build due to out of date git hash\npipeline commit: $env.GIT_COMMIT\nquay: "+fields[1])
           }
         }
       }
@@ -80,22 +89,35 @@ def waitForBuild(String repoName, String formattedBranch) {
         if (fields.length > 2) {
           noPendingQuayBuilds = noPendingQuayBuilds && fields[2].endsWith("complete")
           if(fields[0].startsWith(formattedBranch)) {
-            if(env.GIT_COMMIT.startsWith(fields[1])) {
+            if (!isOpenSourceContribution) {
+              if(env.GIT_COMMIT.startsWith(fields[1])) {
+                quayImageReady = fields[2].endsWith("complete")
+                if (quayImageReady) {
+                  println "found quay build: "+res
+                }
+                break
+              } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1])) {
+                println "previous commit is the newest - sleep and try again"
+                // things get annoying when quay gets slow
+                break
+              } else {
+                // if previous commit is the newest one in quay, then maybe
+                // the job's commit hasn't appeared yet. 
+                // otherwise assume some other newer commit is in the process of building in quay
+                if (!isOpenSourceContribution) {
+                  currentBuild.result = 'ABORTED'
+                  error("aborting build due to out of date git hash\ntag: $formattedBranch\npipeline: $env.GIT_COMMIT\nquay: "+fields[1])
+                } else {
+                  println("Open source contribution. Ignore out of date git hash...")
+                }
+              }
+	    } else {
+              println("## Open Source contribution. Check if the automatedCopy img is ready / fully built.")
               quayImageReady = fields[2].endsWith("complete")
               if (quayImageReady) {
-                println "found quay build: "+res
+                println("## found quay build from automatedCopy img: ${res}")
               }
               break
-            } else if(env.GIT_PREVIOUS_COMMIT && env.GIT_PREVIOUS_COMMIT.startsWith(fields[1])) {
-              println "previous commit is the newest - sleep and try again"
-              // things get annoying when quay gets slow
-              break
-            } else {
-              // if previous commit is the newest one in quay, then maybe
-              // the job's commit hasn't appeared yet. 
-              // otherwise assume some other newer commit is in the process of building in quay
-              currentBuild.result = 'ABORTED'
-              error("aborting build due to out of date git hash\ntag: $formattedBranch\npipeline: $env.GIT_COMMIT\nquay: "+fields[1])
             }
           }
         }
