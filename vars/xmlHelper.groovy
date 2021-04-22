@@ -6,7 +6,7 @@ def assembleFeatureLabelMap() {
   def featureLabelMap = [:]
   try {
     // avoid "No such file or directory" error if runTests fails before CodeceptJS test reports are generated
-    def xmlResultFilesRaw = sh(returnStdout: true, script: "[ \"\$(ls -A output)\" ] && ls output/result*.xml || echo \"Warn: there are no output/result-*.xml files to parse\" ")
+    def xmlResultFilesRaw = sh(returnStdout: true, script: ("ls output/result*.xml || echo \"Warn: there are no output/result-*.xml files to parse\" ")
     if (xmlResultFilesRaw.contains('Warn')) {
       return null;
     }
