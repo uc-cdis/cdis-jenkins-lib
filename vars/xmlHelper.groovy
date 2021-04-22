@@ -10,9 +10,15 @@ def assembleFeatureLabelMap() {
     if (xmlResultFilesRaw.contains('Warn')) {
       return null;
     }
-    def xmlResults = new XmlSlurper().parseText(xmlResultFilesRaw)
+    
+    def xmlResultFiles = xmlResultFilesRaw.split('\n')
+    println(xmlResultFiles)
+    
+    xmlResultFiles.each{ xmlResultFile->
+      def xmlResultString = sh(returnStdout: true, script: "cat ${xmlResultFile}")
+      def xmlResults = new XmlSlurper().parseText(xmlResultString)
 
-    xmlResults.testsuite.findAll { testsuite ->
+      xmlResults.testsuite.findAll { testsuite ->
         testsuite.@failures.toInteger() > 0
       }.each { testsuite ->
         def failedTestSuite = testsuite.@name
@@ -23,15 +29,15 @@ def assembleFeatureLabelMap() {
         featureLabelMap[failedTestSuite] = testSelectorlabel
         println "Found failed test suite: ${failedTestSuite} with label ${testSelectorlabel}"
       }
-      
-      return featureLabelMap;
     }
-
-    catch (e) {
-    println("Something wrong happened: ${e}")
-    println("Ignore and return null map")
-    return null;
-    }
+    
+    return featureLabelMap;
+  }
+  catch (e) {
+  println("Something wrong happened: ${e}")
+  println("Ignore and return null map")
+  return null;
+  }
   return null;
 }
 
