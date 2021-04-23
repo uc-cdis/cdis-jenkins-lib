@@ -175,7 +175,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
           currentBuild.result = 'UNSTABLE'
           unstableMsg = "testsuite ${selectedTest} failed" 
           unstable(unstableMsg)
-          throw new Exception(unstableMsg)
+          throw new Exception(selectedTest)
         }
       })
     }

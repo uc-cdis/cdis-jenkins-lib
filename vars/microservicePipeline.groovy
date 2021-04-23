@@ -348,8 +348,13 @@ def call(Map config) {
                   Utils.markStageSkippedForConditional(STAGE_NAME)
                 }
               } catch (ex) {
-                println("### ## adding to list of failedTestSuites: ${selectedTestLabel}");
-                failedTestSuites.add(selectedTestLabel);
+                println("### ## ex.getMessage(): ${ex.getMessage()}")
+                if (ex.getMessage().contains("test-")) {
+                  println("### ## adding to list of failedTestSuites: ${ex.getMessage()}");
+                  failedTestSuites.add();
+                } else {
+                  println("## something weird happened. Could not figure out which test failed. Details: ${ex}")
+                }
                 metricsHelper.writeMetricWithResult(STAGE_NAME, false)
               }
             }
