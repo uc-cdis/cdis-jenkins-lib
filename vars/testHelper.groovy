@@ -185,9 +185,10 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
 /**
 * Process the results from the parallel testing
 *
+* @param isNightlyBuild - Flag to decide which Slack channel the test results will be sent to
 * @param failedTestSuites - list of test suites that failed during parallel execution
 */
-def processCIResults(String namespace, List<String> failedTestSuites = []) {
+def processCIResults(String namespace, String isNightlyBuild = "false", List<String> failedTestSuites = []) {
   dir('gen3-qa') {
     gen3Qa(namespace, {
       def successMsg = "Successful CI run for https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :tada:"
