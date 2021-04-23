@@ -349,9 +349,14 @@ def call(Map config) {
                 }
               } catch (ex) {
                 println("### ## ex.getMessage(): ${ex.getMessage()}")
-                if (ex.getMessage().contains("test-")) {
-                  println("### ## adding to list of failedTestSuites: ${ex.getMessage()}");
-                  failedTestSuites.add();
+                if (ex.getMessage().contains("suites/")) {
+                  failedTestSuite = ex.getMessage();
+                  // TODO: Move this logic that translates suites/<suite>/<script>.js
+                  // into the label formatted string to a helper groovy function somewhere
+                  failedTestLabelSplit = failedTestSuite.split("/")
+                  failedTestLabel = "test-" + failedTestLabelSplit[1] + "-" + failedTestLabelSplit[2]
+                  println("### ## adding to list of failedTestSuites: ${failedTestLabel}");
+                  failedTestSuites.add(failedTestLabel);
                 } else {
                   println("## something weird happened. Could not figure out which test failed. Details: ${ex}")
                 }
