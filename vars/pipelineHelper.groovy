@@ -82,7 +82,7 @@ def handleError(e) {
 def teardown(String buildResult) {
   archiveArtifacts(artifacts: '**/output/*.png', allowEmptyArchive: true)
   archiveArtifacts(artifacts: '**/output/*.log.gz', allowEmptyArchive: true)
-  archiveArtifacts(artifacts: '**/output/*.log', allowEmptyArchive: true)
+  archiveArtifacts(artifacts: '*.log', allowEmptyArchive: true)
 
   if ("UNSTABLE" == buildResult) {
     echo "Build Unstable!"
