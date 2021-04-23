@@ -89,7 +89,6 @@ def saveLogs(String kubectlNamespace) {
     saveLogsResult = sh(returnStatus: true, script: """
       #!/bin/bash
       bash ${cloudAutomationPath()}/gen3/bin/save-failed-pod-logs.sh
-      mv *.log gen3-qa/output/
     """)
     if (saveLogsResult != 0) {
       throw new Exception("The Gen3 save logs operation failed.")
