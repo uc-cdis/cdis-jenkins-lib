@@ -160,7 +160,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         testResult = null
         List<String> failedTestSuites = [];
         testResult = sh(script: """
-          bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --selectedTest=${selectedTest}
+          bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=false --selectedTest=${selectedTest}
         """, returnStatus: true);
         
         dir('output') {
