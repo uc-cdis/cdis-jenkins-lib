@@ -16,6 +16,7 @@ def assembleFeatureLabelMap() {
     
     xmlResultFiles.each{ xmlResultFile->
       def xmlResultString = sh(returnStdout: true, script: "cat ${xmlResultFile}")
+      println(xmlResultString)
       def xmlResults = new XmlSlurper().parseText(xmlResultString)
 
       xmlResults.testsuite.findAll { testsuite ->
@@ -40,4 +41,3 @@ def assembleFeatureLabelMap() {
   }
   return null;
 }
-
