@@ -106,7 +106,7 @@ def sendSlackNotifications(String kubectlNamespace, String isNightlyBuild = "fal
       def REPO_NAME = env.JOB_NAME.split('/')[1];
       slackSend(color: 'bad', channel: isNightlyBuild == "true" ? "#nightly-builds" : "#gen3-qa-notifications", message: "OH NOUS! :open_mouth: K8sReset failed :rotating_light: on ${kubectlNamespace}. Go check the failing pods / logs here: https://jenkins.planx-pla.net/blue/organizations/jenkins/CDIS_GitHub_Org%2F${REPO_NAME}/detail/${PR_NUMBER}/${env.BUILD_NUMBER}/pipeline .")
     }
-  })
+  )
 }
 
 /**
