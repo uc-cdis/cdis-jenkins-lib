@@ -18,7 +18,7 @@ def assembleFeatureLabelMap() {
       def xmlResultString = sh(returnStdout: true, script: "cat ${xmlResultFile}").toString().trim()
       println(xmlResultString)
       def xmlResults = new XmlSlurper().parseText(xmlResultString)
-      println(xmlResults)
+      println("### ## check if xml slurper works: ${xmlResults.@name}")
 
       xmlResults.testsuite.findAll { testsuite ->
         println("### ##checking testsuite: ${testsuite.@name}")
