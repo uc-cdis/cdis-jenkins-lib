@@ -15,9 +15,9 @@ def assembleFeatureLabelMap() {
     println(xmlResultFiles)
     
     xmlResultFiles.each{ xmlResultFile->
-      //def xmlResultString = sh(returnStdout: true, script: "cat ${xmlResultFile}")
-      //println(xmlResultString)
-      def xmlResults = new XmlSlurper().parse(readFile(${xmlResultFile}))
+      def xmlResultString = sh(returnStdout: true, script: "cat ${xmlResultFile}").toString().trim()
+      println(xmlResultString)
+      def xmlResults = new XmlSlurper().parseText(xmlResultString)
 
       xmlResults.testsuite.findAll { testsuite ->
         testsuite.@failures.toInteger() > 0
