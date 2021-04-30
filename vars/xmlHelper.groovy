@@ -18,8 +18,10 @@ def assembleFeatureLabelMap() {
       def xmlResultString = sh(returnStdout: true, script: "cat ${xmlResultFile}").toString().trim()
       println(xmlResultString)
       def xmlResults = new XmlSlurper().parseText(xmlResultString)
+      println(xmlResults)
 
       xmlResults.testsuite.findAll { testsuite ->
+        println("### ##checking testsuite: ${testsuite.@name}")
         testsuite.@failures.toInteger() > 0
       }.each { testsuite ->
         def failedTestSuite = testsuite.@name
@@ -28,10 +30,11 @@ def assembleFeatureLabelMap() {
         def testSelectorlabel = "test-" + j[j.length-2] + "-" + j[j.length-1].substring(0, j[j.length-1].indexOf("."))
         
         featureLabelMap[failedTestSuite] = testSelectorlabel
-        println "Found failed test suite: ${failedTestSuite} with label ${testSelectorlabel}"
+        println "### ##Found failed test suite: ${failedTestSuite} with label ${testSelectorlabel}"
       }
     }
     
+    println("### ## Here are the failed suites: ${featureLabelMap}")
     return featureLabelMap;
   }
   catch (e) {
