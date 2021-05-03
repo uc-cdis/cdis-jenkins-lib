@@ -29,15 +29,14 @@ def assembleFeatureLabelMap() {
           featureLabelMap[failedTestSuite] = testSelectorlabel
           println "### ##Found failed test suite: ${failedTestSuite} with label ${testSelectorlabel}"
         }
+      }
     }
-    
     println("### ## Here are the failed suites: ${featureLabelMap}")
     return featureLabelMap
-  }
-  catch (e) {
-  println("Something wrong happened: ${e}")
-  println("Ignore and return null map")
-  return null;
+  }catch (e) {
+    println("Something wrong happened: ${e}")
+    println("Ignore and return null map")
+    return null;
   }
   return null;
 }
