@@ -99,7 +99,7 @@ def saveLogs(String kubectlNamespace) {
 /**
 * Send Slack notifications to improve observability on k8sReset failures
 */
-def sendSlackNotifications(String kubectlNamespace, String isNightlyBuild = "false") {
+def sendSlackNotification(String kubectlNamespace, String isNightlyBuild = "false") {
   kube(kubectlNamespace, {
       // include url in the notification (e.g., # https://jenkins.planx-pla.net/blue/organizations/jenkins/CDIS_GitHub_Org%2Fcdis-manifest/detail/PR-2503/7/pipeline)
       def PR_NUMBER = env.BRANCH_NAME.split('-')[1];
