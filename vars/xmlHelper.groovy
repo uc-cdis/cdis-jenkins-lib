@@ -32,7 +32,7 @@ def assembleFeatureLabelMap() {
     }
     
     println("### ## Here are the failed suites: ${featureLabelMap}")
-    return featureLabelMap;
+    return featureLabelMap
   }
   catch (e) {
   println("Something wrong happened: ${e}")
