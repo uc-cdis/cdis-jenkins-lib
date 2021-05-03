@@ -15,6 +15,7 @@ def call(Map config) {
   doNotRunTests = false
   doNotModifyManifest = false
   isGen3Release = "false"
+  isNightlyBuild = "false"
   selectedTest = "all"
   prLabels = null
   kubectlNamespace = null
