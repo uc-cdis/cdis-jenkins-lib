@@ -303,6 +303,7 @@ spec:
 	          pipeConfig.serviceTesting.name,
 	          testedEnv,
 	          isGen3Release,
+                  isNightlyBuild,
 	          selectedTests
 	        )
 	      } else {
