@@ -16,11 +16,9 @@ def assembleFeatureLabelMap() {
     
     xmlResultFiles.each{ xmlResultFile->
       def xmlResultString = sh(returnStdout: true, script: "cat ${xmlResultFile}").toString().trim()
-      println("### xmlResultString: ${xmlResultString}")
       def xmlResults = new XmlSlurper().parseText(xmlResultString)
 
       xmlResults.testsuite.each { testsuite ->
-        println("### checking testsuite: ${testsuite.@name.toString()}")
         if (testsuite.@failures.toInteger() > 0){
           def failedTestSuite = testsuite.@name.toString()
           def filePath = testsuite.@file.toString()
@@ -28,7 +26,6 @@ def assembleFeatureLabelMap() {
           def testSelectorlabel = "test-" + j[j.length-2] + "-" + j[j.length-1].substring(0, j[j.length-1].indexOf("."))
         
           featureLabelMap[failedTestSuite] = testSelectorlabel
-          println "### ##Found failed test suite: ${failedTestSuite} with label ${testSelectorlabel}"
         }
       }
     }
