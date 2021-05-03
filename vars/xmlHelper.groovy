@@ -19,7 +19,7 @@ def assembleFeatureLabelMap() {
       def xmlResults = new XmlSlurper().parseText(xmlResultString)
 
       xmlResults.testsuite.each { testsuite ->
-        println("### checking testsuite: ${testsuite.@name}")
+        println("### checking testsuite: ${testsuite.@name.toString()}")
         if (testsuite.@failures.toInteger() > 0){
           def failedTestSuite = testsuite.@name
           def filePath = testsuite.@file.toString()
