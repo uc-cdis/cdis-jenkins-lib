@@ -232,7 +232,8 @@ def call(Map config) {
         }
        } catch (ex) {
          // ignore aborted pipelines (not a failure, just some subsequent commit that initiated a new build)
-         if (ex.getClass().getCanonicalName() != "hudson.AbortException") {
+         if (ex.getClass().getCanonicalName() != "hudson.AbortException") && 
+            (ex.getClass().getCanonicalName() != "org.jenkinsci.plugins.workflow.steps.FlowInterruptedException") {
            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
            kubeHelper.sendSlackNotification(kubectlNamespace, isNightlyBuild)
            kubeHelper.saveLogs(kubectlNamespace)
