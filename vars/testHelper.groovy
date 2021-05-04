@@ -45,18 +45,14 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         sh "/bin/rm -rf output/ || true"
         sh "mkdir output"
         testResult = null
-        //List<String> failedTestSuites = [];
         TestSuitesNonZeroStatusCodes = [];
         selectedTests.each {selectedTest ->
           testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --selectedTest=${selectedTest}", returnStatus: true);
           if (testResult != 0){
             TestSuitesNonZeroStatusCodes.add(testResult)
-            //TODO: get which test suite is failed
-            //TODO: using test suite and label map to replace XML parsing
           }
         }
         // check XMLs inside the output folder
-        //failedTestSuites = xmlHelper.identifyFailedTestSuites()
         def featureLabelMap = xmlHelper.assembleFeatureLabelMap()
         
         if (TestSuitesNonZeroStatusCodes.size() == 0) {
