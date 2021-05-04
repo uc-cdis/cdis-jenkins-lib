@@ -45,7 +45,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         sh "/bin/rm -rf output/ || true"
         sh "mkdir output"
         testResult = null
-        List<String> failedTestSuites = [];
+        //List<String> failedTestSuites = [];
         TestSuitesNonZeroStatusCodes = [];
         selectedTests.each {selectedTest ->
           testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --selectedTest=${selectedTest}", returnStatus: true);
@@ -74,7 +74,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         def successMsg = "Successful CI run for https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :tada:"
         if (TestSuitesNonZeroStatusCodes.size() != 0) {
           def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
-          if (failedTestSuites.size() < 10) {
+          if (featureLabelMap.size() < 10) {
             def commaSeparatedListOfLabels = ""
             featureLabelMap.each { testSuite, retryLabel ->
               failureMsg += " - Test Suite *${testSuite}* failed :red_circle: (label :label: *${retryLabel}*)\n"
