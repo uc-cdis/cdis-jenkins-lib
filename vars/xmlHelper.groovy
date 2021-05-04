@@ -54,6 +54,12 @@ def identifyFailedTestSuites() {
     def xmlTestSuiteFiles = xmlTestSuiteFilesRaw.split('\n')
     println(xmlTestSuiteFiles)
 
+    // New process to capture failed test suites
+    def xmlResultFilesRaw = sh(returnStdout: true, script: "cat output/result*.xml | grep failures=\\\" |  grep -v \"Mocha Tests\" | grep -v "failures=\\\"0\"")
+
+    def xmlResultFiles = xmlResultFilesRaw.split('\n')
+    println(xmlResultFilesRaw)
+
     xmlTestSuiteFiles.each{ xmlFile->
       println('reading test suite file... ' + xmlFile)
                   
