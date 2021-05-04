@@ -232,6 +232,7 @@ def call(Map config) {
         }
        } catch (ex) {
          metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+         kubeHelper.sendSlackNotification(kubectlNamespace, isNightlyBuild)
          kubeHelper.saveLogs(kubectlNamespace)
          throw ex
        }
