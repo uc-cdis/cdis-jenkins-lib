@@ -77,7 +77,7 @@ def reset(String kubectlNamespace) {
 */
 def waitForPods(String kubectlNamespace) {
   kube(kubectlNamespace, {
-    sh "bash ${cloudAutomationPath()}/gen3/bin/kube-wait4-pods.sh"
+    sh "bash ${cloudAutomationPath()}/gen3/bin/kube-wait4-pods.sh default true"
   })
 }
 
