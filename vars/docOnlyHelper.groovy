@@ -4,7 +4,7 @@ def checkTestSkippingCriteria() {
     fileChange = fileChanges[key][0]
     def releasesFolder = fileChange =~ /^(releases\/.*)/
     def dotFolder = fileChange =~ /^(\..*)/
-    def docFile = fileChange =~ /(.*\.md)|(.*\.png)|(.*\.txt)|(.*\.feature)|(.*\.xlsx)|(.*\.pdf)|(CODEOWNERS)|swagger.yaml|openapi.yaml/
+    def docFile = fileChange =~ /(.*\.md)|(.*\.png)|(.*\.txt)|(.*\.feature)|(.*\.xlsx)|(.*\.pdf)|(CODEOWNERS)|(.*\/swagger.yaml)|(.*\/openapi.yaml)/
     if (releasesFolder) {
       println('Found releases folder: ' + releasesFolder[0][0])
     } else if (dotFolder) {
