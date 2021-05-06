@@ -83,6 +83,9 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   sh(returnStdout: true, script: "if cat tmpGitClone/$changedDir/manifest.json | jq --exit-status '.indexd' >/dev/null; then "
     + "jq -r .indexd < tmpGitClone/$changedDir/manifest.json > indexd_block.json; "
     + "fi")
+  // fetch netpolicy from the target environment
+  netpolicyFromTargetEnv = sh(returnStdout: true, script: "if cat tmpGitClone/$changedDir/manifest.json | jq .global.netpolicy")
+
   String s = sh(returnStdout: true, script: "jq -r keys < cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   println s
   def keys = new groovy.json.JsonSlurper().parseText(s)
@@ -129,6 +132,13 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   sh(returnStdout: true, script: "if [ -f \"indexd_block.json\" ]; then "
     + "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sp \"\$(cat indexd_block.json)\" '(.indexd) = \$sp' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
     + "fi")
+  // delete netpolicy if the manifest from the target enviroment does not have it
+  if (netpolicyFromTargetEnv == "null"){
+    sh(returnStdout: true, script:
+    "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq 'del(.global.netpolicy)' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
+    )
+  }
+
   String rs = sh(returnStdout: true, script: "cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   return rs
 }
