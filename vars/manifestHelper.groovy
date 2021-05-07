@@ -134,7 +134,7 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   // delete netpolicy if the manifest from the target enviroment does not have it
   if (netpolicyStatus != 0){
     sh(returnStdout: true, script:
-    "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r -argjson sp 'del(.global.netpolicy) = \$sp' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
+    "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r 'del(.global.netpolicy)' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json "
     )
   }
 
