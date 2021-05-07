@@ -313,6 +313,9 @@ def call(Map config) {
           try {
             if(!doNotRunTests) {
               testHelper.runScriptToCreateProgramsAndProjects(kubectlNamespace)
+              if (selectedTests.contains("all")) {
+                selectedTests = testHelper.gatherAllTestSuiteLabels(kubectlNamespace)
+              }
               env.GEN3_SKIP_PROJ_SETUP = "true"
             } else {
               Utils.markStageSkippedForConditional(STAGE_NAME)

@@ -216,6 +216,21 @@ def processCIResults(String namespace, String isNightlyBuild = "false", List<Str
 }
 
 /**
+* Run py script that returns a full list of all the gen3-qa test suites
+*
+* @param namespace - k8s namespace
+*/
+def gatherAllTestSuiteLabels(String namespace) {
+  dir('gen3-qa') {
+    gen3Qa(namespace, {
+      def selectedTests = sh("python scripts/list-all-test-suites-for-ci.py", returnStdout: true)
+      return selectedTests.split("\n")
+    })
+  }
+}
+gatherAllTestSuiteLabels
+
+/**
 * Simulates data used in tests
 *
 * @param namespace - namespace to simulate data for
