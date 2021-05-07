@@ -220,7 +220,7 @@ def gatherAllTestSuiteLabels(String namespace) {
     gen3Qa(namespace, {
       def selectedTests = sh(script:"""
         #!/bin/bash -x
-        python3.6 scripts/list-all-test-suites-for-ci.py
+        python3 scripts/list-all-test-suites-for-ci.py
       """, returnStdout: true)
       return selectedTests.split("\n")
     })
