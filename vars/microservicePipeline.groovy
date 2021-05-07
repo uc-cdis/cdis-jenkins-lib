@@ -224,6 +224,8 @@ def call(Map config) {
          }
          metricsHelper.writeMetricWithResult(STAGE_NAME, true)
 	}
+      } else {
+        testedEnv = kubeHelper.getHostname(kubectlNamespace)
       }
 /*
       stage('K8sReset') {
