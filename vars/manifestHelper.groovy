@@ -84,8 +84,7 @@ def mergeManifest(String changedDir, String selectedNamespace) {
     + "jq -r .indexd < tmpGitClone/$changedDir/manifest.json > indexd_block.json; "
     + "fi")
   // fetch netpolicy from the target environment
-  sh(returnStdout: true, script: "cat tmpGitClone/$changedDir/manifest.json | jq .global.netpolicy")
-  netpolicyStatus = sh(returnStdout: true, script:"echo $?")
+  netpolicyStatus = sh(returnStatus : true, script: "cat tmpGitClone/$changedDir/manifest.json | jq --exit-status '.global.netpolicy'")
   String s = sh(returnStdout: true, script: "jq -r keys < cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   println s
   def keys = new groovy.json.JsonSlurper().parseText(s)
