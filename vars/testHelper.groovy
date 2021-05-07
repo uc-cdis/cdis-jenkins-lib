@@ -28,13 +28,13 @@ def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) 
 }
 
 /**
-* Runs gen3-qa integration tests
+* Soon to be legacy function that runs gen3-qa integration tests sequentially (pfft... what a loser)
 *
 * @param namespace - namespace to run integration tests in
 * @param service - name of service the test is being run for
 * @param testedEnv - environment the test is being run for (for manifest PRs)
 */
-def runIntegrationTests(String namespace, String service, String testedEnv, String isGen3Release, String isNightlyBuild = "false",  List<String> selectedTests = ['all']) {
+def soonToBeLegacyRunIntegrationTests(String namespace, String service, String testedEnv, String isGen3Release, String isNightlyBuild = "false", List<String> selectedTests = ['all']) {
   withCredentials([
     usernamePassword(credentialsId: 'ras-test-user1-for-ci-tests', usernameVariable: 'RAS_TEST_USER_1_USERNAME', passwordVariable: 'RAS_TEST_USER_1_PASSWORD'),
     usernamePassword(credentialsId: 'ras-test-user2-for-ci-tests', usernameVariable: 'RAS_TEST_USER_2_USERNAME', passwordVariable: 'RAS_TEST_USER_2_PASSWORD')
@@ -68,6 +68,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
           sh(script: "bash ${env.WORKSPACE}/cloud-automation/gen3/bin/logs.sh snapshot", returnStatus: true)
         }
         def successMsg = "Successful CI run for https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :tada:"
+        def commonMsg = "Duration: ${currentBuild.durationString} :clock1:\n"
         if (TestSuitesNonZeroStatusCodes.size() != 0) {
           def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
           if (featureLabelMap.size() < 10) {
@@ -84,6 +85,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
           } else {
             failureMsg += " >10 test suites failed on this PR check :rotating_light:. This might indicate an environmental/config issue. cc: @planxqa :allthethings: :allthethings: :allthethings:"
           }
+          failureMsg += "\n " + commonMsg
 
           slackSend(color: 'bad', channel: isNightlyBuild == "true" ? "#nightly-builds" : "#gen3-qa-notifications", message: failureMsg)
           currentBuild.result = 'ABORTED'
@@ -95,6 +97,136 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
     }
   }
 }
+
+/**
+* Runs utility script to create programs and projects
+*
+* @param namespace - namespace where programs and projects will be created
+*/
+def runScriptToCreateProgramsAndProjects(String namespace) {
+  dir('gen3-qa') {
+    gen3Qa(namespace, {
+      def createProgramAndProjectsOutput = sh(script: """
+         #!/bin/bash -x
+         npm ci
+         export KUBECTL_NAMESPACE="${namespace}"
+         export HOSTNAME="${namespace}.planx-pla.net"
+         node files/createProgramAndProjectsForTesting.js
+      """, returnStdout: true);
+      println("#### createProgramAndProjectsOutput: ${createProgramAndProjectsOutput}");
+    })
+  }
+}
+
+/**
+* Awesomely runs gen3-qa integration tests IN PARALLEL ヽ(ಠ_ಠ)ノ
+*
+* @param namespace - namespace to run integration tests in
+* @param service - name of service the test is being run for
+* @param testedEnv - environment the test is being run for (for manifest PRs)
+*/
+def runIntegrationTests(String namespace, String service, String testedEnv, String selectedTest) {
+  withCredentials([
+    usernamePassword(credentialsId: 'ras-test-user1-for-ci-tests', usernameVariable: 'RAS_TEST_USER_1_USERNAME', passwordVariable: 'RAS_TEST_USER_1_PASSWORD'),
+    usernamePassword(credentialsId: 'ras-test-user2-for-ci-tests', usernameVariable: 'RAS_TEST_USER_2_USERNAME', passwordVariable: 'RAS_TEST_USER_2_PASSWORD')
+  ]) {
+    dir('gen3-qa') {
+      gen3Qa(namespace, {
+        sh "mkdir -p output"
+
+        // Need a mutex so only one parallel test can execute the codeceptjs bootstrap script
+        // We must run the gcp setup from https://github.com/uc-cdis/gen3-qa/blob/master/test_setup.js only once
+        // otherwise we will face "There were concurrent policy changes" errors
+        // The first thread to reach this stage must drop a marker file
+        if (fileExists('gen3-qa-mutex.marker')) {
+          echo 'gen3-qa-mutex.marker found!'
+          
+          sh(script: """
+            #!/bin/bash +x
+            # disable bootstrap script from codeceptjs
+            sed -i '/bootstrap:/d' codecept.conf.js
+          """, returntdout: true);
+        } else {
+          echo 'the marker file has not been created yet, creating gen3-qa-mutex.marker now...'
+          writeFile(file: 'gen3-qa-mutex.marker', text: "--> ${selectedTest} got here first!")
+          // Give a chance for the first thread to run the codeceptjs bootstrapping script
+        }
+             
+        testResult = null
+        List<String> failedTestSuites = [];
+        testResult = sh(script: """
+          bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=false --selectedTest=${selectedTest}
+        """, returnStatus: true);
+        
+        dir('output') {
+          // collect and archive service logs
+          echo "Archiving service logs via 'gen3 logs snapshot'"
+          sh(script: "bash ${env.WORKSPACE}/cloud-automation/gen3/bin/logs.sh snapshot", returnStatus: true)
+        }
+
+        if (testResult != 0) {
+          // Mark as unstable for proper visual feedback in blue ocean
+          // but let the ProcessCIResults stage deal with the error handling
+          currentBuild.result = 'UNSTABLE'
+          unstableMsg = "testsuite ${selectedTest} failed" 
+          unstable(unstableMsg)
+          throw new Exception(selectedTest)
+        }
+      })
+    }
+  }
+}
+
+/**
+* Process the results from the parallel testing
+*
+* @param isNightlyBuild - Flag to decide which Slack channel the test results will be sent to
+* @param failedTestSuites - list of test suites that failed during parallel execution
+*/
+def processCIResults(String namespace, String isNightlyBuild = "false", List<String> failedTestSuites = []) {
+  dir('gen3-qa') {
+    gen3Qa(namespace, {
+      def successMsg = "Successful CI run for https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :tada:"
+      def commonMsg = "Duration ${currentBuild.durationString} :clock1:\n"
+      println("### ## failedTestSuites: ${failedTestSuites}");
+      failedTestSuites = failedTestSuites.toSet()
+      if (failedTestSuites.size() > 0) {
+        def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
+        failureMsg += failedTestSuites.collect { " - *${it}* failed :red_circle:" }.join "\n"         
+        commaSeparatedListOfLabels = failedTestSuites.join ","
+
+        failureMsg += " To label :label: & retry :jenkins:, just send the following message: \n @qa-bot replay-pr ${REPO_NAME} ${PR_NUMBER} ${commaSeparatedListOfLabels}"
+      
+        failureMsg += "\n " + commonMsg
+
+        slackSend(color: 'bad', channel: isNightlyBuild == "true" ? "#nightly-builds" : "#gen3-qa-notifications", message: failureMsg)
+        currentBuild.result = 'ABORTED'
+        error("aborting build - testsuite failed")
+      } else {
+        successMsg += "\n " + commonMsg
+        slackSend(color: "#439FE0", channel: isNightlyBuild == "true" ? "#nightly-builds" : "#gen3-qa-notifications", message: successMsg)
+      }
+    })
+  }
+}
+
+/**
+* Run py script that returns a full list of all the gen3-qa test suites
+*
+* @param namespace - k8s namespace
+*/
+def gatherAllTestSuiteLabels(String namespace) {
+  dir('gen3-qa') {
+    gen3Qa(namespace, {
+      def selectedTests = sh(script:"""
+        #!/bin/bash -x
+        python3 scripts/list-all-test-suites-for-ci.py
+      """, returnStdout: true)
+      return selectedTests.split("\n")
+    })
+  }
+}
+gatherAllTestSuiteLabels
 
 /**
 * Simulates data used in tests

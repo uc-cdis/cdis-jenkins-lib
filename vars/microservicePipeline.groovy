@@ -9,10 +9,11 @@ import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 */
 def call(Map config) {
   node('master') {
-    def AVAILABLE_NAMESPACES = ciEnsPoolHelper.fetchCIEnvs()
+    def AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs()
     List<String> namespaces = []
     List<String> selectedTests = []
     doNotRunTests = false
+    runParallelTests = false
     isGen3Release = "false"
     isNightlyBuild = "false"
     prLabels = null
@@ -47,6 +48,10 @@ def call(Map config) {
             case "doc-only":
               println('Skip tests if git diff matches expected criteria')
 	      doNotRunTests = docOnlyHelper.checkTestSkippingCriteria()
+              break
+            case "parallel-testing":
+              println('Run labelled test suites in parallel')
+              runParallelTests = true
               break
             case "decommission-environment":
               println('Skip tests if an environment folder is deleted')
@@ -219,6 +224,8 @@ def call(Map config) {
          }
          metricsHelper.writeMetricWithResult(STAGE_NAME, true)
 	}
+      } else {
+        testedEnv = kubeHelper.getHostname(kubectlNamespace)
       }
 
       stage('K8sReset') {
@@ -242,6 +249,7 @@ def call(Map config) {
        }
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
+
       stage('VerifyClusterHealth') {
        try {
         if(!doNotRunTests) {
@@ -289,25 +297,103 @@ def call(Map config) {
        }
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
-      stage('RunTests') {
-       try {
-        if(!doNotRunTests) {
-          testHelper.runIntegrationTests(
-            kubectlNamespace,
-            pipeConfig.serviceTesting.name,
-            testedEnv,
-            isGen3Release,
-            isNightlyBuild,
-            selectedTests
-          )
-        } else {
-          Utils.markStageSkippedForConditional(STAGE_NAME)
+      if(!runParallelTests) {
+        stage('RunTests') {
+          try {
+            if(!doNotRunTests) {
+              testHelper.soonToBeLegacyRunIntegrationTests(
+                kubectlNamespace,
+                pipeConfig.serviceTesting.name,
+                testedEnv,
+                isGen3Release,
+                isNightlyBuild,
+                selectedTests
+              )
+            } else {
+              Utils.markStageSkippedForConditional(STAGE_NAME)
+            }
+          } catch (ex) {
+            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+            throw ex
+          }
         }
-       } catch (ex) {
-         metricsHelper.writeMetricWithResult(STAGE_NAME, false)
-         throw ex
-       }
+      } else {
+        stage('runNonConcurrentStuff') {
+          try {
+            if(!doNotRunTests) {
+              testHelper.runScriptToCreateProgramsAndProjects(kubectlNamespace)
+              if (selectedTests.contains("all")) {
+                selectedTests = testHelper.gatherAllTestSuiteLabels(kubectlNamespace)
+              }
+              env.GEN3_SKIP_PROJ_SETUP = "true"
+            } else {
+              Utils.markStageSkippedForConditional(STAGE_NAME)
+            }
+          } catch (ex) {
+            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+            throw ex
+          }
+          metricsHelper.writeMetricWithResult(STAGE_NAME, true)
+        }
+
+        def testsToParallelize = [:]
+        List<String> failedTestSuites = [];
+
+        selectedTests.each {selectedTest ->
+          parallelStageName = selectedTest.replace("/", "-")
+          testsToParallelize["parallel-${parallelStageName}"] = {
+            stage('RunTest') {
+              selectedTestLabelSplit = selectedTest.split("/")
+              selectedTestLabel = "test-" + selectedTestLabelSplit[1] + "-" + selectedTestLabelSplit[2]
+              println("## ## testedEnv: ${testedEnv}")
+              try {
+                if(!doNotRunTests) {
+                  println("### ## selectedTestLabel: ${selectedTestLabel}");
+                  testHelper.runIntegrationTests(
+                    kubectlNamespace,
+                    pipeConfig.serviceTesting.name,
+                    testedEnv,
+                    selectedTest
+                  )
+                } else {
+                  Utils.markStageSkippedForConditional(STAGE_NAME)
+                }
+              } catch (ex) {
+                println("### ## ex.getMessage(): ${ex.getMessage()}")
+                if (ex.getMessage().contains("suites/")) {
+                  failedTestSuite = ex.getMessage();
+                  // TODO: Move this logic that translates suites/<suite>/<script>.js
+                  // into the label formatted string to a helper groovy function somewhere
+                  failedTestLabelSplit = failedTestSuite.split("/")
+                  failedTestLabel = "test-" + failedTestLabelSplit[1] + "-" + failedTestLabelSplit[2]
+                  println("### ## adding to list of failedTestSuites: ${failedTestLabel}");
+                  failedTestSuites.add(failedTestLabel);
+                } else {
+                  println("## something weird happened. Could not figure out which test failed. Details: ${ex}")
+                }
+                metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+              }
+            }
+          }
+        }
+
+        parallel testsToParallelize
+
+        stage('ProcessCIResults') {
+          try {
+            if(!doNotRunTests) {
+              testHelper.processCIResults(kubectlNamespace, isNightlyBuild, failedTestSuites)
+            } else {
+              Utils.markStageSkippedForConditional(STAGE_NAME)
+            }
+          } catch (ex) {
+            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+            throw ex
+          }
+          metricsHelper.writeMetricWithResult(STAGE_NAME, true)
+        }
       }
+
       stage('CleanS3') {
        try {
         if(!doNotRunTests) {
