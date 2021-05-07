@@ -227,7 +227,7 @@ def call(Map config) {
       } else {
         testedEnv = kubeHelper.getHostname(kubectlNamespace)
       }
-/*
+
       stage('K8sReset') {
        try {
         if(!doNotRunTests) {
@@ -249,7 +249,7 @@ def call(Map config) {
        }
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
-*/
+
       stage('VerifyClusterHealth') {
        try {
         if(!doNotRunTests) {
