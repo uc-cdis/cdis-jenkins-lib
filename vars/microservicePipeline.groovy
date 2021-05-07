@@ -343,6 +343,7 @@ def call(Map config) {
             stage('RunTest') {
               selectedTestLabelSplit = selectedTest.split("/")
               selectedTestLabel = "test-" + selectedTestLabelSplit[1] + "-" + selectedTestLabelSplit[2]
+              println("## ## testedEnv: ${testedEnv}")
               try {
                 if(!doNotRunTests) {
                   println("### ## selectedTestLabel: ${selectedTestLabel}");
