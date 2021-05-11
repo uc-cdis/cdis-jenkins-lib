@@ -17,7 +17,6 @@ def call(Map config) {
     isGen3Release = "false"
     isNightlyBuild = "false"
     prLabels = null
-    kubectlNamespace = null
     kubeLocks = []
     testedEnv = "" // for manifest pipeline
     pipeConfig = pipelineHelper.setupConfig(config)
@@ -325,7 +324,8 @@ def call(Map config) {
               testHelper.runScriptToCreateProgramsAndProjects(kubectlNamespace)
               if (selectedTests.contains("all")) {
                 selectedTests = testHelper.gatherAllTestSuiteLabels(kubectlNamespace)
-
+		
+		println("### ## selectedTests: ${selectedTests}")
                 println("### ## selectedTests size: ${selectedTests.size()}")
                 // Too many test suites cause a ArrayIndexOutOfBoundsException error
                 // Removing items to identify the number of tests that Jenkins can accommodate
