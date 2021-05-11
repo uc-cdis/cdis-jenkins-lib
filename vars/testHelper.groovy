@@ -222,6 +222,7 @@ def gatherAllTestSuiteLabels(String namespace) {
         #!/bin/bash -x
         python3 scripts/list-all-test-suites-for-ci.py
       """, returnStdout: true)
+      println("### ## selectedTests scripts/list-all-test-suites-for-ci.py output: ${selectedTests}")
       return selectedTests.split("\n")
     })
   }
