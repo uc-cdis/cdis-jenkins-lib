@@ -321,12 +321,12 @@ def call(Map config) {
             if(!doNotRunTests) {
               testHelper.runScriptToCreateProgramsAndProjects(kubectlNamespace)
               if (selectedTests.contains("all")) {
-                selectedTests = testHelper.gatherAllTestSuiteLabels(kubectlNamespace)
+                def listOfAllTestSuites = testHelper.gatherAllTestSuiteLabels(kubectlNamespace)
 		
                 println("### ## selectedTests size: ${selectedTests.size()}")
                 // Too many test suites cause a ArrayIndexOutOfBoundsException error
                 // Removing items to identify the number of tests that Jenkins can accommodate
-                ArrayList<String> selectedTests = new ArrayList<String>(selectedTests.subList(0, 40));
+                selectedTests = new ArrayList<String>(listOfAllTestSuites.subList(0, 40));
               }
               env.GEN3_SKIP_PROJ_SETUP = "true"
             } else {
