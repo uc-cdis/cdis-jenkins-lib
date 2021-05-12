@@ -223,7 +223,7 @@ def gatherAllTestSuiteLabels(String namespace) {
         println("### ## Running: python3 ${env.WORKSPACE}/gen3-qa/scripts/list-all-test-suites-for-ci.py ...")
         def listOfTestSuitesCmd = ['python3', "${env.WORKSPACE}/gen3-qa/scripts/list-all-test-suites-for-ci.py"].execute()
         listOfTestSuitesCmd.consumeProcessOutput(sout, serr)
-        listOfTestSuitesCmd.waitForOrKill(15000)
+        listOfTestSuitesCmd.waitForOrKill(60000)
         println("### ## stdout of list-all-test-suites-for-ci.py: ${sout.toString()}")
         println("### ## stderr of list-all-test-suites-for-ci.py: ${serr.toString()}")
         return sout.toString().split("\n")
