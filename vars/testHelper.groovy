@@ -218,17 +218,21 @@ def processCIResults(String namespace, String isNightlyBuild = "false", List<Str
 def gatherAllTestSuiteLabels(String namespace) {
   dir('gen3-qa') {
     gen3Qa(namespace, {
-      def listOfTestSuitesOutput = sh(script:"""
-        #!/bin/bash -x
-        export NAMESPACE=\"${namespace}\"
-        python3 scripts/list-all-test-suites-for-ci.py
-      """, returnStdout: true)
-      println("### ## output of list-all-test-suites-for-ci.py: ${listOfTestSuitesOutput}")
-      return listOfTestSuitesOutput.split("\n")
+      def sout = new StringBuffer(), serr = new StringBuffer()
+      try {
+        def listOfTestSuitesCmd = 'python3 scripts/list-all-test-suites-for-ci.py'.execute()
+        listOfTestSuitesCmd.consumeProcessOutput(sout, serr)
+        listOfTestSuitesCmd.waitForOrKill(5000)
+        println("### ## output of list-all-test-suites-for-ci.py: ${sout}")
+        return sout.split("\n")
+      } catch(e) (
+        println("### Exception: ${e}")
+        println(serr)
+        throw e
+      }
     })
   }
 }
-gatherAllTestSuiteLabels
 
 /**
 * Simulates data used in tests
