@@ -222,8 +222,9 @@ def gatherAllTestSuiteLabels(String namespace) {
       try {
         def listOfTestSuitesCmd = ['python3', 'scripts/list-all-test-suites-for-ci.py'].execute()
         listOfTestSuitesCmd.consumeProcessOutput(sout, serr)
-        listOfTestSuitesCmd.waitForOrKill(5000)
-        println("### ## output of list-all-test-suites-for-ci.py: ${sout}")
+        listOfTestSuitesCmd.waitForOrKill(10000)
+        println("### ## stdout of list-all-test-suites-for-ci.py: ${sout.toString()}")
+        println("### ## stderr of list-all-test-suites-for-ci.py: ${serr.toString()}")
         return sout.toString().split("\n")
       } catch(e) {
         println("### Exception: ${e}")
