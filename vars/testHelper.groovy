@@ -220,7 +220,7 @@ def gatherAllTestSuiteLabels(String namespace) {
     gen3Qa(namespace, {
       def sout = new StringBuffer(), serr = new StringBuffer()
       try {
-        def listOfTestSuitesCmd = ['pwd'].execute()
+        def listOfTestSuitesCmd = ['python3', 'scripts/list-all-test-suites-for-ci.py'].execute()
         listOfTestSuitesCmd.consumeProcessOutput(sout, serr)
         listOfTestSuitesCmd.waitForOrKill(10000)
         println("### ## stdout of list-all-test-suites-for-ci.py: ${sout.toString()}")
