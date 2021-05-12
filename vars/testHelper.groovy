@@ -218,20 +218,14 @@ def processCIResults(String namespace, String isNightlyBuild = "false", List<Str
 def gatherAllTestSuiteLabels(String namespace) {
   dir('gen3-qa') {
     gen3Qa(namespace, {
-      def sout = new StringBuffer(), serr = new StringBuffer()
-      try {
-        println("### ## Running: python3 ${env.WORKSPACE}/gen3-qa/scripts/list-all-test-suites-for-ci.py ...")
-        def listOfTestSuitesCmd = ['cd', "${env.WORKSPACE}/gen3-qa", "&&", "python3", "./scripts/list-all-test-suites-for-ci.py"].execute()
-        listOfTestSuitesCmd.consumeProcessOutput(sout, serr)
-        listOfTestSuitesCmd.waitForOrKill(60000)
-        println("### ## stdout of list-all-test-suites-for-ci.py: ${sout.toString()}")
-        println("### ## stderr of list-all-test-suites-for-ci.py: ${serr.toString()}")
-        return sout.toString().split("\n")
-      } catch(e) {
-        println("### Exception: ${e}")
-        println(serr.toString())
-        throw e
-      }
+      def selectedTests = sh(script:"""
+        #!/bin/bash -x
+        pwd
+        export NAMESPACE=${namespace}
+        python3 ./scripts/list-all-test-suites-for-ci.py
+      """, returnStdout: true)
+      println("### ## selectedTests scripts/list-all-test-suites-for-ci.py output: ${selectedTests}")
+      return selectedTests.split("\n")
     })
   }
 }
