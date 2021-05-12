@@ -218,13 +218,15 @@ def processCIResults(String namespace, String isNightlyBuild = "false", List<Str
 def gatherAllTestSuiteLabels(String namespace) {
   dir('gen3-qa') {
     gen3Qa(namespace, {
+      def sout = new StringBuffer(), serr = new StringBuffer()
       def testsuites = ["python3", "./scripts/list-all-test-suites-for-ci.py"].execute()
-      testsuites.waitFor()
+      testsuites.waitForProcessOutput(sout, serr)
 
       println "Exit value: ${testsuites.exitValue()}"
 
-      println("### ## list-all-test-suites-for-ci.py output: ${testsuites.text}")
-      return testsuites.text.split("\n")
+      println("### ## list-all-test-suites-for-ci.py stdout: ${sout}")
+      println("### ## list-all-test-suites-for-ci.py stderr: ${serr}")
+      return sout.split("\n")
     })
   }
 }
