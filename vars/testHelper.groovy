@@ -218,12 +218,19 @@ def processCIResults(String namespace, String isNightlyBuild = "false", List<Str
 def gatherAllTestSuiteLabels(String namespace) {
   dir('gen3-qa') {
     gen3Qa(namespace, {
-      def selectedTests = sh(script:"""
+      def whateverOutput = sh(script:"""
+        #!/bin/bash -x
+        python -c \"print('hello')\"
+      """, returnStdout: true)
+
+      println("### ## whateverOutput: ${whateverOutput}")
+
+      def listOfTestSuitesOutput = sh(script:"""
         #!/bin/bash -x
         python3 scripts/list-all-test-suites-for-ci.py
       """, returnStdout: true)
-      println("### ## selectedTests scripts/list-all-test-suites-for-ci.py output: ${selectedTests}")
-      return selectedTests.split("\n")
+      println("### ## output of list-all-test-suites-for-ci.py: ${listOfTestSuitesOutput}")
+      return listOfTestSuitesOutput.split("\n")
     })
   }
 }
