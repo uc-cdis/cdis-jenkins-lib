@@ -226,7 +226,6 @@ def call(Map config) {
       } else {
         testedEnv = kubeHelper.getHostname(kubectlNamespace)
       }
-/*
       stage('K8sReset') {
        try {
         if(!doNotRunTests) {
@@ -296,7 +295,6 @@ def call(Map config) {
        }
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
-*/
       if(!runParallelTests) {
         stage('RunTests') {
           try {
@@ -328,8 +326,7 @@ def call(Map config) {
                 println("### ## selectedTests size: ${selectedTests.size()}")
                 // Too many test suites cause a ArrayIndexOutOfBoundsException error
                 // Removing items to identify the number of tests that Jenkins can accommodate
-                selectedTests = selectedTests.subList(1, 20)
-
+                ArrayList<String> selectedTests = new ArrayList<String>(selectedTests.subList(0, 40));
               }
               env.GEN3_SKIP_PROJ_SETUP = "true"
             } else {
