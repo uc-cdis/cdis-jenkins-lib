@@ -219,14 +219,14 @@ def gatherAllTestSuiteLabels(String namespace) {
   dir('gen3-qa') {
     gen3Qa(namespace, {
       def sout = new StringBuffer(), serr = new StringBuffer()
-      def testsuites = ["python3", "./scripts/list-all-test-suites-for-ci.py"].execute()
+      def testsuites = ["python3", "./scripts/list-all-test-suites-for-ci.py"].execute(null, new File("${env.WORKSPACE/gen3-qa}"))
       testsuites.waitForProcessOutput(sout, serr)
 
       println "Exit value: ${testsuites.exitValue()}"
 
-      println("### ## list-all-test-suites-for-ci.py stdout: ${sout}")
-      println("### ## list-all-test-suites-for-ci.py stderr: ${serr}")
-      return sout.split("\n")
+      println("### ## list-all-test-suites-for-ci.py stdout: ${sout.toString()}")
+      println("### ## list-all-test-suites-for-ci.py stderr: ${serr.toString()}")
+      return sout.toString().split("\n")
     })
   }
 }
