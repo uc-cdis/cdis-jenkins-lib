@@ -221,7 +221,7 @@ def gatherAllTestSuiteLabels(String namespace) {
       def sout = new StringBuffer(), serr = new StringBuffer()
       try {
         println("### ## Running: python3 ${env.WORKSPACE}/gen3-qa/scripts/list-all-test-suites-for-ci.py ...")
-        def listOfTestSuitesCmd = ['python3', "${env.WORKSPACE}/gen3-qa/scripts/list-all-test-suites-for-ci.py"].execute()
+        def listOfTestSuitesCmd = ['cd', "${env.WORKSPACE}/gen3-qa", "&&", "python3", "./scripts/list-all-test-suites-for-ci.py"].execute()
         listOfTestSuitesCmd.consumeProcessOutput(sout, serr)
         listOfTestSuitesCmd.waitForOrKill(60000)
         println("### ## stdout of list-all-test-suites-for-ci.py: ${sout.toString()}")
