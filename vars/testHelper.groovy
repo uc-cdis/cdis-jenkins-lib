@@ -230,7 +230,12 @@ def gatherAllTestSuiteLabels(String namespace) {
 
       println("### ## list-all-test-suites-for-ci.py stdout: ${sout.toString()}")
       println("### ## list-all-test-suites-for-ci.py stderr: ${serr.toString()}")
-      return sout.toString().split("\n")
+
+      // split output by line breaks
+      def testSuitesList = sout.toString().split("\n")
+      println("### ## testSuitesList.size(): ${testSuitesList.size()}")
+
+      return testSuitesList
     })
   }
 }
