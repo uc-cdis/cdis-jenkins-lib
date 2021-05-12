@@ -219,7 +219,7 @@ def gatherAllTestSuiteLabels(String namespace) {
   dir('gen3-qa') {
     gen3Qa(namespace, {
       def sout = new StringBuffer(), serr = new StringBuffer()
-      def testsuites = ["python3", "./scripts/list-all-test-suites-for-ci.py"].execute(null, new File("${env.WORKSPACE/gen3-qa}"))
+      def testsuites = ["python3", "./scripts/list-all-test-suites-for-ci.py"].execute(null, new File("${env.WORKSPACE}/gen3-qa"))
       testsuites.waitForProcessOutput(sout, serr)
 
       println "Exit value: ${testsuites.exitValue()}"
