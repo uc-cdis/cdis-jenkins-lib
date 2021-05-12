@@ -225,7 +225,7 @@ def gatherAllTestSuiteLabels(String namespace) {
         listOfTestSuitesCmd.waitForOrKill(5000)
         println("### ## output of list-all-test-suites-for-ci.py: ${sout}")
         return sout.split("\n")
-      } catch(e) (
+      } catch(e) {
         println("### Exception: ${e}")
         println(serr)
         throw e
