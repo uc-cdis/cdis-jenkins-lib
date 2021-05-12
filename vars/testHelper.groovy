@@ -220,6 +220,7 @@ def gatherAllTestSuiteLabels(String namespace) {
     gen3Qa(namespace, {
       def listOfTestSuitesOutput = sh(script:"""
         #!/bin/bash -x
+        export NAMESPACE=\"${namespace}\"
         python3 scripts/list-all-test-suites-for-ci.py
       """, returnStdout: true)
       println("### ## output of list-all-test-suites-for-ci.py: ${listOfTestSuitesOutput}")
