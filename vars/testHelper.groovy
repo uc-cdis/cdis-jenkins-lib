@@ -219,7 +219,11 @@ def gatherAllTestSuiteLabels(String namespace) {
   dir('gen3-qa') {
     gen3Qa(namespace, {
       def sout = new StringBuffer(), serr = new StringBuffer()
-      def testsuites = ["NAMESPACE=${namespace}", "python3", "./scripts/list-all-test-suites-for-ci.py"].execute(null, new File("${env.WORKSPACE}/gen3-qa"))
+      /*
+        public Process execute(String[] envp, File dir)
+        Executes the command specified by the given list, with the environment defined by envp and under the working directory dir.
+      */
+      def testsuites = ["python3", "./scripts/list-all-test-suites-for-ci.py"].execute(["NAMESPACE=${namespace}"], new File("${env.WORKSPACE}/gen3-qa"))
       testsuites.waitForProcessOutput(sout, serr)
 
       println "Exit value: ${testsuites.exitValue()}"
