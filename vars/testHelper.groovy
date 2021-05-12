@@ -384,11 +384,16 @@ def checkPodHealth(String namespace, String testedEnv) {
   }
 }
 
-def teardown() {
+def teardown(allowEmpty) {
   // try to analyze junit files
   // result xml file may not exist due to pipeline or test suite failures
   try {
-    junit "gen3-qa/output/*.xml"
+    if(allowEmpty){
+      junit testResults: "gen3-qa/output/*.xml", allowEmptyResults: true
+    }
+    else{
+      junit "gen3-qa/output/*.xml"
+    }
   }
   catch(e) {
     def st = new StringWriter()

@@ -415,7 +415,7 @@ def call(Map config) {
     finally {
       stage('Post') {
         kubeHelper.teardown(kubeLocks)
-        testHelper.teardown()
+        testHelper.teardown(doNotRunTests)
         pipelineHelper.teardown(currentBuild.result)
       }
     }

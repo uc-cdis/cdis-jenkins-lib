@@ -336,7 +336,7 @@ spec:
       always {
         script {
           kubeHelper.teardown(kubeLocks)
-          testHelper.teardown()
+          testHelper.teardown(doNotRunTests)
           pipelineHelper.teardown(currentBuild.result)
 	}
       }
