@@ -347,7 +347,7 @@ def call(Map config) {
         selectedTests.each {selectedTestLabel ->
           testsToParallelize["parallel-${selectedTestLabel}"] = {
             stage('RunTest') {
-              selectedTestLabelSplit = selectedTest.split("-")
+              selectedTestLabelSplit = selectedTestLabel.split("-")
               selectedTest = "suites/" + selectedTestLabelSplit[1] + "/" + selectedTestLabelSplit[2] + ".js"
               println("## ## testedEnv: ${testedEnv}")
               try {
