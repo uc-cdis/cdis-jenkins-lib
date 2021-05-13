@@ -73,6 +73,11 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
           def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
           if (featureLabelMap.size() < 10) {
             def commaSeparatedListOfLabels = ""
+
+            if (isNightlyBuild == "true") {
+              commaSeparatedListOfLabels += "nightly-run,"
+            }
+
             featureLabelMap.each { testSuite, retryLabel ->
               failureMsg += " - Test Suite *${testSuite}* failed :red_circle: (label :label: *${retryLabel}*)\n"
               commaSeparatedListOfLabels += "${retryLabel}"
