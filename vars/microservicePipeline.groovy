@@ -345,7 +345,7 @@ def call(Map config) {
         List<String> failedTestSuites = [];
 
         selectedTests.each {selectedTestLabel ->
-          testsToParallelize["parallel-${parallelStageName}"] = {
+          testsToParallelize["parallel-${selectedTestLabel}"] = {
             stage('RunTest') {
               selectedTestLabelSplit = selectedTest.split("-")
               selectedTest = "suites/" + selectedTestLabelSplit[1] + "/" + selectedTestLabelSplit[2] + ".js"
