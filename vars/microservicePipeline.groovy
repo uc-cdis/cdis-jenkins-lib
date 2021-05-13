@@ -344,12 +344,11 @@ def call(Map config) {
         def testsToParallelize = [:]
         List<String> failedTestSuites = [];
 
-        selectedTests.each {selectedTest ->
-          parallelStageName = selectedTest.replace("/", "-")
+        selectedTests.each {selectedTestLabel ->
           testsToParallelize["parallel-${parallelStageName}"] = {
             stage('RunTest') {
-              selectedTestLabelSplit = selectedTest.split("/")
-              selectedTestLabel = "test-" + selectedTestLabelSplit[1] + "-" + selectedTestLabelSplit[2]
+              selectedTestLabelSplit = selectedTest.split("-")
+              selectedTest = "suites/" + selectedTestLabelSplit[1] + "/" + selectedTestLabelSplit[2] + ".js"
               println("## ## testedEnv: ${testedEnv}")
               try {
                 if(!doNotRunTests) {
