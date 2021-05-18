@@ -214,7 +214,7 @@ def call(Map config) {
         stage('ModifyManifest') {
          try {
           if(!doNotRunTests) {
-            testedEnv = manifestHelper.manifestDiff(kubectlNamespace)
+            testedEnv = kubeHelper.getHostname(kubectlNamespace)
 	  } else {
 	    Utils.markStageSkippedForConditional(STAGE_NAME)
           }
@@ -224,10 +224,6 @@ def call(Map config) {
          }
          metricsHelper.writeMetricWithResult(STAGE_NAME, true)
 	}
-      } else {
-        if(!doNotRunTests) {
-          testedEnv = kubeHelper.getHostname(kubectlNamespace)
-        }
       }
 
       stage('K8sReset') {
