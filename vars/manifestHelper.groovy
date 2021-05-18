@@ -1,6 +1,6 @@
 /**
-* Jenkins environments are used for continuous integration, therefore, they should 
-* always run the latest-latest code for all components 
+* Jenkins environments are used for continuous integration, therefore, they should
+* always run the latest-latest code for all components
 * (that is why all Jenkins CI environments, by default, have every service set to the "master" version).
 * Except in two cases:
 *   - When the PR belongs to a service-specific repo, the service that is being tested
@@ -9,7 +9,7 @@
 *   or
 *   - When the PR belongs to a Manifest Repo, all the versions declared in the manifest
 *     corresponding to the environment folder in the git diff should be injected into
-*     the manifest of the selected Jenkins CI env. 
+*     the manifest of the selected Jenkins CI env.
 *
 * TL;DR
 * Edits manifest of a service to provided branch
@@ -51,12 +51,12 @@ def setDictionary(String commonsHostname) {
   def branchDictionary = "https://s3.amazonaws.com/dictionary-artifacts/${prRepoName}/${prBranchName}/schema.json"
 
   echo "Editing cdis-manifest/${commonsHostname} dictionary to set ${prBranchName}"
-  
+
   // keep backup of the original manifest
   sh "cp cdis-manifest/${commonsHostname}/manifest.json cdis-manifest/${commonsHostname}/manifest.json.old"
   // swap current dictionary for the target dictionary
   sh(returnStatus: true, script: "cat cdis-manifest/${commonsHostname}/manifest.json.old | jq --arg theNewDict ${branchDictionary} '.global.dictionary_url |= \$theNewDict' > cdis-manifest/${commonsHostname}/manifest.json")
-  
+
   sh "cat cdis-manifest/${commonsHostname}/manifest.json"
 }
 
@@ -85,7 +85,7 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   sh(returnStdout: true, script: "if cat tmpGitClone/$changedDir/manifest.json | jq --exit-status '.indexd' >/dev/null; then "
     + "jq -r .indexd < tmpGitClone/$changedDir/manifest.json > indexd_block.json; "
     + "fi")
-  
+
   String s = sh(returnStdout: true, script: "jq -r keys < cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   println s
   def keys = new groovy.json.JsonSlurper().parseText(s)
@@ -103,12 +103,12 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   }
   sh(returnStdout: true, script: "bs=\$(jq -r .versions < tmpGitClone/$changedDir/manifest.json) "
           + "&& old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) "
-          + """&& echo \$old | jq -r --arg od ${od} --arg pa ${pa} --argjson vs \"\$bs\"""" 
+          + """&& echo \$old | jq -r --arg od ${od} --arg pa ${pa} --argjson vs \"\$bs\""""
           + / '(.global.dictionary_url) |=/ + "\$od" + / | (.global.portal_app) |=/ + "\$pa"
           + / | (.versions) |=/ + "\$vs" + /'/ + " > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   String parseSowerBlockReturnCode = sh(returnStdout: true, script: "jq -r '.' sower_block.json")
   println(parseSowerBlockReturnCode)
-  if (parseSowerBlockReturnCode == null) {
+  if (parseSowerBlockReturnCode != null) {
     // set Jenkins CI service accounts for sower jobs if the property exists
     sh(returnStdout: true, script: "cat sower_block.json | jq -r '.[] | if has(\"serviceAccountName\") then .serviceAccountName = \"jobs-${selectedNamespace}-planx-pla-net\" else . end' > new_scv_acct_sower_block.json")
     String sowerBlock2 = sh(returnStdout: true, script: "cat new_scv_acct_sower_block.json")
