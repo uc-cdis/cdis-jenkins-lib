@@ -106,9 +106,9 @@ def mergeManifest(String changedDir, String selectedNamespace) {
           + """&& echo \$old | jq -r --arg od ${od} --arg pa ${pa} --argjson vs \"\$bs\"""" 
           + / '(.global.dictionary_url) |=/ + "\$od" + / | (.global.portal_app) |=/ + "\$pa"
           + / | (.versions) |=/ + "\$vs" + /'/ + " > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
-  String parseSowerBlockReturnCode = sh(returnStatus: true, script: "jq -r '.' sower_block.json")
+  String parseSowerBlockReturnCode = sh(returnStdout: true, script: "jq -r '.' sower_block.json")
   println(parseSowerBlockReturnCode)
-  if (parseSowerBlockReturnCode == "0") {
+  if (parseSowerBlockReturnCode == null) {
     // set Jenkins CI service accounts for sower jobs if the property exists
     sh(returnStdout: true, script: "cat sower_block.json | jq -r '.[] | if has(\"serviceAccountName\") then .serviceAccountName = \"jobs-${selectedNamespace}-planx-pla-net\" else . end' > new_scv_acct_sower_block.json")
     String sowerBlock2 = sh(returnStdout: true, script: "cat new_scv_acct_sower_block.json")
