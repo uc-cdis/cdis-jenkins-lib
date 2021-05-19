@@ -9,11 +9,13 @@ import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 */
 def call(Map config) {
   node('master') {
-    def AVAILABLE_NAMESPACES = ciEnsPoolHelper.fetchCIEnvs()
+    def AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs()
     List<String> namespaces = []
     List<String> selectedTests = []
     doNotRunTests = false
+    runParallelTests = false
     isGen3Release = "false"
+    isNightlyBuild = "false"
     prLabels = null
     kubectlNamespace = null
     kubeLocks = []
@@ -47,6 +49,10 @@ def call(Map config) {
               println('Skip tests if git diff matches expected criteria')
 	      doNotRunTests = docOnlyHelper.checkTestSkippingCriteria()
               break
+            case "parallel-testing":
+              println('Run labelled test suites in parallel')
+              runParallelTests = true
+              break
             case "decommission-environment":
               println('Skip tests if an environment folder is deleted')
               doNotRunTests = decommissionEnvHelper.checkDecommissioningEnvironment()
@@ -56,7 +62,9 @@ def call(Map config) {
               break
             case "nightly-run":
               println('Enable additional tests and automation for our nightly-release')
+              // Treat nightly build as a gen3-release labelled PR
               isGen3Release = "true"
+              isNightlyBuild = "true"
               break
             case "debug":
               println("Call npm test with --debug")
@@ -94,13 +102,22 @@ def call(Map config) {
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
       if (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST == false || pipeConfig.MANIFEST != "True") {
-        // Setup stages for NON manifest builds
-        stage('WaitForQuayBuild') {
+       // Setup stages for NON manifest builds
+       def REPO_NAME = env.JOB_NAME.split('/')[1]
+       def repoFromPR = githubHelper.fetchRepoURL()
+       def regexMatchRepoOwner = (repoFromPR =~ /.*api.github.com\/repos\/(.*)\/${REPO_NAME}/)[0];
+       println("### ## regexMatchRepoOwner: ${regexMatchRepoOwner}")
+
+       stage('WaitForQuayBuild') {
          try {
           if(!doNotRunTests) {
+            def isOpenSourceContribution = regexMatchRepoOwner[1] != "uc-cdis"
+            def currentBranchFormatted = isOpenSourceContribution ? "automatedCopy-${pipeConfig['currentBranchFormatted']}" : pipeConfig['currentBranchFormatted'];
+            println("### ## currentBranchFormatted: ${currentBranchFormatted}")
             quayHelper.waitForBuild(
               pipeConfig['quayRegistry'],
-              pipeConfig['currentBranchFormatted']
+              currentBranchFormatted,
+              isOpenSourceContribution
             )
 	  } else {
 	    Utils.markStageSkippedForConditional(STAGE_NAME)
@@ -146,10 +163,12 @@ def call(Map config) {
                 kubeHelper.getHostname(kubectlNamespace)
               )
             } else {
+              def quayBranchName = regexMatchRepoOwner[1] == "uc-cdis" ? pipeConfig.serviceTesting.branch : "automatedCopy-${pipeConfig.serviceTesting.branch}";
+              println("### ## quayBranchName: ${quayBranchName}")            
               manifestHelper.editService(
                 kubeHelper.getHostname(kubectlNamespace),
                 pipeConfig.serviceTesting.name,
-                pipeConfig.serviceTesting.branch
+                quayBranchName
               )
             }
 	  } else {
@@ -196,8 +215,8 @@ def call(Map config) {
          try {
           if(!doNotRunTests) {
             testedEnv = manifestHelper.manifestDiff(kubectlNamespace)
-	  } else {
-	    Utils.markStageSkippedForConditional(STAGE_NAME)
+          } else {
+            Utils.markStageSkippedForConditional(STAGE_NAME)
           }
          } catch (ex) {
            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
@@ -207,6 +226,7 @@ def call(Map config) {
 	}
       }
 /*
+
       stage('K8sReset') {
        try {
         if(!doNotRunTests) {
@@ -217,7 +237,13 @@ def call(Map config) {
           Utils.markStageSkippedForConditional(STAGE_NAME)
         }
        } catch (ex) {
-         metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+         // ignore aborted pipelines (not a failure, just some subsequent commit that initiated a new build)
+         if (ex.getClass().getCanonicalName() != "hudson.AbortException" && 
+            ex.getClass().getCanonicalName() != "org.jenkinsci.plugins.workflow.steps.FlowInterruptedException") {
+           metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+           kubeHelper.sendSlackNotification(kubectlNamespace, isNightlyBuild)
+           kubeHelper.saveLogs(kubectlNamespace)
+         }
          throw ex
        }
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
@@ -270,24 +296,103 @@ def call(Map config) {
        }
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
-      stage('RunTests') {
-       try {
-        if(!doNotRunTests) {
-          testHelper.runIntegrationTests(
-            kubectlNamespace,
-            pipeConfig.serviceTesting.name,
-            testedEnv,
-            isGen3Release,
-            selectedTests
-          )
-        } else {
-          Utils.markStageSkippedForConditional(STAGE_NAME)
+      if(!runParallelTests) {
+        stage('RunTests') {
+          try {
+            if(!doNotRunTests) {
+              testHelper.soonToBeLegacyRunIntegrationTests(
+                kubectlNamespace,
+                pipeConfig.serviceTesting.name,
+                testedEnv,
+                isGen3Release,
+                isNightlyBuild,
+                selectedTests
+              )
+            } else {
+              Utils.markStageSkippedForConditional(STAGE_NAME)
+            }
+          } catch (ex) {
+            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+            throw ex
+          }
         }
-       } catch (ex) {
-         metricsHelper.writeMetricWithResult(STAGE_NAME, false)
-         throw ex
-       }
+      } else {
+        stage('runNonConcurrentStuff') {
+          try {
+            if(!doNotRunTests) {
+              testHelper.runScriptToCreateProgramsAndProjects(kubectlNamespace)
+              if (selectedTests.contains("all")) {
+                selectedTests = testHelper.gatherAllTestSuiteLabels(kubectlNamespace)
+              }
+              env.GEN3_SKIP_PROJ_SETUP = "true"
+            } else {
+              Utils.markStageSkippedForConditional(STAGE_NAME)
+            }
+          } catch (ex) {
+            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+            throw ex
+          }
+          metricsHelper.writeMetricWithResult(STAGE_NAME, true)
+        }
+
+        def testsToParallelize = [:]
+        List<String> failedTestSuites = [];
+
+        selectedTests.each {selectedTest ->
+          parallelStageName = selectedTest.replace("/", "-")
+          testsToParallelize["parallel-${parallelStageName}"] = {
+            stage('RunTest') {
+              selectedTestLabelSplit = selectedTest.split("/")
+              selectedTestLabel = "test-" + selectedTestLabelSplit[1] + "-" + selectedTestLabelSplit[2]
+              println("## ## testedEnv: ${testedEnv}")
+              try {
+                if(!doNotRunTests) {
+                  println("### ## selectedTestLabel: ${selectedTestLabel}");
+                  testHelper.runIntegrationTests(
+                    kubectlNamespace,
+                    pipeConfig.serviceTesting.name,
+                    testedEnv,
+                    selectedTest
+                  )
+                } else {
+                  Utils.markStageSkippedForConditional(STAGE_NAME)
+                }
+              } catch (ex) {
+                println("### ## ex.getMessage(): ${ex.getMessage()}")
+                if (ex.getMessage().contains("suites/")) {
+                  failedTestSuite = ex.getMessage();
+                  // TODO: Move this logic that translates suites/<suite>/<script>.js
+                  // into the label formatted string to a helper groovy function somewhere
+                  failedTestLabelSplit = failedTestSuite.split("/")
+                  failedTestLabel = "test-" + failedTestLabelSplit[1] + "-" + failedTestLabelSplit[2]
+                  println("### ## adding to list of failedTestSuites: ${failedTestLabel}");
+                  failedTestSuites.add(failedTestLabel);
+                } else {
+                  println("## something weird happened. Could not figure out which test failed. Details: ${ex}")
+                }
+                metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+              }
+            }
+          }
+        }
+
+        parallel testsToParallelize
+
+        stage('ProcessCIResults') {
+          try {
+            if(!doNotRunTests) {
+              testHelper.processCIResults(kubectlNamespace, isNightlyBuild, failedTestSuites)
+            } else {
+              Utils.markStageSkippedForConditional(STAGE_NAME)
+            }
+          } catch (ex) {
+            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+            throw ex
+          }
+          metricsHelper.writeMetricWithResult(STAGE_NAME, true)
+        }
       }
+
       stage('CleanS3') {
        try {
         if(!doNotRunTests) {
@@ -309,7 +414,7 @@ def call(Map config) {
     finally {
       stage('Post') {
         kubeHelper.teardown(kubeLocks)
-        testHelper.teardown()
+        testHelper.teardown(doNotRunTests)
         pipelineHelper.teardown(currentBuild.result)
       }
     }

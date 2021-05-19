@@ -1,6 +1,6 @@
 /**
-* Jenkins environments are used for continuous integration, therefore, they should 
-* always run the latest-latest code for all components 
+* Jenkins environments are used for continuous integration, therefore, they should
+* always run the latest-latest code for all components
 * (that is why all Jenkins CI environments, by default, have every service set to the "master" version).
 * Except in two cases:
 *   - When the PR belongs to a service-specific repo, the service that is being tested
@@ -9,7 +9,7 @@
 *   or
 *   - When the PR belongs to a Manifest Repo, all the versions declared in the manifest
 *     corresponding to the environment folder in the git diff should be injected into
-*     the manifest of the selected Jenkins CI env. 
+*     the manifest of the selected Jenkins CI env.
 *
 * TL;DR
 * Edits manifest of a service to provided branch
@@ -51,12 +51,12 @@ def setDictionary(String commonsHostname) {
   def branchDictionary = "https://s3.amazonaws.com/dictionary-artifacts/${prRepoName}/${prBranchName}/schema.json"
 
   echo "Editing cdis-manifest/${commonsHostname} dictionary to set ${prBranchName}"
-  
+
   // keep backup of the original manifest
   sh "cp cdis-manifest/${commonsHostname}/manifest.json cdis-manifest/${commonsHostname}/manifest.json.old"
   // swap current dictionary for the target dictionary
   sh(returnStatus: true, script: "cat cdis-manifest/${commonsHostname}/manifest.json.old | jq --arg theNewDict ${branchDictionary} '.global.dictionary_url |= \$theNewDict' > cdis-manifest/${commonsHostname}/manifest.json")
-  
+
   sh "cat cdis-manifest/${commonsHostname}/manifest.json"
 }
 
@@ -69,6 +69,8 @@ def setDictionary(String commonsHostname) {
 def mergeManifest(String changedDir, String selectedNamespace) {
   String od = sh(returnStdout: true, script: "jq -r .global.dictionary_url < tmpGitClone/$changedDir/manifest.json").trim()
   String pa = sh(returnStdout: true, script: "jq -r .global.portal_app < tmpGitClone/$changedDir/manifest.json").trim()
+  // fetch netpolicy from the target environment
+  netpolicyStatus = sh(returnStatus : true, script: "cat tmpGitClone/$changedDir/manifest.json | jq --exit-status '.global.netpolicy'")
   // fetch sower block from the target environment
   sh "jq -r .sower < tmpGitClone/$changedDir/manifest.json > sower_block.json"
   // fetch portal block from the target environment
@@ -79,6 +81,11 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   sh(returnStdout: true, script: "if cat tmpGitClone/$changedDir/manifest.json | jq --exit-status '.ssjdispatcher' >/dev/null; then "
     + "jq -r .ssjdispatcher < tmpGitClone/$changedDir/manifest.json > ssjdispatcher_block.json; "
     + "fi")
+  // fetch indexd block from the target environment
+  sh(returnStdout: true, script: "if cat tmpGitClone/$changedDir/manifest.json | jq --exit-status '.indexd' >/dev/null; then "
+    + "jq -r .indexd < tmpGitClone/$changedDir/manifest.json > indexd_block.json; "
+    + "fi")
+
   String s = sh(returnStdout: true, script: "jq -r keys < cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   println s
   def keys = new groovy.json.JsonSlurper().parseText(s)
@@ -96,12 +103,12 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   }
   sh(returnStdout: true, script: "bs=\$(jq -r .versions < tmpGitClone/$changedDir/manifest.json) "
           + "&& old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) "
-          + """&& echo \$old | jq -r --arg od ${od} --arg pa ${pa} --argjson vs \"\$bs\"""" 
+          + """&& echo \$old | jq -r --arg od ${od} --arg pa ${pa} --argjson vs \"\$bs\""""
           + / '(.global.dictionary_url) |=/ + "\$od" + / | (.global.portal_app) |=/ + "\$pa"
           + / | (.versions) |=/ + "\$vs" + /'/ + " > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
-  String parseSowerBlockReturnCode = sh(returnStatus: true, script: "jq sower_block.json")
-  println(parseSowerBlockReturnCode)
-  if (parseSowerBlockReturnCode == "0") {
+  String parseSowerBlockOutput = sh(returnStdout: true, script: "jq -r '.' sower_block.json")
+  println(parseSowerBlockOutput)
+  if (parseSowerBlockOutput.length() == "0") {
     // set Jenkins CI service accounts for sower jobs if the property exists
     sh(returnStdout: true, script: "cat sower_block.json | jq -r '.[] | if has(\"serviceAccountName\") then .serviceAccountName = \"jobs-${selectedNamespace}-planx-pla-net\" else . end' > new_scv_acct_sower_block.json")
     String sowerBlock2 = sh(returnStdout: true, script: "cat new_scv_acct_sower_block.json")
@@ -110,6 +117,12 @@ def mergeManifest(String changedDir, String selectedNamespace) {
     String sowerBlock3 = sh(returnStdout: true, script: "cat sower_block.json")
     println(sowerBlock3)
     sh(returnStdout: true, script: "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sj \"\$(cat sower_block.json)\" '(.sower) = \$sj' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
+  }
+  // delete netpolicy if the manifest from the target enviroment does not have it
+  if (netpolicyStatus != 0){
+    sh(returnStdout: true, script:
+    "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r 'del(.global.netpolicy)' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json "
+    )
   }
   // replace Portal block
   sh(returnStdout: true, script: "if [ -f \"portal_block.json\" ]; then "
@@ -121,6 +134,11 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   sh(returnStdout: true, script: "if [ -f \"ssjdispatcher_block.json\" ]; then "
     + "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sp \"\$(cat ssjdispatcher_block.json)\" '(.ssjdispatcher) = \$sp' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
     + "fi")
+  // replace indexd block
+  sh(returnStdout: true, script: "if [ -f \"indexd_block.json\" ]; then "
+    + "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sp \"\$(cat indexd_block.json)\" '(.indexd) = \$sp' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
+    + "fi")
+
   String rs = sh(returnStdout: true, script: "cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   return rs
 }
