@@ -215,8 +215,8 @@ def call(Map config) {
          try {
           if(!doNotRunTests) {
             manifestHelper.manifestDiff(kubectlNamespace)
-	  } else {
-	    Utils.markStageSkippedForConditional(STAGE_NAME)
+          } else {
+            Utils.markStageSkippedForConditional(STAGE_NAME)
           }
          } catch (ex) {
            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
