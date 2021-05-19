@@ -170,6 +170,7 @@ def call(Map config) {
                 pipeConfig.serviceTesting.name,
                 quayBranchName
               )
+              testedEnv = kubeHelper.getHostname(kubectlNamespace)
             }
 	  } else {
 	    Utils.markStageSkippedForConditional(STAGE_NAME)
@@ -214,9 +215,13 @@ def call(Map config) {
         stage('ModifyManifest') {
          try {
           if(!doNotRunTests) {
-            manifestHelper.manifestDiff(kubectlNamespace)
-          } else {
-            Utils.markStageSkippedForConditional(STAGE_NAME)
+            if (isNightlyBuild == "true") {
+              testedEnv = kubeHelper.getHostname(kubectlNamespace)
+            } else {
+              testedEnv = manifestHelper.manifestDiff(kubectlNamespace)
+            }
+	  } else {
+	    Utils.markStageSkippedForConditional(STAGE_NAME)
           }
          } catch (ex) {
            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
@@ -225,10 +230,6 @@ def call(Map config) {
          metricsHelper.writeMetricWithResult(STAGE_NAME, true)
 	}
       }
-
-      // set variable to identify which environment is being tested:
-      testedEnv = kubeHelper.getHostname(kubectlNamespace)
-      println("### ## testedEnv: ${testedEnv}")
 
       stage('K8sReset') {
        try {
