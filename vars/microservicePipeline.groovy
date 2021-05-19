@@ -228,7 +228,6 @@ def call(Map config) {
 
       // set variable to identify which environment is being tested:
       testedEnv = kubeHelper.getHostname(kubectlNamespace)
-      println("### ## testedEnv: ${testedEnv}")
 
       stage('K8sReset') {
        try {
