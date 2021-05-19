@@ -214,7 +214,7 @@ def call(Map config) {
         stage('ModifyManifest') {
          try {
           if(!doNotRunTests) {
-            kubeHelper.getHostname(kubectlNamespace)
+            manifestHelper.manifestDiff(kubectlNamespace)
 	  } else {
 	    Utils.markStageSkippedForConditional(STAGE_NAME)
           }
