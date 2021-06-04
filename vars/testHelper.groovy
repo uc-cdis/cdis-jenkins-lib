@@ -158,6 +158,8 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
           bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=false --selectedTest=${selectedTest}
         """, returnStatus: true);
         
+        echo "testResult status code is ${testResult}"
+        
         dir('output') {
           // collect and archive service logs
           echo "Archiving service logs via 'gen3 logs snapshot'"
