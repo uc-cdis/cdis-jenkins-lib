@@ -326,7 +326,7 @@ def call(Map config) {
                 println("### ## selectedTests: ${listOfAllTestSuites}")
                 // Too many test suites cause a ArrayIndexOutOfBoundsException error
                 // Removing items to identify the number of tests that Jenkins can accommodate
-                selectedTests = new ArrayList<String>(listOfAllTestSuites.toList().subList(0, 20));
+                selectedTests = new ArrayList<String>(listOfAllTestSuites.toList().subList(0, 30));
               }
               env.GEN3_SKIP_PROJ_SETUP = "true"
             } else {
