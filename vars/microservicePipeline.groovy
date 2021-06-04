@@ -226,7 +226,6 @@ def call(Map config) {
       } else {
         testedEnv = kubeHelper.getHostname(kubectlNamespace)
       }
-/*
       stage('K8sReset') {
        try {
         if(!doNotRunTests) {
@@ -239,7 +238,7 @@ def call(Map config) {
        } catch (ex) {
          // ignore aborted pipelines (not a failure, just some subsequent commit that initiated a new build)
          if (ex.getClass().getCanonicalName() != "hudson.AbortException" && 
-            ex.getClass().getCanonicalName() != "org.jenkinsci.plugins.workflow.steps.FlowInterruptedException") {
+            ex.getClass().getCanonicalName() != "org.jenkinsci.plugins.workflow.steps.FlowInterruptedException")         {
            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
            kubeHelper.sendSlackNotification(kubectlNamespace, isNightlyBuild)
            kubeHelper.saveLogs(kubectlNamespace)
@@ -296,7 +295,6 @@ def call(Map config) {
        }
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
       }
-*/
       if(!runParallelTests) {
         stage('RunTests') {
           try {
