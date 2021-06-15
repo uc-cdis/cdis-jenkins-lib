@@ -9,7 +9,6 @@ import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 */
 def call(Map config) {
   node('master') {
-    def AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs()
     List<String> namespaces = []
     List<String> selectedTests = []
     doNotRunTests = false
@@ -21,6 +20,7 @@ def call(Map config) {
     kubeLocks = []
     testedEnv = "" // for manifest pipeline
     pipeConfig = pipelineHelper.setupConfig(config)
+    def AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs(pipeConfig.MANIFEST)
     pipelineHelper.cancelPreviousRunningBuilds()
     prLabels = githubHelper.fetchLabels()
 

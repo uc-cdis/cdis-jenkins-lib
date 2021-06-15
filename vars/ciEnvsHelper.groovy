@@ -1,6 +1,11 @@
-def fetchCIEnvs() {
+def fetchCIEnvs(pipeconfigManifest) {
   try{
-    jenkins_envs_url="https://cdistest-public-test-bucket.s3.amazonaws.com/jenkins-envs.txt";
+    def jenkins_envs_url = ""
+    if (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST == false || pipeConfig.MANIFEST != "True") {
+      jenkins_envs_url="https://cdistest-public-test-bucket.s3.amazonaws.com/jenkins-envs-services.txt";
+    } else {
+      jenkins_envs_url="https://cdistest-public-test-bucket.s3.amazonaws.com/jenkins-envs-releases.txt";
+    }
     println("Shooting a request to: " + jenkins_envs_url);
     def get = new URL(jenkins_envs_url).openConnection();
     def getRC = get.getResponseCode();
