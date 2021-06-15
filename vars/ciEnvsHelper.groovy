@@ -1,7 +1,7 @@
 def fetchCIEnvs(pipeconfigManifest) {
   try{
     def jenkins_envs_url = ""
-    if (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST == false || pipeConfig.MANIFEST != "True") {
+    if (pipeconfigManifest == null || pipeconfigManifest == false || pipeconfigManifest != "True") {
       jenkins_envs_url="https://cdistest-public-test-bucket.s3.amazonaws.com/jenkins-envs-services.txt";
     } else {
       jenkins_envs_url="https://cdistest-public-test-bucket.s3.amazonaws.com/jenkins-envs-releases.txt";
