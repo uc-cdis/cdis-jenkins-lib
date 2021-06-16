@@ -1,4 +1,4 @@
-def fetchCIEnvs(pipeconfigManifest) {
+def fetchCIEnvs(pipeconfigManifest = false) {
   try{
     def jenkins_envs_url = ""
     if (pipeconfigManifest == null || pipeconfigManifest == false || pipeconfigManifest != "True") {
