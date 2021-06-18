@@ -346,6 +346,8 @@ def call(Map config) {
         def testGroupSize = 5;
         def testGroups = selectedTests.collate( testGroupSize )
         for (testGroup in testGroups){
+          println("### ## testGroup: ${testGroup}")
+          def testsToParallelize=[];
           testGroup.each {selectedTestLabel ->
             testsToParallelize["parallel-${selectedTestLabel}"] = {
               stage('RunTest') {
