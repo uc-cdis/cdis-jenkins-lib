@@ -344,7 +344,7 @@ def call(Map config) {
         // Experiment with splitting tests to different groups
         // TODO: sort selectedTests by running time
         def testGroupSize = 5;
-        def testGroups = selectedTests.collate( splitsize )
+        def testGroups = selectedTests.collate( testGroupSize )
         for (testGroup in testGroups){
           testGroup.each {selectedTestLabel ->
             testsToParallelize["parallel-${selectedTestLabel}"] = {
