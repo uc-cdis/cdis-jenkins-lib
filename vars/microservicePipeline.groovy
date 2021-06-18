@@ -339,7 +339,6 @@ def call(Map config) {
           metricsHelper.writeMetricWithResult(STAGE_NAME, true)
         }
 
-        def testsToParallelize = [:]
         List<String> failedTestSuites = [];
         // Experiment with splitting tests to different groups
         // TODO: sort selectedTests by running time
@@ -347,7 +346,7 @@ def call(Map config) {
         def testGroups = selectedTests.collate( testGroupSize )
         for (testGroup in testGroups){
           println("### ## testGroup: ${testGroup}")
-          def testsToParallelize=[];
+          def testsToParallelize = [:]
           testGroup.each {selectedTestLabel ->
             testsToParallelize["parallel-${selectedTestLabel}"] = {
               stage('RunTest') {
