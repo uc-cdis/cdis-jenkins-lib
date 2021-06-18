@@ -341,46 +341,50 @@ def call(Map config) {
 
         def testsToParallelize = [:]
         List<String> failedTestSuites = [];
-
-        selectedTests.each {selectedTestLabel ->
-          testsToParallelize["parallel-${selectedTestLabel}"] = {
-            stage('RunTest') {
-              selectedTestLabelSplit = selectedTestLabel.split("-")
-              selectedTest = "suites/" + selectedTestLabelSplit[1] + "/" + selectedTestLabelSplit[2] + ".js"
-              println("## ## testedEnv: ${testedEnv}")
-              try {
-                if(!doNotRunTests) {
-                  println("### ## selectedTestLabel: ${selectedTestLabel}");
-                  testHelper.runIntegrationTests(
-                    kubectlNamespace,
-                    pipeConfig.serviceTesting.name,
-                    testedEnv,
-                    selectedTest
-                  )
-                } else {
-                  Utils.markStageSkippedForConditional(STAGE_NAME)
+        // Experiment with splitting tests to different groups
+        // TODO: sort selectedTests by running time
+        def testGroupSize = 5;
+        def testGroups = selectedTests.collate( splitsize )
+        for (testGroup in testGroups){
+          testGroup.each {selectedTestLabel ->
+            testsToParallelize["parallel-${selectedTestLabel}"] = {
+              stage('RunTest') {
+                selectedTestLabelSplit = selectedTestLabel.split("-")
+                selectedTest = "suites/" + selectedTestLabelSplit[1] + "/" + selectedTestLabelSplit[2] + ".js"
+                println("## ## testedEnv: ${testedEnv}")
+                try {
+                  if(!doNotRunTests) {
+                    println("### ## selectedTestLabel: ${selectedTestLabel}");
+                    testHelper.runIntegrationTests(
+                      kubectlNamespace,
+                      pipeConfig.serviceTesting.name,
+                      testedEnv,
+                      selectedTest
+                    )
+                  } else {
+                    Utils.markStageSkippedForConditional(STAGE_NAME)
+                  }
+                } catch (ex) {
+                  println("### ## ex.getMessage(): ${ex.getMessage()}")
+                  if (ex.getMessage().contains("suites/")) {
+                    failedTestSuite = ex.getMessage();
+                    // TODO: Move this logic that translates suites/<suite>/<script>.js
+                    // into the label formatted string to a helper groovy function somewhere
+                    failedTestLabelSplit = failedTestSuite.split("/")
+                    failedTestLabel = "test-" + failedTestLabelSplit[1] + "-" + failedTestLabelSplit[2]
+                    println("### ## adding to list of failedTestSuites: ${failedTestLabel}");
+                    failedTestSuites.add(failedTestLabel);
+                  } else {
+                    println("## something weird happened. Could not figure out which test failed. Details: ${ex}")
+                  }
+                  metricsHelper.writeMetricWithResult(STAGE_NAME, false)
                 }
-              } catch (ex) {
-                println("### ## ex.getMessage(): ${ex.getMessage()}")
-                if (ex.getMessage().contains("suites/")) {
-                  failedTestSuite = ex.getMessage();
-                  // TODO: Move this logic that translates suites/<suite>/<script>.js
-                  // into the label formatted string to a helper groovy function somewhere
-                  failedTestLabelSplit = failedTestSuite.split("/")
-                  failedTestLabel = "test-" + failedTestLabelSplit[1] + "-" + failedTestLabelSplit[2]
-                  println("### ## adding to list of failedTestSuites: ${failedTestLabel}");
-                  failedTestSuites.add(failedTestLabel);
-                } else {
-                  println("## something weird happened. Could not figure out which test failed. Details: ${ex}")
-                }
-                metricsHelper.writeMetricWithResult(STAGE_NAME, false)
               }
             }
           }
+
+          parallel testsToParallelize
         }
-
-        parallel testsToParallelize
-
         stage('ProcessCIResults') {
           try {
             if(!doNotRunTests) {
