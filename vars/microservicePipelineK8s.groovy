@@ -96,6 +96,9 @@ spec:
         steps {
 	  script {
 	    try {
+	      // if the changes are doc-only, automatically skip the tests
+	      doNotRunTests = doNotRunTests || docOnlyHelper.checkTestSkippingCriteria()
+
 	      for(label in prLabels) {
 	        println(label['name']);
 	        switch(label['name']) {
@@ -106,13 +109,9 @@ spec:
 	     	    selectedTest = "suites/" + selectedTestLabel[1] + "/" + selectedTestLabel[2] + ".js"
                     selectedTests.add(selectedTest)
 	     	    break
-	          case "doc-only":
-	     	    println('Skip tests if git diff matches expected criteria')
-	     	    doNotRunTests = docOnlyHelper.checkTestSkippingCriteria()
-	     	    break
 	          case "decommission-environment":
 	     	    println('Skip tests if an environment folder is deleted')
-	     	    doNotRunTests = decommissionEnvHelper.checkDecommissioningEnvironment()
+	     	    doNotRunTests = doNotRunTests || decommissionEnvHelper.checkDecommissioningEnvironment()
 	          case "commission-environment":
 	     	    println('Skip ModifyManifest step to introduce a new CI environment')
 	     	    doNotModifyManifest = true

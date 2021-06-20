@@ -35,6 +35,10 @@ def call(Map config) {
        try {
         // giving a chance for auto-label gh actions to catch up
         sleep(30)
+
+        // if the changes are doc-only, automatically skip the tests
+        doNotRunTests = doNotRunTests || docOnlyHelper.checkTestSkippingCriteria()
+
         for(label in prLabels) {
           println(label['name']);
           switch(label['name']) {
@@ -45,17 +49,13 @@ def call(Map config) {
               selectedTest = "suites/" + selectedTestLabel[1] + "/" + selectedTestLabel[2] + ".js"
               selectedTests.add(selectedTest)
               break
-            case "doc-only":
-              println('Skip tests if git diff matches expected criteria')
-	      doNotRunTests = docOnlyHelper.checkTestSkippingCriteria()
-              break
             case "parallel-testing":
               println('Run labelled test suites in parallel')
               runParallelTests = true
               break
             case "decommission-environment":
               println('Skip tests if an environment folder is deleted')
-              doNotRunTests = decommissionEnvHelper.checkDecommissioningEnvironment()
+              doNotRunTests = doNotRunTests || decommissionEnvHelper.checkDecommissioningEnvironment()
             case "gen3-release":
               println('Enable additional tests and automation')
               isGen3Release = "true"
