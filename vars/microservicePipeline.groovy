@@ -22,7 +22,6 @@ def call(Map config) {
     pipeConfig = pipelineHelper.setupConfig(config)
     def AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs(pipeConfig.MANIFEST)
     pipelineHelper.cancelPreviousRunningBuilds()
-    prLabels = githubHelper.fetchLabels()
 
     try {
       stage('CleanWorkspace') {
@@ -35,6 +34,7 @@ def call(Map config) {
        try {
         // giving a chance for auto-label gh actions to catch up
         sleep(30)
+        prLabels = githubHelper.fetchLabels()
 
         // if the changes are doc-only, automatically skip the tests
         doNotRunTests = doNotRunTests || docOnlyHelper.checkTestSkippingCriteria()
