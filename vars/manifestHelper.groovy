@@ -70,7 +70,9 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   String od = sh(returnStdout: true, script: "jq -r .global.dictionary_url < tmpGitClone/$changedDir/manifest.json").trim()
   String pa = sh(returnStdout: true, script: "jq -r .global.portal_app < tmpGitClone/$changedDir/manifest.json").trim()
   // fetch netpolicy from the target environment
-  netpolicyStatus = sh(returnStatus : true, script: "cat tmpGitClone/$changedDir/manifest.json | jq --exit-status '.global.netpolicy'")
+  sh(returnStatus : true, script: "if cat tmpGitClone/$changedDir/manifest.json | jq --exit-status '.global.netpolicy' >/dev/null; then "
+    + "jq -r .global.netpolicy < tmpGitClone/$changedDir/manifest.json > netpolicy.json; "
+    + "fi")
   // fetch sower block from the target environment
   sh "jq -r .sower < tmpGitClone/$changedDir/manifest.json > sower_block.json"
   // fetch portal block from the target environment
@@ -118,12 +120,12 @@ def mergeManifest(String changedDir, String selectedNamespace) {
     println(sowerBlock3)
     sh(returnStdout: true, script: "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sj \"\$(cat sower_block.json)\" '(.sower) = \$sj' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   }
-  // delete netpolicy if the manifest from the target enviroment does not have it
-  if (netpolicyStatus != 0){
-    sh(returnStdout: true, script:
-    "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r 'del(.global.netpolicy)' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json "
-    )
-  }
+  // replace netpolicy
+  sh(returnStdout: true, script: "if [ -f \"netpolicy.json\" ]; then "
+    + "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sp \"\$(cat netpolicy.json)\" '(.global.netpolicy) = \$sp' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
+    + "else "
+    + "jq 'del(.global.netpolicy)' cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json > manifest_tmp.json && mv manifest_tmp.json cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
+    + "fi")
   // replace Portal block
   sh(returnStdout: true, script: "if [ -f \"portal_block.json\" ]; then "
     + "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sp \"\$(cat portal_block.json)\" '(.portal) = \$sp' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
