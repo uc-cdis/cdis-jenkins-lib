@@ -122,9 +122,9 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   }
   // replace netpolicy
   sh(returnStdout: true, script: "if [ -f \"netpolicy.json\" ]; then "
-    + "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sp \"\$(cat netpolicy.json)\" '(.global.netpolicy) = \$sp' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
+    + "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq --arg sp \"\$(cat netpolicy.json)\" '.global.netpolicy = \$sp' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
     + "else "
-    + "jq 'del(.global.netpolicy)' cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json > manifest_tmp.json && mv manifest_tmp.json cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
+    + "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r 'del(.global.netpolicy)' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json;"
     + "fi")
   // replace Portal block
   sh(returnStdout: true, script: "if [ -f \"portal_block.json\" ]; then "
