@@ -25,7 +25,7 @@ def fetchAllRepos(String currentRepoName) {
     } else {
       git(
         url: 'https://github.com/uc-cdis/gen3-qa.git',
-        branch: 'master'
+        branch: 'fix/studyViewerConfig_run_test'
       );
     }
   }
