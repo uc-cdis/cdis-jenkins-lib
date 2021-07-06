@@ -4,7 +4,7 @@ import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 
 /**
 * Pipline for building and testing microservices
-* 
+*
 * @param config - pipeline configuration
 */
 def call(Map config) {
@@ -94,9 +94,14 @@ def call(Map config) {
         // If a specific test suite is not specified, run them all
         if (selectedTests.size == 0) {
 	  selectedTests.add("all")
+
+          // include long running tests in the nightly-build
+          if (isNightlyBuild == "true") {
+            selectedTests.add("test-portal-pfbExportTest")
+          }
         }
        } catch (ex) {
-        metricsHelper.writeMetricWithResult(STAGE_NAME, false)  
+        metricsHelper.writeMetricWithResult(STAGE_NAME, false)
         throw ex
        }
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
@@ -164,7 +169,7 @@ def call(Map config) {
               )
             } else {
               def quayBranchName = regexMatchRepoOwner[1] == "uc-cdis" ? pipeConfig.serviceTesting.branch : "automatedCopy-${pipeConfig.serviceTesting.branch}";
-              println("### ## quayBranchName: ${quayBranchName}")            
+              println("### ## quayBranchName: ${quayBranchName}")
               manifestHelper.editService(
                 kubeHelper.getHostname(kubectlNamespace),
                 pipeConfig.serviceTesting.name,
@@ -242,7 +247,7 @@ def call(Map config) {
         }
        } catch (ex) {
          // ignore aborted pipelines (not a failure, just some subsequent commit that initiated a new build)
-         if (ex.getClass().getCanonicalName() != "hudson.AbortException" && 
+         if (ex.getClass().getCanonicalName() != "hudson.AbortException" &&
             ex.getClass().getCanonicalName() != "org.jenkinsci.plugins.workflow.steps.FlowInterruptedException") {
            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
            kubeHelper.sendSlackNotification(kubectlNamespace, isNightlyBuild)
