@@ -4,18 +4,28 @@ import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 
 /**
 * Pipline for building and testing microservices
-* 
+*
 * @param config - pipeline configuration
 */
 def call(Map config) {
-  node('master') {
+
+  // check if PR contains a label to define where the PR check must run
+  // giving a chance for auto-label gh actions to catch up
+  sleep(30)
+  def prLabels = githubHelper.fetchLabels()
+
+  // run all PR checks on jenkins-master by default
+  def theNode = 'master'
+  if (prLabels.contains('run-on-jenkins-ci-worker'))) {
+    theNode = 'gen3-ci-worker'
+  }
+  node(theNode) {
     List<String> namespaces = []
     List<String> selectedTests = []
     doNotRunTests = false
     runParallelTests = false
     isGen3Release = "false"
     isNightlyBuild = "false"
-    prLabels = null
     kubectlNamespace = null
     kubeLocks = []
     testedEnv = "" // for manifest pipeline
@@ -32,10 +42,6 @@ def call(Map config) {
       }
       stage('CheckPRLabels') {
        try {
-        // giving a chance for auto-label gh actions to catch up
-        sleep(30)
-        prLabels = githubHelper.fetchLabels()
-
         // if the changes are doc-only, automatically skip the tests
         doNotRunTests = doNotRunTests || docOnlyHelper.checkTestSkippingCriteria()
 
@@ -96,7 +102,7 @@ def call(Map config) {
 	  selectedTests.add("all")
         }
        } catch (ex) {
-        metricsHelper.writeMetricWithResult(STAGE_NAME, false)  
+        metricsHelper.writeMetricWithResult(STAGE_NAME, false)
         throw ex
        }
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
@@ -164,7 +170,7 @@ def call(Map config) {
               )
             } else {
               def quayBranchName = regexMatchRepoOwner[1] == "uc-cdis" ? pipeConfig.serviceTesting.branch : "automatedCopy-${pipeConfig.serviceTesting.branch}";
-              println("### ## quayBranchName: ${quayBranchName}")            
+              println("### ## quayBranchName: ${quayBranchName}")
               manifestHelper.editService(
                 kubeHelper.getHostname(kubectlNamespace),
                 pipeConfig.serviceTesting.name,
@@ -242,7 +248,7 @@ def call(Map config) {
         }
        } catch (ex) {
          // ignore aborted pipelines (not a failure, just some subsequent commit that initiated a new build)
-         if (ex.getClass().getCanonicalName() != "hudson.AbortException" && 
+         if (ex.getClass().getCanonicalName() != "hudson.AbortException" &&
             ex.getClass().getCanonicalName() != "org.jenkinsci.plugins.workflow.steps.FlowInterruptedException") {
            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
            kubeHelper.sendSlackNotification(kubectlNamespace, isNightlyBuild)
