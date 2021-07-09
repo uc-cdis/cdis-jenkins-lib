@@ -16,7 +16,7 @@ def call(Map config) {
 
   // run all PR checks on jenkins-master by default
   def theNode = 'master'
-  if (prLabels.contains('run-on-jenkins-ci-worker'))) {
+  if (prLabels.contains('run-on-jenkins-ci-worker')) {
     theNode = 'gen3-ci-worker'
   }
   node(theNode) {
