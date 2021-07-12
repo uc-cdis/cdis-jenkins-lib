@@ -165,6 +165,17 @@ def overwriteConfigFolders(String changedDir, String selectedNamespace) {
     if (folders.contains('etlMapping.yaml')) {
       sh(script: "cp -rf tmpGitClone/$changedDir/etlMapping.yaml cdis-manifest/${selectedNamespace}.planx-pla.net/")
     }
+    // Overwrite manifests folder
+    if(folders.contains('manifests')){
+      List<String> manifests_sub_folders = sh(returnStdout: true, script: "ls tmpGitClone/$changedDir/manifests").split()
+      // Overwrite mariner folder
+      if(manifests_sub_folders.contains('mariner')){
+        sh(script: "cp -rf tmpGitClone/$changedDir/mariner cdis-manifest/${selectedNamespace}.planx-pla.net/")
+        // replace s3 bucket
+        config_location = "cdis-manifest/${selectedNamespace}.planx-pla.net/manifests/mariner/mariner.json"
+        sh(returnStdout: true, script: "jq '.storage.s3.name=\"qaplanetv1--${selectedNamespace}--mariner-707767160287\"' ${config_location} > mariner_tmp.json && mv mariner_tmp.json ${config_location}")
+      }
+    }
   }
 
 /**
