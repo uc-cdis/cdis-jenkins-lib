@@ -13,11 +13,10 @@ def call(Map config) {
   // giving a chance for auto-label gh actions to catch up
   sleep(30)
   def prLabels = githubHelper.fetchLabels()
-  println("check list of labels: $prLabels")
 
   // run all PR checks on jenkins-master by default
   def theNode = 'master'
-  if (prLabels.contains('run-on-jenkins-ci-worker')) {
+  if (prLabels.any{label -> label.name == "run-on-jenkins-ci-worker"}) {
     println('Found [run-on-jenkins-ci-worker] label, running CI on ci worker pod...')
     theNode = 'gen3-ci-worker'
   }
