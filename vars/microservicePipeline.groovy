@@ -19,7 +19,7 @@ def call(Map config) {
     println('Found [run-on-jenkins-ci-worker] label, running CI on ci worker pod...')
     runOnGen3CIWorker = true
   }
-  node(theNode) {
+  node(runOnGen3CIWorker? 'gen3-ci-worker' : 'master') {
     List<String> namespaces = []
     List<String> selectedTests = []
     doNotRunTests = false
