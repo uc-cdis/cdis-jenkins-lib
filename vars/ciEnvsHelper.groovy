@@ -1,7 +1,7 @@
 def fetchCIEnvs(runOnGen3CIWorker = false) {
   try{
     def jenkins_envs_url="https://cdistest-public-test-bucket.s3.amazonaws.com/jenkins-envs-services.txt";
-    if (runOnGen3CIWorker == "True") {
+    if (runOnGen3CIWorker) {
       jenkins_envs_url="https://cdistest-public-test-bucket.s3.amazonaws.com/jenkins-envs-releases.txt";
     }
     println("Shooting a request to: " + jenkins_envs_url);
