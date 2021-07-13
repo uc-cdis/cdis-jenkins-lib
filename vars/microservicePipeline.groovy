@@ -33,7 +33,7 @@ def call(Map config) {
 
     // if this is a Manifests repo, run on separate jenkins worker pod
     // this is overridable by the 'run-on-jenkins-ci-worker' PR label
-    if (pipeconfigManifest == "True") {
+    if (pipeConfig.MANIFEST == "True") {
       runOnGen3CIWorker = true
     }
     def AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs(runOnGen3CIWorker)
