@@ -145,7 +145,7 @@ def call(Map config) {
          try {
           if(!doNotRunTests) {
             (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'], namespaces)
-            currentBuild.displayName = '#${BUILD_NUMBER}(${kubectlNamespace})'
+            currentBuild.displayName = "#${BUILD_NUMBER}(${kubectlNamespace})"
             kubeLocks << lock
 	  } else {
 	    Utils.markStageSkippedForConditional(STAGE_NAME)
