@@ -1,7 +1,7 @@
-def fetchCIEnvs(pipeconfigManifest = false) {
+def fetchCIEnvs(theNode = 'master') {
   try{
     def jenkins_envs_url = ""
-    if (pipeconfigManifest == null || pipeconfigManifest == false || pipeconfigManifest != "True") {
+    if (theNode == "master") {
       jenkins_envs_url="https://cdistest-public-test-bucket.s3.amazonaws.com/jenkins-envs-services.txt";
     } else {
       jenkins_envs_url="https://cdistest-public-test-bucket.s3.amazonaws.com/jenkins-envs-releases.txt";
@@ -10,7 +10,7 @@ def fetchCIEnvs(pipeconfigManifest = false) {
     def get = new URL(jenkins_envs_url).openConnection();
     def getRC = get.getResponseCode();
     println(getRC);
-    List<String> ciEnvironments = [];    
+    List<String> ciEnvironments = [];
     if(getRC.equals(200)) {
       ciEnvsRaw = get.getInputStream().getText();
       ciEnvironments = ciEnvsRaw.split('\n')

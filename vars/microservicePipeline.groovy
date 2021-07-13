@@ -31,7 +31,7 @@ def call(Map config) {
     kubeLocks = []
     testedEnv = "" // for manifest pipeline
     pipeConfig = pipelineHelper.setupConfig(config)
-    def AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs(pipeConfig.MANIFEST)
+    def AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs(theNode)
     pipelineHelper.cancelPreviousRunningBuilds()
 
     try {
