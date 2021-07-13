@@ -14,13 +14,12 @@ def call(Map config) {
   sleep(30)
   def prLabels = githubHelper.fetchLabels()
 
-  // run all PR checks on jenkins-master by default
-  def theNode = 'master'
+  def runOnGen3CIWorker = false;
   if (prLabels.any{label -> label.name == "run-on-jenkins-ci-worker"}) {
     println('Found [run-on-jenkins-ci-worker] label, running CI on ci worker pod...')
-    theNode = 'gen3-ci-worker'
+    runOnGen3CIWorker = true
   }
-  node(theNode) {
+  node(runOnGen3CIWorker? 'gen3-ci-worker' : 'master') {
     List<String> namespaces = []
     List<String> selectedTests = []
     doNotRunTests = false
@@ -31,7 +30,13 @@ def call(Map config) {
     kubeLocks = []
     testedEnv = "" // for manifest pipeline
     pipeConfig = pipelineHelper.setupConfig(config)
-    def AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs(pipeConfig.MANIFEST, theNode)
+
+    // if this is a Manifests repo, run on separate jenkins worker pod
+    // this is overridable by the 'run-on-jenkins-ci-worker' PR label
+    if (pipeConfig.MANIFEST == "True") {
+      runOnGen3CIWorker = true
+    }
+    def AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs(runOnGen3CIWorker)
     pipelineHelper.cancelPreviousRunningBuilds()
 
     try {
