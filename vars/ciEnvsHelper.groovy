@@ -1,9 +1,7 @@
-def fetchCIEnvs(theNode = 'master') {
+def fetchCIEnvs(pipeconfigManifest = false, theNode = 'master') {
   try{
-    def jenkins_envs_url = ""
-    if (theNode == "master") {
-      jenkins_envs_url="https://cdistest-public-test-bucket.s3.amazonaws.com/jenkins-envs-services.txt";
-    } else {
+    def jenkins_envs_url="https://cdistest-public-test-bucket.s3.amazonaws.com/jenkins-envs-services.txt";
+    if (pipeconfigManifest == "True" || theNode == 'gen3-ci-worker') {
       jenkins_envs_url="https://cdistest-public-test-bucket.s3.amazonaws.com/jenkins-envs-releases.txt";
     }
     println("Shooting a request to: " + jenkins_envs_url);
