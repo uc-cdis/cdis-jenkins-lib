@@ -145,7 +145,6 @@ def call(Map config) {
          try {
           if(!doNotRunTests) {
             (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'], namespaces)
-            currentBuild.displayName = "#${BUILD_NUMBER} - ${kubectlNamespace}"
             kubeLocks << lock
 	  } else {
 	    Utils.markStageSkippedForConditional(STAGE_NAME)
@@ -154,7 +153,8 @@ def call(Map config) {
            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
            throw ex
          }
-         metricsHelper.writeMetricWithResult(STAGE_NAME, true)
+        currentBuild.displayName = "#${BUILD_NUMBER} - ${kubectlNamespace}" 
+	metricsHelper.writeMetricWithResult(STAGE_NAME, true)
         }
         stage('CleanUp3rdPartyResources') {
          try {
@@ -203,7 +203,6 @@ def call(Map config) {
          try {
           if(!doNotRunTests) {
             (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'], namespaces)
-            currentBuild.displayName = "#${BUILD_NUMBER} - ${kubectlNamespace}"
             kubeLocks << lock
           } else {
             Utils.markStageSkippedForConditional(STAGE_NAME)
@@ -212,6 +211,7 @@ def call(Map config) {
            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
            throw ex
          }
+	 currentBuild.displayName = "#${BUILD_NUMBER} - ${kubectlNamespace}"
          metricsHelper.writeMetricWithResult(STAGE_NAME, true)
         }
         stage('CleanUp3rdPartyResources') {
