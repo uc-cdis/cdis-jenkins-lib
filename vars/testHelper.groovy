@@ -28,7 +28,7 @@ def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) 
 }
 
 /**
-* Soon to be legacy function that runs gen3-qa integration tests sequentially (pfft... what a loser)
+* Soon to be legacy function that runs gen3-qa integration tests sequentially
 *
 * @param namespace - namespace to run integration tests in
 * @param service - name of service the test is being run for
@@ -54,7 +54,7 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
         }
         // check XMLs inside the output folder
         def featureLabelMap = xmlHelper.assembleFeatureLabelMap()
-        
+
         if (TestSuitesNonZeroStatusCodes.size() == 0) {
           // if the test succeeds, then verify that we got some test results ...
           testResult = sh(script: "ls output/ | grep '.*\\.xml'", returnStatus: true)
@@ -70,7 +70,7 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
         def successMsg = "Successful CI run for https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :tada:"
         def commonMsg = "Duration: ${currentBuild.durationString} :clock1:\n"
         if (TestSuitesNonZeroStatusCodes.size() != 0) {
-          def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
+          def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: running on ${KUBECTL_NAMESPACE} :jenkins:. \n"
           if (featureLabelMap.size() < 10) {
             def commaSeparatedListOfLabels = ""
 
@@ -83,7 +83,7 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
               commaSeparatedListOfLabels += "${retryLabel}"
               // add comma except for the last one
               if(testSuite != featureLabelMap.keySet().last()) {
-                commaSeparatedListOfLabels += ","                
+                commaSeparatedListOfLabels += ","
               }
             }
             failureMsg += " To label & retry, just send the following message: \n @qa-bot replay-pr ${REPO_NAME} ${PR_NUMBER} ${commaSeparatedListOfLabels}"
@@ -145,7 +145,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         // The first thread to reach this stage must drop a marker file
         if (fileExists('gen3-qa-mutex.marker')) {
           echo 'gen3-qa-mutex.marker found!'
-          
+
           sh(script: """
             #!/bin/bash +x
             # disable bootstrap script from codeceptjs
@@ -156,13 +156,13 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
           writeFile(file: 'gen3-qa-mutex.marker', text: "--> ${selectedTest} got here first!")
           // Give a chance for the first thread to run the codeceptjs bootstrapping script
         }
-             
+
         testResult = null
         List<String> failedTestSuites = [];
         testResult = sh(script: """
           bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=false --selectedTest=${selectedTest}
         """, returnStatus: true);
-        
+
         dir('output') {
           // collect and archive service logs
           echo "Archiving service logs via 'gen3 logs snapshot'"
@@ -173,7 +173,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
           // Mark as unstable for proper visual feedback in blue ocean
           // but let the ProcessCIResults stage deal with the error handling
           currentBuild.result = 'UNSTABLE'
-          unstableMsg = "testsuite ${selectedTest} failed" 
+          unstableMsg = "testsuite ${selectedTest} failed"
           unstable(unstableMsg)
           throw new Exception(selectedTest)
         }
@@ -197,11 +197,11 @@ def processCIResults(String namespace, String isNightlyBuild = "false", List<Str
       failedTestSuites = failedTestSuites.toSet()
       if (failedTestSuites.size() > 0) {
         def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
-        failureMsg += failedTestSuites.collect { " - *${it}* failed :red_circle:" }.join "\n"         
+        failureMsg += failedTestSuites.collect { " - *${it}* failed :red_circle:" }.join "\n"
         commaSeparatedListOfLabels = failedTestSuites.join ","
 
         failureMsg += " To label :label: & retry :jenkins:, just send the following message: \n @qa-bot replay-pr ${REPO_NAME} ${PR_NUMBER} ${commaSeparatedListOfLabels}"
-      
+
         failureMsg += "\n " + commonMsg
 
         slackSend(color: 'bad', channel: isNightlyBuild == "true" ? "#nightly-builds" : "#gen3-qa-notifications", message: failureMsg)
@@ -261,7 +261,7 @@ def fetchDataClient(String dataClientBranch="master") {
     download_location = "dataclient.zip"
     sh String.format("aws s3 cp s3://cdis-dc-builds/%s/dataclient_%s.zip %s", branch, os, download_location)
     assert fileExists(download_location)
-    sh "unzip ${download_location}"    
+    sh "unzip ${download_location}"
 
     // make sure we can execute it
     executable_name = "gen3-client"
