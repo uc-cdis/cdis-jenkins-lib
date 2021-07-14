@@ -153,8 +153,8 @@ def call(Map config) {
            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
            throw ex
          }
-        currentBuild.displayName = "#${BUILD_NUMBER} - ${kubectlNamespace}" 
-	metricsHelper.writeMetricWithResult(STAGE_NAME, true)
+	 currentBuild.displayName = "#${BUILD_NUMBER} - ${kubectlNamespace}"
+	 metricsHelper.writeMetricWithResult(STAGE_NAME, true)
         }
         stage('CleanUp3rdPartyResources') {
          try {
