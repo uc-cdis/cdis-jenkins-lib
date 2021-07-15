@@ -4,23 +4,40 @@ import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 
 /**
 * Pipline for building and testing microservices
-* 
+*
 * @param config - pipeline configuration
 */
 def call(Map config) {
-  node('master') {
+
+  // check if PR contains a label to define where the PR check must run
+  // giving a chance for auto-label gh actions to catch up
+  sleep(30)
+  def prLabels = githubHelper.fetchLabels()
+  def pipeConfig = pipelineHelper.setupConfig(config)
+
+  def runOnGen3CIWorker = false;
+  if (prLabels.any{label -> label.name == "run-on-jenkins-ci-worker"}) {
+    println('Found [run-on-jenkins-ci-worker] label, running CI on ci worker pod...')
+    runOnGen3CIWorker = true
+  }
+  // if this is a Manifests repo, run on separate jenkins worker pod
+  // this is overridable by the 'run-on-jenkins-ci-worker' PR label
+  if (pipeConfig.MANIFEST == "True") {
+    runOnGen3CIWorker = true
+  }
+
+  node(runOnGen3CIWorker? 'gen3-ci-worker' : 'master') {
     List<String> namespaces = []
     List<String> selectedTests = []
     doNotRunTests = false
     runParallelTests = false
     isGen3Release = "false"
     isNightlyBuild = "false"
-    prLabels = null
     kubectlNamespace = null
     kubeLocks = []
     testedEnv = "" // for manifest pipeline
-    pipeConfig = pipelineHelper.setupConfig(config)
-    def AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs(pipeConfig.MANIFEST)
+
+    def AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs(runOnGen3CIWorker)
     pipelineHelper.cancelPreviousRunningBuilds()
 
     try {
@@ -32,10 +49,6 @@ def call(Map config) {
       }
       stage('CheckPRLabels') {
        try {
-        // giving a chance for auto-label gh actions to catch up
-        sleep(30)
-        prLabels = githubHelper.fetchLabels()
-
         // if the changes are doc-only, automatically skip the tests
         doNotRunTests = doNotRunTests || docOnlyHelper.checkTestSkippingCriteria()
 
@@ -96,7 +109,7 @@ def call(Map config) {
 	  selectedTests.add("all")
         }
        } catch (ex) {
-        metricsHelper.writeMetricWithResult(STAGE_NAME, false)  
+        metricsHelper.writeMetricWithResult(STAGE_NAME, false)
         throw ex
        }
        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
@@ -140,7 +153,8 @@ def call(Map config) {
            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
            throw ex
          }
-         metricsHelper.writeMetricWithResult(STAGE_NAME, true)
+	 currentBuild.displayName = "#${BUILD_NUMBER} - ${kubectlNamespace}"
+	 metricsHelper.writeMetricWithResult(STAGE_NAME, true)
         }
         stage('CleanUp3rdPartyResources') {
          try {
@@ -164,7 +178,7 @@ def call(Map config) {
               )
             } else {
               def quayBranchName = regexMatchRepoOwner[1] == "uc-cdis" ? pipeConfig.serviceTesting.branch : "automatedCopy-${pipeConfig.serviceTesting.branch}";
-              println("### ## quayBranchName: ${quayBranchName}")            
+              println("### ## quayBranchName: ${quayBranchName}")
               manifestHelper.editService(
                 kubeHelper.getHostname(kubectlNamespace),
                 pipeConfig.serviceTesting.name,
@@ -197,6 +211,7 @@ def call(Map config) {
            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
            throw ex
          }
+	 currentBuild.displayName = "#${BUILD_NUMBER} - ${kubectlNamespace}"
          metricsHelper.writeMetricWithResult(STAGE_NAME, true)
         }
         stage('CleanUp3rdPartyResources') {
@@ -242,7 +257,7 @@ def call(Map config) {
         }
        } catch (ex) {
          // ignore aborted pipelines (not a failure, just some subsequent commit that initiated a new build)
-         if (ex.getClass().getCanonicalName() != "hudson.AbortException" && 
+         if (ex.getClass().getCanonicalName() != "hudson.AbortException" &&
             ex.getClass().getCanonicalName() != "org.jenkinsci.plugins.workflow.steps.FlowInterruptedException") {
            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
            kubeHelper.sendSlackNotification(kubectlNamespace, isNightlyBuild)
