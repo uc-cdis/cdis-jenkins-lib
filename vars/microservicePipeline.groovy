@@ -107,6 +107,11 @@ def call(Map config) {
         // If a specific test suite is not specified, run them all
         if (selectedTests.size == 0) {
 	  selectedTests.add("all")
+
+          // include long running tests in the nightly-build
+          if (isNightlyBuild == "true") {
+            selectedTests.add("test-portal-pfbExportTest")
+          }
         }
        } catch (ex) {
         metricsHelper.writeMetricWithResult(STAGE_NAME, false)
