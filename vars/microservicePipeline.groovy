@@ -110,7 +110,7 @@ def call(Map config) {
 
           // include long running tests in the nightly-build
           if (isNightlyBuild == "true") {
-            selectedTests.add("test-portal-pfbExportTest")
+            selectedTests.add("suites/portal/pfbExportTest.js")
           }
         }
        } catch (ex) {
