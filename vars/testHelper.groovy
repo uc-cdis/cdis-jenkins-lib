@@ -28,7 +28,7 @@ def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) 
 }
 
 /**
-* Soon to be legacy function that runs gen3-qa integration tests sequentially (pfft... what a loser)
+* Soon to be legacy function that runs gen3-qa integration tests sequentially
 *
 * @param namespace - namespace to run integration tests in
 * @param service - name of service the test is being run for
@@ -70,7 +70,7 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
         def successMsg = "Successful CI run for https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :tada:"
         def commonMsg = "Duration: ${currentBuild.durationString} :clock1:\n"
         if (TestSuitesNonZeroStatusCodes.size() != 0) {
-          def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: \n"
+          def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: running on ${KUBECTL_NAMESPACE} :jenkins:. \n"
           if (featureLabelMap.size() < 10) {
             def commaSeparatedListOfLabels = ""
 
