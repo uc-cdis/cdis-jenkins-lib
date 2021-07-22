@@ -192,5 +192,5 @@ def manifestDiff(String selectedNamespace) {
 def fetchHostnameFromMutatedEnvironment() {
   println('fetching mutatedEnvHostname from nightly.planx-pla.net/manifest.json...')
   def actualTestedEnv = sh(returnStdout: true, script: "jq -r .global.mutatedEnvHostname < tmpGitClone/nightly.planx-pla.net/manifest.json").trim()
-  println('### ## found this hostname -> ${actualTestedEnv}')
+  println("### ## found this hostname -> ${actualTestedEnv}")
 }
