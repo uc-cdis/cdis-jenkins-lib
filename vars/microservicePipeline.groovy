@@ -235,10 +235,13 @@ def call(Map config) {
         stage('ModifyManifest') {
          try {
           if(!doNotRunTests) {
+            // this function also calls overwriteConfigFolders
+            testedEnv = manifestHelper.manifestDiff(kubectlNamespace)
+
+            // the nightly build flow will always set testedEnv to nightly.planx-pla.net
+            // unless we fetch the correct name of the mutated environment
             if (isNightlyBuild == "true") {
-              testedEnv = kubeHelper.getHostname(kubectlNamespace)
-            } else {
-              testedEnv = manifestHelper.manifestDiff(kubectlNamespace)
+              testedEnv = manifestHelper.fetchHostnameFromMutatedEnvironment()
             }
 	  } else {
 	    Utils.markStageSkippedForConditional(STAGE_NAME)

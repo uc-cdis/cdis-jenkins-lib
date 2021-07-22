@@ -149,6 +149,7 @@ def mergeManifest(String changedDir, String selectedNamespace) {
 def overwriteConfigFolders(String changedDir, String selectedNamespace) {
     List<String> folders = sh(returnStdout: true, script: "ls tmpGitClone/$changedDir").split()
     if (folders.contains('portal')) {
+      println('Copying all the contents from tmpGitClone/$changedDir/portal into cdis-manifest/${selectedNamespace}.planx-pla.net/...')
       sh(script: "cp -rf tmpGitClone/$changedDir/portal cdis-manifest/${selectedNamespace}.planx-pla.net/")
 
       // Some commons display a user agreement quiz after logging in for the
@@ -161,6 +162,7 @@ def overwriteConfigFolders(String changedDir, String selectedNamespace) {
       }
     }
     if (folders.contains('etlMapping.yaml')) {
+      println('Copying etl mapping config from tmpGitClone/$changedDir/etlMapping.yaml into cdis-manifest/${selectedNamespace}.planx-pla.net/...')
       sh(script: "cp -rf tmpGitClone/$changedDir/etlMapping.yaml cdis-manifest/${selectedNamespace}.planx-pla.net/")
     }
   }
@@ -182,4 +184,13 @@ def manifestDiff(String selectedNamespace) {
         return key
       }
     }
-  }
+}
+
+/**
+* Returns the hostname of the mutated environment (currently used for nightly-build)
+*/
+def fetchHostnameFromMutatedEnvironment() {
+  println('fetching mutatedEnvHostname from nightly.planx-pla.net/manifest.json...')
+  def actualTestedEnv = sh(returnStdout: true, script: "jq -r .global.mutatedEnvHostname < tmpGitClone/nightly.planx-pla.net/manifest.json").trim()
+  println("### ## found this hostname -> ${actualTestedEnv}")
+}
