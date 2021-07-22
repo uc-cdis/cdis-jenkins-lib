@@ -190,5 +190,7 @@ def manifestDiff(String selectedNamespace) {
 * Returns the hostname of the mutated environment (currently used for nightly-build)
 */
 def fetchHostnameFromMutatedEnvironment() {
-  println('not implemented yet')
+  println('fetching mutatedEnvHostname from nightly.planx-pla.net/manifest.json...')
+  def actualTestedEnv = sh(returnStdout: true, script: "jq -r .global.mutatedEnvHostname < tmpGitClone/nightly.planx-pla.net/manifest.json").trim()
+  println('### ## found this hostname -> ${actualTestedEnv}')
 }
