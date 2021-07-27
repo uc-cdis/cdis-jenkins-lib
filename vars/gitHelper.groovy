@@ -25,7 +25,7 @@ def fetchAllRepos(String currentRepoName) {
     } else {
       git(
         url: 'https://github.com/uc-cdis/gen3-qa.git',
-        branch: 'fix/refactor_logic_around_target_node_file_mapping'
+        branch: 'chore/tweak_pfb_export_test'
       );
     }
   }
