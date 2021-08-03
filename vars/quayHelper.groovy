@@ -7,7 +7,18 @@ import java.text.SimpleDateFormat;
 
 def waitForBuild(String repoName, String formattedBranch, def isOpenSourceContribution = false) {
   if (repoName == "jenkins-lib" || repoName.contains("dictionary")) { return "skip" }
-  if (repoName == "pelican") { repoName == "pelican-export"}
+  
+  if (repoName == "pelican") {
+    repoName = "pelican-export"
+    }
+  else (repoName == "sower-jobs") {
+    println "iterating through the list ['metadata-manifest-ingestion', 'get-dbgap-metadata', 'manifest-indexing', 'download-indexd-manifest']"
+    sower_jobs = ['metadata-manifest-ingestion', 'get-dbgap-metadata manifest-indexing', 'download-indexd-manifest']
+    for (sowerjob in sower_jobs) {
+        repoName = "$sowerjob"
+    }
+  }
+
   echo("Waiting for Quay to build:\n  repoName: ${repoName}\n  branch: '${formattedBranch}'\n  commit: ${env.GIT_COMMIT}\n  previous commit: ${env.GIT_PREVIOUS_COMMIT}")
   def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 3600)
   def timeout = (new Date().getTime()) + 3600000
