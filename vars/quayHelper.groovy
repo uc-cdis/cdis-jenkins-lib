@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 
 def waitForBuild(String repoName, String formattedBranch, def isOpenSourceContribution = false) {
   if (repoName == "jenkins-lib" || repoName.contains("dictionary")) { return "skip" }
+  if (repoName == "pelican") { repoName == "pelican-export"}
   echo("Waiting for Quay to build:\n  repoName: ${repoName}\n  branch: '${formattedBranch}'\n  commit: ${env.GIT_COMMIT}\n  previous commit: ${env.GIT_PREVIOUS_COMMIT}")
   def timestamp = (("${currentBuild.timeInMillis}".substring(0, 10) as Integer) - 3600)
   def timeout = (new Date().getTime()) + 3600000
@@ -15,13 +16,13 @@ def waitForBuild(String repoName, String formattedBranch, def isOpenSourceContri
   timeQuery = "curl -s "+timeUrl+/ | jq '.builds[] | "\(.tags[]),\(.display_name),\(.phase)"'/
   limitUrl = "$QUAY_API"+repoName+"/build/?limit=25"
   limitQuery = "curl -s "+limitUrl+/ | jq '.builds[] | "\(.tags[]),\(.display_name),\(.phase)"'/
-  
+
   def quayImageReady = false
   def noPendingQuayBuilds = false
   while(quayImageReady != true && noPendingQuayBuilds != true) {
     noPendingQuayBuilds = true
     currentTime = new Date().getTime()
-    
+
     DateFormat friendlyFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS Z");
     String timeoutFormatted = friendlyFormat.format(timeout);
     String currentTimeFormatted = friendlyFormat.format(currentTime);
@@ -102,7 +103,7 @@ def waitForBuild(String repoName, String formattedBranch, def isOpenSourceContri
                 break
               } else {
                 // if previous commit is the newest one in quay, then maybe
-                // the job's commit hasn't appeared yet. 
+                // the job's commit hasn't appeared yet.
                 // otherwise assume some other newer commit is in the process of building in quay
                 if (!isOpenSourceContribution) {
                   currentBuild.result = 'ABORTED'
