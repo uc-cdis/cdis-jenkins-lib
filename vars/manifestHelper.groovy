@@ -26,16 +26,21 @@
 */
 def editService(String commonsHostname, String serviceName, String quayBranchName) {
   if (null == commonsHostname || null == serviceName || null == quayBranchName) {
-    error("Mising parameter for editing manifest service:\n  commonsHostname: ${commonsHostname}\n  serviceName: ${serviceName}\n  quayBranchName: ${quayBranchName}")
+    error("Missing parameter for editing manifest service:\n  commonsHostname: ${commonsHostname}\n  serviceName: ${serviceName}\n  quayBranchName: ${quayBranchName}")
   }
   dir("cdis-manifest/${commonsHostname}") {
     currentBranch = "${serviceName}:[a-zA-Z0-9._-]*"
     targetBranch = "${serviceName}:${quayBranchName}"
     echo "Editing cdis-manifest/${commonsHostname} service ${serviceName} to branch ${quayBranchName}"
     // swap current branch for the target branch
-    sh 'sed -i -e "s,'+"${currentBranch},${targetBranch}"+',g" manifest.json'
-    sh 'cat manifest.json'
-  }
+    // mariner-engine and mariner-s3sidecar need to be replaced in mariner.json file
+    if(serviceName == 'mariner-engine' || serviceName == 'mariner-s3sidecar'){
+      sh 'sed -i -e "s,'+"${currentBranch},${targetBranch}"+',g" /manifests/mariner/mariner.json'
+      sh 'cat /manifests/mariner/mariner.json'
+    }else{
+      sh 'sed -i -e "s,'+"${currentBranch},${targetBranch}"+',g" manifest.json'
+      sh 'cat manifest.json'
+    }
 }
 
 /**
