@@ -41,6 +41,7 @@ def editService(String commonsHostname, String serviceName, String quayBranchNam
       sh 'sed -i -e "s,'+"${currentBranch},${targetBranch}"+',g" manifest.json'
       sh 'cat manifest.json'
     }
+  }
 }
 
 /**
