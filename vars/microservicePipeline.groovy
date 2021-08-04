@@ -132,22 +132,14 @@ def call(Map config) {
             def isOpenSourceContribution = regexMatchRepoOwner[1] != "uc-cdis"
             def currentBranchFormatted = isOpenSourceContribution ? "automatedCopy-${pipeConfig['currentBranchFormatted']}" : pipeConfig['currentBranchFormatted'];
             println("### ## currentBranchFormatted: ${currentBranchFormatted}")
-            if(pipeConfig.currentRepoName == 'mariner'){
-              quayHelper.waitForBuild(
-                'mariner-server',
-                currentBranchFormatted,
-                isOpenSourceContribution
-              )
-              quayHelper.waitForBuild(
-                'mariner-engine',
-                currentBranchFormatted,
-                isOpenSourceContribution
-              )
-              quayHelper.waitForBuild(
-                'mariner-s3sidecar',
-                currentBranchFormatted,
-                isOpenSourceContribution
-              )
+            if(pipeConfig.IMAGES_TO_BUILD != null || pipeConfig.IMAGES_TO_BUILD.size > 0){
+              for (image_to_build in pipeConfig.IMAGES_TO_BUILD) {
+                quayHelper.waitForBuild(
+                  image_to_build,
+                  currentBranchFormatted,
+                  isOpenSourceContribution
+                )
+              }
             } else{
               quayHelper.waitForBuild(
                 pipeConfig['quayRegistry'],
