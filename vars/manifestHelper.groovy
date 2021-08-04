@@ -70,7 +70,9 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   String od = sh(returnStdout: true, script: "jq -r .global.dictionary_url < tmpGitClone/$changedDir/manifest.json").trim()
   String pa = sh(returnStdout: true, script: "jq -r .global.portal_app < tmpGitClone/$changedDir/manifest.json").trim()
   // fetch netpolicy from the target environment
-  netpolicyStatus = sh(returnStatus : true, script: "cat tmpGitClone/$changedDir/manifest.json | jq --exit-status '.global.netpolicy'")
+  sh(returnStatus : true, script: "if cat tmpGitClone/$changedDir/manifest.json | jq --exit-status '.global.netpolicy' >/dev/null; then "
+    + "jq -r .global.netpolicy < tmpGitClone/$changedDir/manifest.json > netpolicy.json; "
+    + "fi")
   // fetch sower block from the target environment
   sh "jq -r .sower < tmpGitClone/$changedDir/manifest.json > sower_block.json"
   // fetch portal block from the target environment
@@ -118,12 +120,12 @@ def mergeManifest(String changedDir, String selectedNamespace) {
     println(sowerBlock3)
     sh(returnStdout: true, script: "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sj \"\$(cat sower_block.json)\" '(.sower) = \$sj' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   }
-  // delete netpolicy if the manifest from the target enviroment does not have it
-  if (netpolicyStatus != 0){
-    sh(returnStdout: true, script:
-    "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r 'del(.global.netpolicy)' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json "
-    )
-  }
+  // replace netpolicy
+  sh(returnStdout: true, script: "if [ -f \"netpolicy.json\" ]; then "
+    + "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq --arg sp \"\$(cat netpolicy.json)\" '.global.netpolicy = \$sp' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
+    + "else "
+    + "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r 'del(.global.netpolicy)' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json;"
+    + "fi")
   // replace Portal block
   sh(returnStdout: true, script: "if [ -f \"portal_block.json\" ]; then "
     + "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sp \"\$(cat portal_block.json)\" '(.portal) = \$sp' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
@@ -164,6 +166,22 @@ def overwriteConfigFolders(String changedDir, String selectedNamespace) {
     if (folders.contains('etlMapping.yaml')) {
       println('Copying etl mapping config from tmpGitClone/$changedDir/etlMapping.yaml into cdis-manifest/${selectedNamespace}.planx-pla.net/...')
       sh(script: "cp -rf tmpGitClone/$changedDir/etlMapping.yaml cdis-manifest/${selectedNamespace}.planx-pla.net/")
+    }
+    // List manifests folder
+    println("###List manifests folder...")
+    if(folders.contains('manifests')){
+      List<String> manifests_sub_folders = sh(returnStdout: true, script: "ls tmpGitClone/$changedDir/manifests").split()
+      // Overwrite mariner folder
+      println("###Overwrite  mariner folder...")
+      if(manifests_sub_folders.contains('mariner')){
+        sh(returnStdout: true, script: "cp -rf tmpGitClone/$changedDir/manifests/mariner cdis-manifest/${selectedNamespace}.planx-pla.net/manifests")
+        sh(returnStdout: true, script: "echo \$(cat tmpGitClone/$changedDir/manifests/mariner/mariner.json)")
+        // replace s3 bucket
+        println("###Replace s3 bucket in mariner.json...")
+        config_location = "cdis-manifest/${selectedNamespace}.planx-pla.net/manifests/mariner/mariner.json"
+        sh(returnStdout: true, script: "echo \$(cat ${config_location})")
+        sh(returnStdout: true, script: "jq '.storage.s3.name=\"qaplanetv1--${selectedNamespace}--mariner-707767160287\"' ${config_location} > mariner_tmp.json && mv mariner_tmp.json ${config_location}")
+      }
     }
   }
 
