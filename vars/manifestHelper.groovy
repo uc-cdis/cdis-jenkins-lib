@@ -35,8 +35,8 @@ def editService(String commonsHostname, String serviceName, String quayBranchNam
     // swap current branch for the target branch
     // mariner-engine and mariner-s3sidecar need to be replaced in mariner.json file
     if(serviceName == 'mariner-engine' || serviceName == 'mariner-s3sidecar'){
-      sh 'sed -i -e "s,'+"${currentBranch},${targetBranch}"+',g" /manifests/mariner/mariner.json'
-      sh 'cat /manifests/mariner/mariner.json'
+      sh 'sed -i -e "s,'+"${currentBranch},${targetBranch}"+',g" ./manifests/mariner/mariner.json'
+      sh 'cat ./manifests/mariner/mariner.json'
     }else{
       sh 'sed -i -e "s,'+"${currentBranch},${targetBranch}"+',g" manifest.json'
       sh 'cat manifest.json'
