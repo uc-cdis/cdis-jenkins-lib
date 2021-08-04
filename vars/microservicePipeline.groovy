@@ -133,6 +133,7 @@ def call(Map config) {
             def currentBranchFormatted = isOpenSourceContribution ? "automatedCopy-${pipeConfig['currentBranchFormatted']}" : pipeConfig['currentBranchFormatted'];
             println("### ## currentBranchFormatted: ${currentBranchFormatted}")
             if(pipeConfig.IMAGES_TO_BUILD != null || pipeConfig.IMAGES_TO_BUILD.size > 0){
+              println("### ## IMAGES_TO_BUILD: ${pipeConfig.IMAGES_TO_BUILD }")
               for (image_to_build in pipeConfig.IMAGES_TO_BUILD) {
                 quayHelper.waitForBuild(
                   image_to_build,
