@@ -34,6 +34,9 @@ def editService(String commonsHostname, String serviceName, String quayBranchNam
     echo "Editing cdis-manifest/${commonsHostname} service ${serviceName} to branch ${quayBranchName}"
     // swap current branch for the target branch
     // mariner-engine and mariner-s3sidecar need to be replaced in mariner.json file
+    // TODO: Refactor this later to remove IF conditions per-service-name and come up with a generic way to mutate versions in split manifests
+    // e.g., sh 'sed -i -e "s,'+"${currentBranch},${targetBranch}"+',g" ./manifests/'"${repoName}"'/'"${repoName}"'.json'
+    // Assuming the folder name and the manifest name will always match the repo name
     if(serviceName == 'mariner-engine' || serviceName == 'mariner-s3sidecar'){
       sh 'sed -i -e "s,'+"${currentBranch},${targetBranch}"+',g" ./manifests/mariner/mariner.json'
       sh 'cat ./manifests/mariner/mariner.json'
