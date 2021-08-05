@@ -195,11 +195,22 @@ def call(Map config) {
             } else {
               def quayBranchName = regexMatchRepoOwner[1] == "uc-cdis" ? pipeConfig.serviceTesting.branch : "automatedCopy-${pipeConfig.serviceTesting.branch}";
               println("### ## quayBranchName: ${quayBranchName}")
-              manifestHelper.editService(
-                kubeHelper.getHostname(kubectlNamespace),
-                pipeConfig.serviceTesting.name,
-                quayBranchName
-              )
+              if(pipeConfig.IMAGES_TO_BUILD != null && pipeConfig.IMAGES_TO_BUILD.size > 0){
+                for (image_to_build in pipeConfig.IMAGES_TO_BUILD) {
+                  manifestHelper.editService(
+                    kubeHelper.getHostname(kubectlNamespace),
+                    image_to_build,
+                    quayBranchName
+                  )
+                }
+              }else{
+                manifestHelper.editService(
+                  kubeHelper.getHostname(kubectlNamespace),
+                  pipeConfig.serviceTesting.name,
+                  quayBranchName
+               )
+              }
+
               testedEnv = kubeHelper.getHostname(kubectlNamespace)
             }
 	  } else {
