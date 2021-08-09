@@ -61,8 +61,8 @@ spec:
         secretKeyRef:
           name: jenkins-g3auto
           key: google_app_creds.json
-  serviceAccount: gen3-self-service-account
-  serviceAccountName: gen3-self-service-account
+  serviceAccount: jenkins-service
+  serviceAccountName: jenkins-service
 '''
         defaultContainer 'shell'
             }
