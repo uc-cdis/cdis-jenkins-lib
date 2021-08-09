@@ -269,10 +269,10 @@ spec:
                                         )
 
                                     }
-                                    # If this is a service repo, just figure out the jenkins env hostname
+                                    // If this is a service repo, just figure out the jenkins env hostname
                                     testedEnv = kubeHelper.getHostname(kubectlNamespace)
                                 } else {
-                                    # If this is a manifest repo, identify the env folder based on the git diff
+                                    // If this is a manifest repo, identify the env folder based on the git diff
                                     testedEnv = manifestHelper.manifestDiff(kubectlNamespace)
                                 }
                             } else {
