@@ -244,7 +244,7 @@ spec:
                     script {
                         try {
                             if(!doNotRunTests) {
-                                # TODO: We can only left-shift Dictionary changes once we achieve ephemeral CI envs.
+                                // TODO: We can only left-shift Dictionary changes once we achieve ephemeral CI envs.
                                 if (pipeConfig.DICTIONARY != null && (pipeConfig.DICTIONARY == true || pipeConfig.DICTIONARY == "True")) {
                                     manifestHelper.setDictionary(
                                         kubeHelper.getHostname(kubectlNamespace)
