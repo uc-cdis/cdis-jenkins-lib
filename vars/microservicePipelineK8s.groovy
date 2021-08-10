@@ -18,6 +18,8 @@ def call(Map config) {
     kubeLocks = []
     testedEnv = "" // for manifest pipeline
 
+    def prLabels = githubHelper.fetchLabels()
+
     def AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs()
     pipelineHelper.cancelPreviousRunningBuilds()
 
