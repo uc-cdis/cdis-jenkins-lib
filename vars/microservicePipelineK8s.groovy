@@ -40,6 +40,7 @@ spec:
   containers:
   - name: shell
     image: quay.io/cdis/gen3-ci-worker:chore_prepare_jenkins-ci-worker_img_for_gen3-qa-in-a-box
+    imagePullPolicy: Always
     command:
     - sleep
     args:
