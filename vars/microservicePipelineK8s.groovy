@@ -17,6 +17,7 @@ def call(Map config) {
     kubectlNamespace = null
     kubeLocks = []
     testedEnv = "" // for manifest pipeline
+    regexMatchRepoOwner = "" // to track the owner of the github repository
 
     def prLabels = githubHelper.fetchLabels()
 
@@ -182,11 +183,18 @@ spec:
 	            script {
 	                try {
                             if(!doNotRunTests) {
-                                def isOpenSourceContribution = regexMatchRepoOwner[1] != "uc-cdis"
-                                def currentBranchFormatted = isOpenSourceContribution ? "automatedCopy-${pipeConfig['currentBranchFormatted']}" : pipeConfig['currentBranchFormatted'];
-                                println("### ## currentBranchFormatted: ${currentBranchFormatted}")
                                 if (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST == false || pipeConfig.MANIFEST != "True") {
                       	            // for NON manifest builds
+                                    def REPO_NAME = env.JOB_NAME.split('/')[1]
+                                    def repoFromPR = githubHelper.fetchRepoURL()
+                                    regexMatchRepoOwner = (repoFromPR =~ /.*api.github.com\/repos\/(.*)\/${REPO_NAME}/)[0];
+                                    println("### ## regexMatchRepoOwner: ${regexMatchRepoOwner}")
+
+                                    // handle feature branch image builds from forked repos
+                                    def isOpenSourceContribution = regexMatchRepoOwner[1] != "uc-cdis"
+                                    def currentBranchFormatted = isOpenSourceContribution ? "automatedCopy-${pipeConfig['currentBranchFormatted']}" : pipeConfig['currentBranchFormatted'];
+                                    println("### ## currentBranchFormatted: ${currentBranchFormatted}")
+
                                     if(pipeConfig.IMAGES_TO_BUILD != null && pipeConfig.IMAGES_TO_BUILD.size > 0){
                                         println("### ## IMAGES_TO_BUILD: ${pipeConfig.IMAGES_TO_BUILD }")
                                         for (image_to_build in pipeConfig.IMAGES_TO_BUILD) {
