@@ -45,8 +45,6 @@ spec:
     args:
     - infinity
     env:
-    - name: JAVA_HOME
-      value: "/usr/lib/jvm/java-11-openjdk-amd64"
     - name: AWS_DEFAULT_REGION
       value: us-east-1
     - name: JAVA_OPTS
