@@ -182,6 +182,9 @@ spec:
 	            script {
 	                try {
                             if(!doNotRunTests) {
+                                def isOpenSourceContribution = regexMatchRepoOwner[1] != "uc-cdis"
+                                def currentBranchFormatted = isOpenSourceContribution ? "automatedCopy-${pipeConfig['currentBranchFormatted']}" : pipeConfig['currentBranchFormatted'];
+                                println("### ## currentBranchFormatted: ${currentBranchFormatted}")
                                 if (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST == false || pipeConfig.MANIFEST != "True") {
                       	            // for NON manifest builds
                                     if(pipeConfig.IMAGES_TO_BUILD != null && pipeConfig.IMAGES_TO_BUILD.size > 0){
