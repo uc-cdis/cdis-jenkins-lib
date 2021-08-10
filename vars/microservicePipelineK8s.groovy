@@ -39,7 +39,7 @@ metadata:
 spec:
   containers:
   - name: shell
-    image: quay.io/cdis/gen3-qa-controller:0.5
+    image: quay.io/cdis/gen3-ci-worker:poc1
     command:
     - sleep
     args:
