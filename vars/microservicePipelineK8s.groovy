@@ -45,15 +45,8 @@ spec:
     args:
     - infinity
     env:
-    - name: JENKINS_SECRET
-      valueFrom:
-        secretKeyRef:
-          key: jenkins-jnlp-agent-secret
-          name: jenkins-worker-g3auto
-    - name: JENKINS_AGENT_NAME
-      value: gen3-qa-worker
-    - name: JENKINS_TUNNEL
-      value: jenkins-agent:50000
+    - name: JAVA_HOME
+      value: "/usr/lib/jvm/java-11-openjdk-amd64"
     - name: AWS_DEFAULT_REGION
       value: us-east-1
     - name: JAVA_OPTS
