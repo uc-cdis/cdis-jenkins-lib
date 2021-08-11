@@ -8,15 +8,11 @@ import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 * @param config - pipeline configuration
 */
 def call(Map config) {
-
-  // check if PR contains a label to define where the PR check must run
-  // giving a chance for auto-label gh actions to catch up
-  sleep(30)
-  def prLabels = githubHelper.fetchLabels()
   def pipeConfig = pipelineHelper.setupConfig(config)
 
+  // prLabels are added to the config map in vars/testPipeline.groovy
   def runOnGen3CIWorker = false;
-  if (prLabels.any{label -> label.name == "run-on-jenkins-ci-worker"}) {
+  if (config.prLabels.any{label -> label.name == "run-on-jenkins-ci-worker"}) {
     println('Found [run-on-jenkins-ci-worker] label, running CI on ci worker pod...')
     runOnGen3CIWorker = true
   }
@@ -52,7 +48,7 @@ def call(Map config) {
         // if the changes are doc-only, automatically skip the tests
         doNotRunTests = doNotRunTests || docOnlyHelper.checkTestSkippingCriteria()
 
-        for(label in prLabels) {
+        for(label in config.prLabels) {
           println(label['name']);
           switch(label['name']) {
             case ~/^test-.*/:

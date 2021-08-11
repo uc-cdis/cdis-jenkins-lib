@@ -19,8 +19,6 @@ def call(Map config) {
     testedEnv = "" // for manifest pipeline
     regexMatchRepoOwner = "" // to track the owner of the github repository
 
-    def prLabels = githubHelper.fetchLabels()
-
     def AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs()
     pipelineHelper.cancelPreviousRunningBuilds()
 
@@ -101,7 +99,8 @@ spec:
                             // if the changes are doc-only, automatically skip the tests
                             doNotRunTests = doNotRunTests || docOnlyHelper.checkTestSkippingCriteria()
 
-                            for(label in prLabels) {
+                            // prLabels are added to the config map in vars/testPipeline.groovy
+                            for(label in config.prLabels) {
                                 println(label['name']);
                                 switch(label['name']) {
                                     case ~/^test-.*/:
