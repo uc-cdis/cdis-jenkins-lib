@@ -47,7 +47,7 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
         testResult = null
         TestSuitesNonZeroStatusCodes = [];
         selectedTests.each {selectedTest ->
-          testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --seleniumTimeout=3600 --selectedTest=${selectedTest}", returnStatus: true);
+          testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --seleniumTimeout=5400 --selectedTest=${selectedTest}", returnStatus: true);
           if (testResult != 0){
             TestSuitesNonZeroStatusCodes.add(testResult)
           }
