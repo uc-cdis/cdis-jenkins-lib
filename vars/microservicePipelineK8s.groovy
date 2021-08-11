@@ -490,7 +490,7 @@ spec:
                     script {
                         try {
 	                    if(!doNotRunTests) {
-                                testHelper.cleanS3()
+                                testHelper.cleanS3(kubectlNamespace)
 	                    } else {
                                 Utils.markStageSkippedForConditional(STAGE_NAME)
                             }
