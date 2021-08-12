@@ -83,7 +83,10 @@ def mergeManifest(String changedDir, String selectedNamespace) {
     + "jq -r .global.netpolicy < tmpGitClone/$changedDir/manifest.json > netpolicy.json; "
     + "fi")
   
-  def manifestBlockKeys = ["sower", "portal", "ssjdispatcher", "indexd", "metadata"]
+  // fetch sower block from the target environment
+  sh "jq -r .sower < tmpGitClone/$changedDir/manifest.json > sower_block.json"
+
+  def manifestBlockKeys = ["portal", "ssjdispatcher", "indexd", "metadata"]
   for (String item : manifestBlockKeys) {
     sh(returnStdout: true, script: "if cat tmpGitClone/${changedDir}/manifest.json | jq --exit-status '.${item}' >/dev/null; then "
       + "jq -r .${item} < tmpGitClone/${changedDir}/manifest.json > ${item}_block.json; "
