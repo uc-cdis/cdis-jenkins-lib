@@ -76,6 +76,7 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
 
             if (isNightlyBuild == "true") {
               commaSeparatedListOfLabels += "nightly-run,"
+              failureMsg += ":moon: This nightly-build failed while mutating into *${testedEnv}*... \n"
             }
 
             featureLabelMap.each { testSuite, retryLabel ->
