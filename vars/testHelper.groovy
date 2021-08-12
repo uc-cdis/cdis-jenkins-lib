@@ -47,7 +47,7 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
         testResult = null
         TestSuitesNonZeroStatusCodes = [];
         selectedTests.each {selectedTest ->
-          testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --selectedTest=${selectedTest}", returnStatus: true);
+          testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --seleniumTimeout=7200 --selectedTest=${selectedTest}", returnStatus: true);
           if (testResult != 0){
             TestSuitesNonZeroStatusCodes.add(testResult)
           }
@@ -161,7 +161,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
         testResult = null
         List<String> failedTestSuites = [];
         testResult = sh(script: """
-          bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=false --selectedTest=${selectedTest}
+          bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=false --seleniumTimeout=7200 --selectedTest=${selectedTest}
         """, returnStatus: true);
 
         dir('output') {

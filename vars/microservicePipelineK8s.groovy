@@ -19,8 +19,6 @@ def call(Map config) {
     testedEnv = "" // for manifest pipeline
     regexMatchRepoOwner = "" // to track the owner of the github repository
 
-    def prLabels = githubHelper.fetchLabels()
-
     def AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs()
     pipelineHelper.cancelPreviousRunningBuilds()
 
@@ -39,21 +37,13 @@ metadata:
 spec:
   containers:
   - name: shell
-    image: quay.io/cdis/gen3-ci-worker:master
+    image: quay.io/cdis/gen3-ci-worker:chore_prepare_jenkins-ci-worker_img_for_gen3-qa-in-a-box
+    imagePullPolicy: Always
     command:
     - sleep
     args:
     - infinity
     env:
-    - name: JENKINS_SECRET
-      valueFrom:
-        secretKeyRef:
-          key: jenkins-jnlp-agent-secret
-          name: jenkins-worker-g3auto
-    - name: JENKINS_AGENT_NAME
-      value: gen3-qa-worker
-    - name: JENKINS_TUNNEL
-      value: jenkins-agent:50000
     - name: AWS_DEFAULT_REGION
       value: us-east-1
     - name: JAVA_OPTS
@@ -109,7 +99,8 @@ spec:
                             // if the changes are doc-only, automatically skip the tests
                             doNotRunTests = doNotRunTests || docOnlyHelper.checkTestSkippingCriteria()
 
-                            for(label in prLabels) {
+                            // prLabels are added to the config map in vars/testPipeline.groovy
+                            for(label in config.prLabels) {
                                 println(label['name']);
                                 switch(label['name']) {
                                     case ~/^test-.*/:
@@ -498,7 +489,7 @@ spec:
                     script {
                         try {
 	                    if(!doNotRunTests) {
-                                testHelper.cleanS3()
+                                testHelper.cleanS3(kubectlNamespace)
 	                    } else {
                                 Utils.markStageSkippedForConditional(STAGE_NAME)
                             }
