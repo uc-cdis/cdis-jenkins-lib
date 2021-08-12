@@ -37,7 +37,7 @@ metadata:
 spec:
   containers:
   - name: shell
-    image: quay.io/cdis/gen3-ci-worker:chore_prepare_jenkins-ci-worker_img_for_gen3-qa-in-a-box
+    image: quay.io/cdis/gen3-ci-worker:master
     imagePullPolicy: Always
     command:
     - sleep
