@@ -161,7 +161,7 @@ def getHostname(String kubectlNamespace) {
 */
 def provisionCIEnv() {
   kube(kubectlNamespace, {
-    sh "bash ${cloudAutomationPath()}/gen3/bin/provision-vi-env.sh"
+    sh "bash ${cloudAutomationPath()}/gen3/bin/provision-ci-env.sh"
   })
 }
 
