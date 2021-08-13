@@ -156,6 +156,15 @@ def getHostname(String kubectlNamespace) {
   })
 }
 
+/**
+* Provisions an ephemeral CI environment
+*/
+def provisionCIEnv() {
+  kube(kubectlNamespace, {
+    sh "bash ${cloudAutomationPath()}/gen3/bin/provision-vi-env.sh"
+  })
+}
+
 def teardown(List kubeLocks) {
   kubeLocks.each {
     klock('unlock', it.lockOwner, it.lockName, it.kubectlNamespace)
