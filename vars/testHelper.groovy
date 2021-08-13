@@ -37,7 +37,8 @@ def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) 
 def soonToBeLegacyRunIntegrationTests(String namespace, String service, String testedEnv, String isGen3Release, String isNightlyBuild = "false", List<String> selectedTests = ['all']) {
   withCredentials([
     usernamePassword(credentialsId: 'ras-test-user1-for-ci-tests', usernameVariable: 'RAS_TEST_USER_1_USERNAME', passwordVariable: 'RAS_TEST_USER_1_PASSWORD'),
-    usernamePassword(credentialsId: 'ras-test-user2-for-ci-tests', usernameVariable: 'RAS_TEST_USER_2_USERNAME', passwordVariable: 'RAS_TEST_USER_2_PASSWORD')
+    usernamePassword(credentialsId: 'ras-test-user2-for-ci-tests', usernameVariable: 'RAS_TEST_USER_2_USERNAME', passwordVariable: 'RAS_TEST_USER_2_PASSWORD'),
+    usernamePassword(credentialsId: 'jenkins-user-api-token', usernameVariable: 'JENKINS_USERNAME', passwordVariable: 'JENKINS_USER_API_TOKEN')
   ]) {
     dir('gen3-qa') {
       gen3Qa(namespace, {
@@ -134,7 +135,8 @@ def runScriptToCreateProgramsAndProjects(String namespace) {
 def runIntegrationTests(String namespace, String service, String testedEnv, String selectedTest) {
   withCredentials([
     usernamePassword(credentialsId: 'ras-test-user1-for-ci-tests', usernameVariable: 'RAS_TEST_USER_1_USERNAME', passwordVariable: 'RAS_TEST_USER_1_PASSWORD'),
-    usernamePassword(credentialsId: 'ras-test-user2-for-ci-tests', usernameVariable: 'RAS_TEST_USER_2_USERNAME', passwordVariable: 'RAS_TEST_USER_2_PASSWORD')
+    usernamePassword(credentialsId: 'ras-test-user2-for-ci-tests', usernameVariable: 'RAS_TEST_USER_2_USERNAME', passwordVariable: 'RAS_TEST_USER_2_PASSWORD'),
+    usernamePassword(credentialsId: 'jenkins-user-api-token', usernameVariable: 'JENKINS_USERNAME', passwordVariable: 'JENKINS_USER_API_TOKEN')
   ]) {
     dir('gen3-qa') {
       gen3Qa(namespace, {
