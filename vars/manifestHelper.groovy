@@ -82,20 +82,16 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   sh(returnStatus : true, script: "if cat tmpGitClone/$changedDir/manifest.json | jq --exit-status '.global.netpolicy' >/dev/null; then "
     + "jq -r .global.netpolicy < tmpGitClone/$changedDir/manifest.json > netpolicy.json; "
     + "fi")
+  
   // fetch sower block from the target environment
   sh "jq -r .sower < tmpGitClone/$changedDir/manifest.json > sower_block.json"
-  // fetch portal block from the target environment
-  sh(returnStdout: true, script: "if cat tmpGitClone/$changedDir/manifest.json | jq --exit-status '.portal' >/dev/null; then "
-    + "jq -r .portal < tmpGitClone/$changedDir/manifest.json > portal_block.json; "
-    + "fi")
-  // fetch ssjdispatcher block from the target environment
-  sh(returnStdout: true, script: "if cat tmpGitClone/$changedDir/manifest.json | jq --exit-status '.ssjdispatcher' >/dev/null; then "
-    + "jq -r .ssjdispatcher < tmpGitClone/$changedDir/manifest.json > ssjdispatcher_block.json; "
-    + "fi")
-  // fetch indexd block from the target environment
-  sh(returnStdout: true, script: "if cat tmpGitClone/$changedDir/manifest.json | jq --exit-status '.indexd' >/dev/null; then "
-    + "jq -r .indexd < tmpGitClone/$changedDir/manifest.json > indexd_block.json; "
-    + "fi")
+
+  def manifestBlockKeys = ["portal", "ssjdispatcher", "indexd", "metadata"]
+  for (String item : manifestBlockKeys) {
+    sh(returnStdout: true, script: "if cat tmpGitClone/${changedDir}/manifest.json | jq --exit-status '.${item}' >/dev/null; then "
+      + "jq -r .${item} < tmpGitClone/${changedDir}/manifest.json > ${item}_block.json; "
+      + "fi")
+  }
 
   String s = sh(returnStdout: true, script: "jq -r keys < cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   println s
@@ -141,14 +137,13 @@ def mergeManifest(String changedDir, String selectedNamespace) {
     + "else "
     + "jq 'del(.portal)' cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json > manifest_tmp.json && mv manifest_tmp.json cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
     + "fi")
-  // replace ssjdispatcher block
-  sh(returnStdout: true, script: "if [ -f \"ssjdispatcher_block.json\" ]; then "
-    + "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sp \"\$(cat ssjdispatcher_block.json)\" '(.ssjdispatcher) = \$sp' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
-    + "fi")
-  // replace indexd block
-  sh(returnStdout: true, script: "if [ -f \"indexd_block.json\" ]; then "
-    + "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sp \"\$(cat indexd_block.json)\" '(.indexd) = \$sp' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
-    + "fi")
+    
+  def manifestMergeBlockKeys = ["ssjdispatcher", "indexd", "metadata"]
+  for (String item : manifestMergeBlockKeys) {
+    sh(returnStdout: true, script: "if [ -f \"${item}_block.json\" ]; then "
+      + "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sp \"\$(cat ${item}_block.json)\" '(.${item}) = \$sp' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
+      + "fi")
+  }
 
   String rs = sh(returnStdout: true, script: "cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
   return rs
