@@ -63,6 +63,13 @@ spec:
         secretKeyRef:
           name: jenkins-g3auto
           key: google_app_creds.json
+    volumeMounts:
+    - mountPath: /home/jenkins/agent
+      name: ci-datadir
+  volumes:
+  - name: ci-datadir
+    persistentVolumeClaim:
+      claimName: datadir-jenkins-ci
   serviceAccount: jenkins-service
   serviceAccountName: jenkins-service
 '''
