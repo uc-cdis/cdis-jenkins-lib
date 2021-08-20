@@ -286,7 +286,14 @@ spec:
                                     testedEnv = kubeHelper.getHostname(kubectlNamespace)
                                 } else {
                                     // If this is a manifest repo, identify the env folder based on the git diff
+                                    // this function also calls overwriteConfigFolders
                                     testedEnv = manifestHelper.manifestDiff(kubectlNamespace)
+
+                                    // the nightly build flow will always set testedEnv to nightly.planx-pla.net
+                                    // unless we fetch the correct name of the mutated environment
+                                    if (isNightlyBuild == "true") {
+                                        testedEnv = manifestHelper.fetchHostnameFromMutatedEnvironment()
+                                    }
                                 }
                             } else {
                                 Utils.markStageSkippedForConditional(STAGE_NAME)
