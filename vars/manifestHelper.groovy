@@ -167,6 +167,11 @@ def overwriteConfigFolders(String changedDir, String selectedNamespace) {
         sh(script: "sed -i '/\"requiredCerts\":/d' ${config_location}")
       }
     }
+    // Aggregate Metadata Config
+    if (folders.contains('metadata')) {
+      println("### Overwrite metadata folder ###")
+      sh(script: "cp -rf tmpGitClone/$changedDir/metadata cdis-manifest/${selectedNamespace}.planx-pla.net/")
+    }
     if (folders.contains('etlMapping.yaml')) {
       println('Copying etl mapping config from tmpGitClone/$changedDir/etlMapping.yaml into cdis-manifest/${selectedNamespace}.planx-pla.net/...')
       sh(script: "cp -rf tmpGitClone/$changedDir/etlMapping.yaml cdis-manifest/${selectedNamespace}.planx-pla.net/")
