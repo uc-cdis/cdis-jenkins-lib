@@ -1,3 +1,4 @@
+/* groovylint-disable LineLength */
 /**
 * Jenkins environments are used for continuous integration, therefore, they should
 * always run the latest-latest code for all components
@@ -171,6 +172,7 @@ def overwriteConfigFolders(String changedDir, String selectedNamespace) {
     if (folders.contains('metadata')) {
       println("### Overwrite metadata folder ###")
       sh(script: "cp -rf tmpGitClone/$changedDir/metadata cdis-manifest/${selectedNamespace}.planx-pla.net/")
+      sh(script: "sed -i -E 's#(\"AGG_MDS_NAMESPACE\":).*#\\1 \"${selectedNamespace}\"#' cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
       sh(script: "sed -i -E 's#(\"mds_url\":).*#\\1 \"https://${selectedNamespace}.planx-pla.net\",#' cdis-manifest/${selectedNamespace}.planx-pla.net/metadata/aggregate_config.json")
       sh(script: "sed -i -E 's#(\"commons_url\":).*#\\1 \"${selectedNamespace}.planx-pla.net\"#' cdis-manifest/${selectedNamespace}.planx-pla.net/metadata/aggregate_config.json")
     }
