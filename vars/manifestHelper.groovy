@@ -171,7 +171,7 @@ def overwriteConfigFolders(String changedDir, String selectedNamespace) {
     // Aggregate Metadata Config
     if (folders.contains('metadata')) {
       println("### Overwrite metadata folder ###")
-      sh(script: "cp -rf tmpGitClone/$changedDir/metadata cdis-manifest/${selectedNamespace}.planx-pla.net/")
+      // sh(script: "cp -rf tmpGitClone/$changedDir/metadata cdis-manifest/${selectedNamespace}.planx-pla.net/")
       sh(script: "sed -i -E 's#(\"AGG_MDS_NAMESPACE\":).*#\\1 \"${selectedNamespace}\"#' cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
       sh(script: "sed -i -E 's#(\"mds_url\":).*#\\1 \"https://${selectedNamespace}.planx-pla.net\",#' cdis-manifest/${selectedNamespace}.planx-pla.net/metadata/aggregate_config.json")
       sh(script: "sed -i -E 's#(\"commons_url\":).*#\\1 \"${selectedNamespace}.planx-pla.net\"#' cdis-manifest/${selectedNamespace}.planx-pla.net/metadata/aggregate_config.json")
