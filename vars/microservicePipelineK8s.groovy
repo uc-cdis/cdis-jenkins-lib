@@ -306,6 +306,7 @@ spec:
                     }
                 }
             }
+/*
             stage('K8sReset') {
                 steps {
                     script {
@@ -390,6 +391,7 @@ spec:
                     }
                 }
             }
+*/
             stage('RunTests') {
                 steps {
                     script {
