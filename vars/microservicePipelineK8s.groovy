@@ -37,7 +37,7 @@ metadata:
 spec:
   containers:
   - name: shell
-    image: quay.io/cdis/gen3-ci-worker:master
+    image: quay.io/cdis/gen3-ci-worker:pybase3-1.6.2
     imagePullPolicy: Always
     command:
     - sleep
