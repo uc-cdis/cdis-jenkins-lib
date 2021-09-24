@@ -71,7 +71,7 @@ spec:
         }
 		option {
 			// Preserve stashes from the recent completed builds
-    		preserveStashes()
+			preserveStashes()
 		}
         stages {
             stage('CleanWorkspace') {
@@ -227,8 +227,8 @@ spec:
 	                    if(!doNotRunTests) {
 	                        (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'], namespaces)
                                 kubeLocks << lock
-							writeFile file: "kubectlNamespace.sha", text: kubectlNamespace
-							stash includes: "kubectlNamespace.sha", name: 'kubectlNamespace_stash'
+								writeFile file: "kubectlNamespace.sha", text: kubectlNamespace
+								stash includes: "kubectlNamespace.sha", name: 'kubectlNamespace_stash'
 	                    } else {
 	                        Utils.markStageSkippedForConditional(STAGE_NAME)
 	                    }
