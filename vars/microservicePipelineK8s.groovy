@@ -69,6 +69,10 @@ spec:
         defaultContainer 'shell'
             }
         }
+		option {
+			// Preserve stashes from the recent completed builds
+    		preserveStashes()
+		}
         stages {
             stage('CleanWorkspace') {
                 steps {
@@ -223,6 +227,8 @@ spec:
 	                    if(!doNotRunTests) {
 	                        (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'], namespaces)
                                 kubeLocks << lock
+							writeFile file: "kubectlNamespace.sha", text: kubectlNamespace
+							stash includes: "kubectlNamespace.sha", name: 'kubectlNamespace_stash'
 	                    } else {
 	                        Utils.markStageSkippedForConditional(STAGE_NAME)
 	                    }
@@ -396,6 +402,8 @@ spec:
                         if(!runParallelTests) {
                             try {
                                 if(!doNotRunTests) {
+									unstash name: 'kubectlNamespace_stash'
+                  					kubectlNamespace = readFile('kubectlNamespace.sha').trim()
                                     testHelper.soonToBeLegacyRunIntegrationTests(
                                         kubectlNamespace,
                                         pipeConfig.serviceTesting.name,
