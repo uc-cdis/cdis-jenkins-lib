@@ -89,6 +89,9 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
               }
             }
             failureMsg += " To label & retry, just send the following message: \n @qa-bot replay-pr ${REPO_NAME} ${PR_NUMBER} ${commaSeparatedListOfLabels}"
+            if (service == "cloud-automation") {
+              failureMsg += " Or use this message to also skip gen3 helper tests for this cloud-automation PR: \n @qa-bot replay-pr ${REPO_NAME} ${PR_NUMBER} skip-gen3-helper-tests,${commaSeparatedListOfLabels}"
+            }
           } else {
             failureMsg += " >10 test suites failed on this PR check :rotating_light:. This might indicate an environmental/config issue. cc: @planxqa :allthethings: :allthethings: :allthethings:"
           }
