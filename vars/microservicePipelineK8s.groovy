@@ -69,7 +69,7 @@ spec:
         defaultContainer 'shell'
             }
         }
-		option {
+		options {
 			// Preserve stashes from the recent completed builds
 			preserveStashes()
 		}
