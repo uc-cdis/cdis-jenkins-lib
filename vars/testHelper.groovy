@@ -68,8 +68,13 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
           echo "Archiving service logs via 'gen3 logs snapshot'"
           sh(script: "bash ${env.WORKSPACE}/cloud-automation/gen3/bin/logs.sh snapshot", returnStatus: true)
         }
-        def successMsg = "Successful CI run for https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :tada:"
+        def successMsg = "Successful CI run for https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :tada: \n"
+        if (isNightlyBuild == "true") {
+          successMsg += "The nightly build successfully tested all versions and config artifacts from: *${testedEnv}* \n"
+        }
         def commonMsg = "Duration: ${currentBuild.durationString} :clock1:\n"
+        successMsg += commonMsg
+
         if (TestSuitesNonZeroStatusCodes.size() != 0) {
           def failureMsg = "CI Failure on https://github.com/uc-cdis/$REPO_NAME/pull/$PR_NUMBER :facepalm: running on ${KUBECTL_NAMESPACE} :jenkins:. \n"
           if (featureLabelMap.size() < 10) {
