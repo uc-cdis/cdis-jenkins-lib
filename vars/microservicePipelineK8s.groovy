@@ -71,7 +71,9 @@ spec:
         }
 		options {
 			// Preserve stashes from the recent completed builds
-			preserveStashes()
+			// If a number for buildCount outside of the range of 5, 
+			// the Pipeline will fail with a validation error.
+			preserveStashes(5)
 		}
         stages {
             stage('CleanWorkspace') {
