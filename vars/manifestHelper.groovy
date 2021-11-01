@@ -83,11 +83,11 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   sh(returnStatus : true, script: "if cat tmpGitClone/$changedDir/manifest.json | jq --exit-status '.global.netpolicy' >/dev/null; then "
     + "jq -r .global.netpolicy < tmpGitClone/$changedDir/manifest.json > netpolicy.json; "
     + "fi")
-  
+
   // fetch sower block from the target environment
   sh "jq -r .sower < tmpGitClone/$changedDir/manifest.json > sower_block.json"
 
-  def manifestBlockKeys = ["portal", "ssjdispatcher", "indexd", "metadata"]
+  def manifestBlockKeys = ["portal", "ssjdispatcher", "indexd", "metadata", "mariner", "awsstoragegateway"]
   for (String item : manifestBlockKeys) {
     sh(returnStdout: true, script: "if cat tmpGitClone/${changedDir}/manifest.json | jq --exit-status '.${item}' >/dev/null; then "
       + "jq -r .${item} < tmpGitClone/${changedDir}/manifest.json > ${item}_block.json; "
@@ -138,8 +138,8 @@ def mergeManifest(String changedDir, String selectedNamespace) {
     + "else "
     + "jq 'del(.portal)' cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json > manifest_tmp.json && mv manifest_tmp.json cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
     + "fi")
-    
-  def manifestMergeBlockKeys = ["ssjdispatcher", "indexd", "metadata"]
+
+  def manifestMergeBlockKeys = ["ssjdispatcher", "indexd", "metadata", "mariner", "awsstoragegateway"]
   for (String item : manifestMergeBlockKeys) {
     sh(returnStdout: true, script: "if [ -f \"${item}_block.json\" ]; then "
       + "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sp \"\$(cat ${item}_block.json)\" '(.${item}) = \$sp' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
