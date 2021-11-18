@@ -143,6 +143,8 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   for (String item : manifestMergeBlockKeys) {
     sh(returnStdout: true, script: "if [ -f \"${item}_block.json\" ]; then "
       + "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sp \"\$(cat ${item}_block.json)\" '(.${item}) = \$sp' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
+      + "else "
+      + "jq 'del(.${item})' cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json > manifest_tmp.json && mv manifest_tmp.json cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
       + "fi")
   }
 
