@@ -157,7 +157,8 @@ spec:
                                 selectedTests.add("all")
 
                                 // include long running tests.in the nightly-build
-                                if (isNightlyBuild == "true") {
+                                testedEnv = manifestHelper.fetchHostnameFromMutatedEnvironment()
+                                if(isNightlyBuild == "true" && !testedEnv.contains("pandemic")){
                                     selectedTests.add("suites/portal/pfbExportTest.js")
                                 }
                             }
