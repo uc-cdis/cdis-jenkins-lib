@@ -39,8 +39,8 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
     usernamePassword(credentialsId: 'ras-test-user1-for-ci-tests', usernameVariable: 'RAS_TEST_USER_1_USERNAME', passwordVariable: 'RAS_TEST_USER_1_PASSWORD'),
     usernamePassword(credentialsId: 'ras-test-user2-for-ci-tests', usernameVariable: 'RAS_TEST_USER_2_USERNAME', passwordVariable: 'RAS_TEST_USER_2_PASSWORD'),
     usernamePassword(credentialsId: 'jenkins-user-api-token', usernameVariable: 'JENKINS_USERNAME', passwordVariable: 'JENKINS_USER_API_TOKEN'),
-    string(credentialsId: 'DD_API_KEY', variable: 'SECRET'),
-    string(credentialsId: 'DD_APP_KEY', variable: 'SECRET')
+    string(credentialsId: 'DD_API_KEY', variable: 'DD_API_KEY'),
+    string(credentialsId: 'DD_APP_KEY', variable: 'DD_APP_KEY')
   ]) {
     dir('gen3-qa') {
       gen3Qa(namespace, {
@@ -144,8 +144,8 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
     usernamePassword(credentialsId: 'ras-test-user1-for-ci-tests', usernameVariable: 'RAS_TEST_USER_1_USERNAME', passwordVariable: 'RAS_TEST_USER_1_PASSWORD'),
     usernamePassword(credentialsId: 'ras-test-user2-for-ci-tests', usernameVariable: 'RAS_TEST_USER_2_USERNAME', passwordVariable: 'RAS_TEST_USER_2_PASSWORD'),
     usernamePassword(credentialsId: 'jenkins-user-api-token', usernameVariable: 'JENKINS_USERNAME', passwordVariable: 'JENKINS_USER_API_TOKEN'),
-    string(credentialsId: 'DD_API_KEY', variable: 'SECRET'),
-    string(credentialsId: 'DD_APP_KEY', variable: 'SECRET')
+    string(credentialsId: 'DD_API_KEY', variable: 'DD_API_KEY'),
+    string(credentialsId: 'DD_APP_KEY', variable: 'DD_APP_KEY')
   ]) {
     dir('gen3-qa') {
       gen3Qa(namespace, {
