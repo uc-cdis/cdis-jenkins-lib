@@ -69,6 +69,9 @@ spec:
         defaultContainer 'shell'
             }
         }
+	options {
+        	timeout(time: 4, unit: 'HOURS')   // timeout on whole pipeline job
+    	}
         stages {
             stage('CleanWorkspace') {
                 steps {
