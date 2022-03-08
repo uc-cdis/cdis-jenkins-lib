@@ -12,6 +12,7 @@ def call(Map config) {
     List<String> selectedTests = []
     doNotRunTests = false
     runParallelTests = false
+    skipQuayBuild = false
     isGen3Release = "false"
     isNightlyBuild = "false"
     kubectlNamespace = null
