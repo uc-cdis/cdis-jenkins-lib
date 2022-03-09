@@ -69,9 +69,6 @@ spec:
         defaultContainer 'shell'
             }
         }
-	options {
-        	timeout(time: 4, unit: 'HOURS')   // timeout on whole pipeline job
-    	}
         stages {
             stage('CleanWorkspace') {
                 steps {
@@ -173,6 +170,9 @@ spec:
                 }
             }
             stage('WaitForQuayBuild') {
+                options {
+                    timeout(time: 1, unit: 'HOURS')   // timeout on this stage
+                }
                 steps {
 	            script {
 	                try {
@@ -256,6 +256,9 @@ spec:
                 }
             }
             stage('ModifyManifest') {
+                options {
+                    timeout(time: 2, unit: 'HOURS')   // timeout on this stage
+                }
                 steps {
                     script {
                         try {
@@ -310,6 +313,9 @@ spec:
                 }
             }
             stage('K8sReset') {
+                options {
+                    timeout(time: 2, unit: 'HOURS')   // timeout on this stage
+                }
                 steps {
                     script {
                         try {
@@ -353,6 +359,9 @@ spec:
                 }
             }
             stage('GenerateData') {
+                options {
+                    timeout(time: 1, unit: 'HOURS')   // timeout on this stage
+                }
                 steps {
 	            script {
                         try {
@@ -394,6 +403,9 @@ spec:
                 }
             }
             stage('RunTests') {
+                options {
+                    timeout(time: 3, unit: 'HOURS')   // timeout on this stage
+                }
                 steps {
                     script {
                         if(!runParallelTests) {
