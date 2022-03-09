@@ -177,7 +177,7 @@ spec:
                 steps {
                 script {
                     try {
-                            if(!doNotRunTests && !skipQuayBuild) {
+                            if(!doNotRunTests) {
                                 if (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST == false || pipeConfig.MANIFEST != "True") {
                                       // for NON manifest builds
                                     def REPO_NAME = env.JOB_NAME.split('/')[1]
@@ -190,21 +190,23 @@ spec:
                                     def currentBranchFormatted = isOpenSourceContribution ? "automatedCopy-${pipeConfig['currentBranchFormatted']}" : pipeConfig['currentBranchFormatted'];
                                     println("### ## currentBranchFormatted: ${currentBranchFormatted}")
 
-                                    if(pipeConfig.IMAGES_TO_BUILD != null && pipeConfig.IMAGES_TO_BUILD.size > 0){
-                                        println("### ## IMAGES_TO_BUILD: ${pipeConfig.IMAGES_TO_BUILD }")
-                                        for (image_to_build in pipeConfig.IMAGES_TO_BUILD) {
+                                    if(!skipQuayBuild) {
+                                        if(pipeConfig.IMAGES_TO_BUILD != null && pipeConfig.IMAGES_TO_BUILD.size > 0){
+                                            println("### ## IMAGES_TO_BUILD: ${pipeConfig.IMAGES_TO_BUILD }")
+                                            for (image_to_build in pipeConfig.IMAGES_TO_BUILD) {
+                                                quayHelper.waitForBuild(
+                                                    image_to_build,
+                                                    currentBranchFormatted,
+                                                    isOpenSourceContribution
+                                                )
+                                            }
+                                        } else{
                                             quayHelper.waitForBuild(
-                                                image_to_build,
+                                                pipeConfig['quayRegistry'],
                                                 currentBranchFormatted,
                                                 isOpenSourceContribution
                                             )
                                         }
-                                    } else{
-                                        quayHelper.waitForBuild(
-                                            pipeConfig['quayRegistry'],
-                                            currentBranchFormatted,
-                                            isOpenSourceContribution
-                                        )
                                     }
                                   } else {
                                     Utils.markStageSkippedForConditional(STAGE_NAME)
