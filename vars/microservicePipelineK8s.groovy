@@ -12,6 +12,7 @@ def call(Map config) {
     List<String> selectedTests = []
     doNotRunTests = false
     runParallelTests = false
+    skipQuayBuild = false
     isGen3Release = "false"
     isNightlyBuild = "false"
     kubectlNamespace = null
@@ -72,25 +73,25 @@ spec:
         stages {
             stage('CleanWorkspace') {
                 steps {
-	            script {
+                script {
                         try {
-	                    cleanWs()
-	                } catch (e) {
-	                    pipelineHelper.handleError(e)
-	                }
-	            }
-	        }
+                        cleanWs()
+                    } catch (e) {
+                        pipelineHelper.handleError(e)
+                    }
+                }
+            }
             }
             stage('FetchCode') {
-	        steps {
-	            script {
-	                try {
-	                    gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
-	                } catch (e) {
-	                    pipelineHelper.handleError(e)
-	                }
-	            }
-	        }
+            steps {
+                script {
+                    try {
+                        gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
+                    } catch (e) {
+                        pipelineHelper.handleError(e)
+                    }
+                }
+            }
             }
             stage('CheckPRLabels') {
                 steps {
@@ -143,6 +144,9 @@ spec:
                                         println('This PR check will run in a qaplanetv2 environment! ');
                                         namespaces.add('ci-env-1')
                                         break
+                                    case "skip-quay-build":
+                                        skipQuayBuild = true
+                                        break
                                     default:
                                         println('no-effect label')
                                         break
@@ -171,11 +175,11 @@ spec:
             }
             stage('WaitForQuayBuild') {
                 steps {
-	            script {
-	                try {
-                            if(!doNotRunTests) {
+                script {
+                    try {
+                            if(!doNotRunTests && !skipQuayBuild) {
                                 if (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST == false || pipeConfig.MANIFEST != "True") {
-                      	            // for NON manifest builds
+                                      // for NON manifest builds
                                     def REPO_NAME = env.JOB_NAME.split('/')[1]
                                     def repoFromPR = githubHelper.fetchRepoURL()
                                     regexMatchRepoOwner = (repoFromPR =~ /.*api.github.com\/repos\/(.*)\/${REPO_NAME}/)[0];
@@ -202,7 +206,7 @@ spec:
                                             isOpenSourceContribution
                                         )
                                     }
-                      	        } else {
+                                  } else {
                                     Utils.markStageSkippedForConditional(STAGE_NAME)
                                 }
                             } else {
@@ -218,21 +222,21 @@ spec:
             }
             stage('SelectNamespace') {
                 steps {
-	            script {
-	                try {
-	                    if(!doNotRunTests) {
-	                        (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'], namespaces)
+                script {
+                    try {
+                        if(!doNotRunTests) {
+                            (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'], namespaces)
                                 kubeLocks << lock
-	                    } else {
-	                        Utils.markStageSkippedForConditional(STAGE_NAME)
-	                    }
-	                } catch (e) {
+                        } else {
+                            Utils.markStageSkippedForConditional(STAGE_NAME)
+                        }
+                    } catch (e) {
                             metricsHelper.writeMetricWithResult(STAGE_NAME, false)
-	                    pipelineHelper.handleError(e)
-	                }
+                        pipelineHelper.handleError(e)
+                    }
                         currentBuild.displayName = "#${BUILD_NUMBER} - ${kubectlNamespace}"
                         metricsHelper.writeMetricWithResult(STAGE_NAME, true)
-	            }
+                }
                 }
             }
             stage('CleanUp3rdPartyResources') {
@@ -333,7 +337,7 @@ spec:
             }
             stage('VerifyClusterHealth') {
                 steps {
-	            script {
+                script {
                         try {
                             if(!doNotRunTests) {
                                 kubeHelper.waitForPods(kubectlNamespace)
@@ -351,7 +355,7 @@ spec:
             }
             stage('GenerateData') {
                 steps {
-	            script {
+                script {
                         try {
                             if(!doNotRunTests) {
                                 testHelper.simulateData(kubectlNamespace, testedEnv)
@@ -368,7 +372,7 @@ spec:
             }
             stage('FetchDataClient') {
                 steps {
-	            script {
+                script {
                         try {
                             if(!doNotRunTests) {
                                 // we get the data client from master, unless the service being
@@ -495,9 +499,9 @@ spec:
                 steps {
                     script {
                         try {
-	                    if(!doNotRunTests) {
+                        if(!doNotRunTests) {
                                 testHelper.cleanS3(kubectlNamespace)
-	                    } else {
+                        } else {
                                 Utils.markStageSkippedForConditional(STAGE_NAME)
                             }
                         } catch (e) {
@@ -515,7 +519,7 @@ spec:
                     kubeHelper.teardown(kubeLocks)
                     testHelper.teardown(doNotRunTests)
                     pipelineHelper.teardown(currentBuild.result)
-	        }
+            }
             }
         }
     }
