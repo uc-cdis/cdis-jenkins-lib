@@ -257,7 +257,7 @@ spec:
             }
             stage('ModifyManifest') {
                 options {
-                    timeout(time: 2, unit: 'HOURS')   // timeout on this stage
+                    timeout(time: 2, unit: 'MINUTES')   // timeout on this stage
                 }
                 steps {
                     script {
@@ -360,7 +360,7 @@ spec:
             }
             stage('GenerateData') {
                 options {
-                    timeout(time: 1, unit: 'HOURS')   // timeout on this stage
+                    timeout(time: 10, unit: 'MINUTES')   // timeout on this stage
                 }
                 steps {
 	            script {
@@ -403,9 +403,6 @@ spec:
                 }
             }
             stage('RunTests') {
-                options {
-                    timeout(time: 3, unit: 'HOURS')   // timeout on this stage
-                }
                 steps {
                     script {
                         if(!runParallelTests) {
