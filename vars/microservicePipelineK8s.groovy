@@ -413,7 +413,7 @@ spec:
             }
             stage('RunTests') {
 		options {
-                    timeout(time: 1, unit: 'HOURS')   // timeout on this stage
+                    timeout(time: 2, unit: 'HOURS')   // timeout on this stage
                 }
                 steps {
                     script {
