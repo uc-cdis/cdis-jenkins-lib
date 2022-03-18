@@ -263,7 +263,7 @@ spec:
             }
             stage('ModifyManifest') {
                 options {
-                    timeout(time: 2, unit: 'MINUTES')   // timeout on this stage
+                    timeout(time: 5, unit: 'MINUTES')   // timeout on this stage
                 }
                 steps {
                     script {
