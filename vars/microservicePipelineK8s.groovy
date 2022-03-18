@@ -320,7 +320,7 @@ spec:
             }
             stage('K8sReset') {
                 options {
-                    timeout(time: 30, unit: 'MINUTES')   // timeout on this stage
+                    timeout(time: 1, unit: 'HOURS')   // timeout on this stage
                 }
                 steps {
                     script {
