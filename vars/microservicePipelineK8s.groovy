@@ -263,7 +263,7 @@ spec:
             }
             stage('ModifyManifest') {
                 options {
-                    timeout(time: 5, unit: 'MINUTES')   // timeout on this stage
+                    timeout(time: 2, unit: 'MINUTES')   // timeout on this stage
                 }
                 steps {
                     script {
@@ -320,7 +320,7 @@ spec:
             }
             stage('K8sReset') {
                 options {
-                    timeout(time: 30, unit: 'MINUTES')   // timeout on this stage
+                    timeout(time: 1, unit: 'HOURS')   // timeout on this stage
                 }
                 steps {
                     script {
