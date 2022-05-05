@@ -164,7 +164,7 @@ spec:
                                 if (isNightlyBuild == "true") {
                                     exportToPFBFeatureEnabledExitCode = sh(
                                         returnStatus: true,
-                                        script: "grep \'\"export-to-pfb\"\' tmpGitClone/nightly.planx-pla.net/portal/gitops.json"
+                                        script: "grep '\"export-to-pfb\"' tmpGitClone/nightly.planx-pla.net/portal/gitops.json"
                                     ) as Integer
                                     if (exportToPFBFeatureEnabledExitCode == 0) {
                                         selectedTests.add("suites/portal/pfbExportTest.js")
