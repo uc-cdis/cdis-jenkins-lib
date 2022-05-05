@@ -163,7 +163,7 @@ spec:
                                 // include long running tests.in the nightly-build
                                 if (isNightlyBuild == "true") {
                                     exportToPFBFeatureEnabledExitCode = sh(
-                                        returnStdout: true,
+                                        returnStatus: true,
                                         script: "grep '\"export-to-pfb\"' tmpGitClone/nightly.planx-pla.net/portal/gitops.json"
                                     ) as Integer
                                     if (exportToPFBFeatureEnabledExitCode == 0) {
