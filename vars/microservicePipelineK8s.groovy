@@ -162,7 +162,14 @@ spec:
 
                                 // include long running tests.in the nightly-build
                                 if (isNightlyBuild == "true") {
-                                    selectedTests.add("suites/portal/pfbExportTest.js")
+                                    exportToPFBFeatureEnabledExitCode = sh(
+                                        returnStatus: true,
+                                        script: "grep '\"export-to-pfb\"' tmpGitClone/nightly.planx-pla.net/portal/gitops.json"
+                                    ) as Integer
+                                    if (exportToPFBFeatureEnabledExitCode == 0) {
+                                        selectedTests.add("suites/portal/pfbExportTest.js")
+                                        println('selected PFB Export tests since PFB Export feature is enabled for environment')
+                                    }
                                 }
                             }
                         } catch (ex) {
