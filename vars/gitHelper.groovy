@@ -25,7 +25,7 @@ def fetchAllRepos(String currentRepoName) {
     } else {
       git(
         url: 'https://github.com/uc-cdis/gen3-qa.git',
-        branch: 'master'
+        branch: 'fix/studyViewer_tests'
       );
     }
   }
@@ -37,7 +37,7 @@ def fetchAllRepos(String currentRepoName) {
     } else {
       git(
         url: 'https://github.com/uc-cdis/data-simulator.git',
-        branch: 'fix/studyViewer_tests'
+        branch: 'master'
       );
     }
   }
