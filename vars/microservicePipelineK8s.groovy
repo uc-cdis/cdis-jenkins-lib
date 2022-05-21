@@ -13,6 +13,7 @@ def call(Map config) {
     doNotRunTests = false
     runParallelTests = false
     skipQuayBuild = false
+    debug = "false"
     isGen3Release = "false"
     isNightlyBuild = "false"
     kubectlNamespace = null
@@ -110,6 +111,7 @@ spec:
                                         println "selected test: suites/" + selectedTestLabel[1] + "/" + selectedTestLabel[2] + ".js"
                                         selectedTest = "suites/" + selectedTestLabel[1] + "/" + selectedTestLabel[2] + ".js"
                                         selectedTests.add(selectedTest)
+                                        debug = "true"
                                         break
                                     case "parallel-testing":
                                         println('Run labelled test suites in parallel')
@@ -129,8 +131,8 @@ spec:
                                         isNightlyBuild = "true"
                                         break
                                     case "debug":
-                                        println("Call npm test with --debug")
-                                        println("leverage CodecepJS feature require('codeceptjs').output.debug feature")
+                                        // Run tests in debug mode
+                                        debug = "true"
                                         break
                                     case "not-ready-for-ci":
                                         currentBuild.result = 'ABORTED'
@@ -433,7 +435,8 @@ spec:
                                         testedEnv,
                                         isGen3Release,
                                         isNightlyBuild,
-                                        selectedTests
+                                        selectedTests,
+                                        debug
                                     )
                                 } else {
                                     Utils.markStageSkippedForConditional(STAGE_NAME)
