@@ -29,6 +29,7 @@ def call(Map config) {
     runParallelTests = false
     isGen3Release = "false"
     isNightlyBuild = "false"
+    degbug = "false"
     kubectlNamespace = null
     kubeLocks = []
     testedEnv = "" // for manifest pipeline
@@ -76,8 +77,8 @@ def call(Map config) {
               isNightlyBuild = "true"
               break
             case "debug":
-              println("Call npm test with --debug")
-              println("leverage CodecepJS feature require('codeceptjs').output.debug feature")
+              // Run in debug mode
+              debug= "true"
               break
             case "not-ready-for-ci":
               currentBuild.result = 'ABORTED'
