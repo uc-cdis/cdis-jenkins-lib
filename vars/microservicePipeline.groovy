@@ -29,7 +29,7 @@ def call(Map config) {
     runParallelTests = false
     isGen3Release = "false"
     isNightlyBuild = "false"
-    degbug = "false"
+    debug = "false"
     kubectlNamespace = null
     kubeLocks = []
     testedEnv = "" // for manifest pipeline
