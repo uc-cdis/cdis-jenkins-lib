@@ -104,6 +104,7 @@ def getLatestChangeOfBranch(String branchName=env.CHANGE_BRANCH) {
 
     return fileChanges
   }
+}
 
 /**
 * Returns the timestamp of the latest commit
