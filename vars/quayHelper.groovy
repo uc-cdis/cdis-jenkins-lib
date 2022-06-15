@@ -21,6 +21,7 @@ def waitForBuild(String repoName, String formattedBranch
     println "running time query"
     latestQuayTimestamp = sh(script: query, returnStdout: true)
     if(latestQuayTimestamp){
+      latestQuayTimestamp = latestQuayTimestamp.trim()
       try {
         def quayTime = new Date(Long.valueOf(latestQuayTimestamp) * 1000 )
         println "the latest commit time is "+commitTime
