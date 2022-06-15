@@ -12,7 +12,7 @@ def waitForBuild(String repoName, String formattedBranch
   String commitTimestamp = gitHelper.getTimestampOfLatestCommit('HEAD')
   QUAY_API = 'https://quay.io/api/v1/repository/cdis/'
   url = "$QUAY_API"+repoName+"/tag"
-  query = "curl -s "+timeUrl+/ |  jq '[.tags[]|select(.name=="${formattedBranch}" and (.end_ts == null))][0].start_ts'/
+  query = "curl -s "+url+/ |  jq '[.tags[]|select(.name=="${formattedBranch}" and (.end_ts == null))][0].start_ts'/
 
   def quayImageReady = false
   while(quayImageReady != true) {
