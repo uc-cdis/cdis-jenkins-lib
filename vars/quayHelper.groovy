@@ -17,15 +17,22 @@ def waitForBuild(String repoName, String formattedBranch
 
   def quayImageReady = false
   while(quayImageReady != true) {
+    sleep(15)
     println "running time query"
-    latestQuayTimestamp = sh(script: query, returnStdout: true).trim()
+    latestQuayTimestamp = sh(script: query, returnStdout: true)
+    if(latestQuayTimestamp){
+      try {
+        def quayTime = new Date(Long.valueOf(latestQuayTimestamp) * 1000 )
+        println "the latest commit time is "+commitTime
+        println "the quay build time is "+quayTime
 
-    def quayTime = new Date(Long.valueOf(latestQuayTimestamp) * 1000 )
-    println "the latest commit time is "+commitTime
-    println "the quay build time is "+quayTime
-
-    if(quayTime > commitTime) {
-      quayImageReady = true
+        if(quayTime > commitTime) {
+          quayImageReady = true
+        }
+      }
+      catch(Exception ex) {
+        println("the image is not ready with exception "+ex.getMessage())
+      }
     }
   }
 }
