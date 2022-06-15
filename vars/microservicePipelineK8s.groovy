@@ -214,8 +214,7 @@ spec:
                                         } else{
                                             quayHelper.waitForBuild(
                                                 pipeConfig['quayRegistry'],
-                                                currentBranchFormatted,
-                                                isOpenSourceContribution
+                                                currentBranchFormatted
                                             )
                                         }
                                     }
