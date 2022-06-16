@@ -208,15 +208,13 @@ spec:
                                             for (image_to_build in pipeConfig.IMAGES_TO_BUILD) {
                                                 quayHelper.waitForBuild(
                                                     image_to_build,
-                                                    currentBranchFormatted,
-                                                    isOpenSourceContribution
+                                                    currentBranchFormatted
                                                 )
                                             }
                                         } else{
                                             quayHelper.waitForBuild(
                                                 pipeConfig['quayRegistry'],
-                                                currentBranchFormatted,
-                                                isOpenSourceContribution
+                                                currentBranchFormatted
                                             )
                                         }
                                     }
