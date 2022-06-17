@@ -87,6 +87,7 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   sh "jq -r .sower < tmpGitClone/$changedDir/manifest.json > sower_block.json"
   // copy frontend_root if present
   Integer rc = sh(returnStatus: true, script: "jq -e '.global.frontend_root' < manifest.json | echo \$?")
+  println rc
   if (rc == 0) {
     sh "jq -r .global.frontend_root < tmpGitClone/$changedDir/manifest.json > frontend_root.json"
   }
