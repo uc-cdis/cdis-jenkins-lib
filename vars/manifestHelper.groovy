@@ -86,10 +86,9 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   // fetch sower block from the target environment
   sh "jq -r .sower < tmpGitClone/$changedDir/manifest.json > sower_block.json"
   // copy frontend_root if present
-  Integer rc = sh(returnStatus: true, script: "jq -e '.global.frontend_root' < tmpGitClone/$changedDir/manifest.json | echo \$?")
-  if (rc == 0) {
-    sh "jq -r .global.frontend_root < tmpGitClone/$changedDir/manifest.json > frontend_root.json"
-  }
+  sh(returnStatus : true, script: "if cat tmpGitClone/$changedDir/manifest.json | jq --exit-status '.global.frontend_root' >/dev/null; then "
+    + "jq -r .global.frontend_root < tmpGitClone/$changedDir/manifest.json > frontend_root.json; "
+    + "fi")
   def manifestBlockKeys = ["portal", "ssjdispatcher", "indexd", "metadata", "mariner", "awsstoragegateway"]
   for (String item : manifestBlockKeys) {
     sh(returnStdout: true, script: "if cat tmpGitClone/${changedDir}/manifest.json | jq --exit-status '.${item}' >/dev/null; then "
