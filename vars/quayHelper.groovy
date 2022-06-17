@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat;
 
 def waitForBuild(String repoName, String formattedBranch
 ) {
-  if (repoName == "jenkins-lib" || repoName.contains("dictionary")) { return "skip" }
+  if (repoName == "jenkins-lib" || repoName == "gen3-qa" || repoName.contains("dictionary")) { return "skip" }
   echo("Waiting for Quay to build:\n  repoName: ${repoName}\n  branch: '${formattedBranch}'\n  commit: ${env.GIT_COMMIT}\n  previous commit: ${env.GIT_PREVIOUS_COMMIT}")
   String commitTimestamp = gitHelper.getTimestampOfLatestCommit('HEAD')
   def commitTime = new Date(Long.valueOf(commitTimestamp) * 1000 )
