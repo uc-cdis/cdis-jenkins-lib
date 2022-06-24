@@ -9,7 +9,7 @@ def waitForBuild(String repoName, String formattedBranch
 ) {
   if (repoName == "jenkins-lib" || repoName == "gen3-qa" || repoName.contains("dictionary")) { return "skip" }
   echo("Waiting for Quay to build:\n  repoName: ${repoName}\n  branch: '${formattedBranch}'\n  commit: ${env.GIT_COMMIT}\n  previous commit: ${env.GIT_PREVIOUS_COMMIT}")
-  String commitTimestamp = gitHelper.getTimestampOfLatestCommit('HEAD')
+  String commitTimestamp = gitHelper.getTimestampOfLatestCommit()
   def commitTime = new Date(Long.valueOf(commitTimestamp) * 1000 )
   QUAY_API = 'https://quay.io/api/v1/repository/cdis/'
   url = "$QUAY_API"+repoName+"/tag/"

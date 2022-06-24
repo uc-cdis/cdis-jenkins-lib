@@ -117,7 +117,7 @@ def getTimestampOfLatestCommit(String branchName=env.CHANGE_BRANCH) {
     sh("git config --add remote.origin.fetch +refs/heads/master:refs/remotes/origin/master")
     sh("git fetch --no-tags")
     println("Branchname: ${branchName}")
-    String ts = sh(returnStdout: true, script: "git log $branchName -1 --format=%ct").trim()
+    String ts = sh(returnStdout: true, script: "git log origin/$branchName -1 --format=%ct").trim()
 
     return ts
   }
