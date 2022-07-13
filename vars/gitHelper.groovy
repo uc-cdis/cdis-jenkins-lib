@@ -25,7 +25,7 @@ def fetchAllRepos(String currentRepoName) {
     } else {
       git(
         url: 'https://github.com/uc-cdis/gen3-qa.git',
-        branch: 'chore/add_dicom_viewer_test'
+        branch: 'chore/modify_dicom_viewer_test'
       );
     }
   }
@@ -50,7 +50,7 @@ def fetchAllRepos(String currentRepoName) {
     } else {
       git(
         url: 'https://github.com/uc-cdis/gitops-qa.git',
-        branch: 'test/multiple-guppy-config'
+        branch: 'master'
       )
     }
   }
