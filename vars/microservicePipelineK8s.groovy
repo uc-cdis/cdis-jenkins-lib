@@ -325,7 +325,6 @@ spec:
                     }
                 }
             }
-	    /* 
             stage('K8sReset') {
                 options {
                     timeout(time: 1, unit: 'HOURS')   // timeout on this stage
@@ -419,7 +418,6 @@ spec:
                     }
                 }
             }
-	    */
             stage('RunTests') {
 		options {
                     timeout(time: 3, unit: 'HOURS')   // timeout on this stage
