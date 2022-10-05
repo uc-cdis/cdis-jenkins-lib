@@ -133,7 +133,7 @@ def selectAndLockNamespace(String lockOwner, List<String> namespaces = null) {
     for (int i=0; i < namespaces.size(); ++i) {
       namespaceIndex = (randNum + i) % namespaces.size();
       kubectlNamespace = namespaces.get(namespaceIndex)
-      println("attempting to lock namespace ${kubectlNamespace} with a wait time of 1 minutes")
+      println("attempting to lock namespace ${kubectlNamespace} with a wait time of 1 minute")
       if (klock('lock', lockOwner, lockName, kubectlNamespace)) {
         echo("namespace ${kubectlNamespace}")
         return [kubectlNamespace, newKubeLock(kubectlNamespace, lockOwner, lockName)]
