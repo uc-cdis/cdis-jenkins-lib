@@ -237,6 +237,7 @@ spec:
                 script {
                     try {
                         if(!doNotRunTests) {
+                            println("Picking a namespace from this pool: ${namespaces}");
                             (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'], namespaces)
                                 kubeLocks << lock
                         } else {
