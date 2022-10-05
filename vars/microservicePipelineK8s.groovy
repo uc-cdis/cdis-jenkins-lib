@@ -103,7 +103,7 @@ spec:
 
                             // prLabels are added to the config map in vars/testPipeline.groovy
                             for(label in config.prLabels) {
-                                println(label['name']);
+                                println("Found label: ${label['name']}");
                                 switch(label['name']) {
                                     case ~/^test-.*/:
                                         println('Select a specific test suite and feature')
