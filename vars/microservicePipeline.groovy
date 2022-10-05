@@ -50,13 +50,13 @@ def call(Map config) {
         doNotRunTests = doNotRunTests || docOnlyHelper.checkTestSkippingCriteria()
 
         for(label in config.prLabels) {
-          println(label['name']);
+          println("Found label: ${label['name']}");
           switch(label['name']) {
             case ~/^test-.*/:
               println('Select a specific test suite and feature')
               selectedTestLabel = label['name'].split("-")
-              println "selected test: suites/" + selectedTestLabel[1] + "/" + selectedTestLabel[2] + ".js"
               selectedTest = "suites/" + selectedTestLabel[1] + "/" + selectedTestLabel[2] + ".js"
+              println "selected test: " + selectedTest
               selectedTests.add(selectedTest)
               break
             case "parallel-testing":
@@ -157,6 +157,7 @@ def call(Map config) {
         stage('SelectNamespace') {
          try {
           if(!doNotRunTests) {
+            println("Picking a namespace from this pool: ${namespaces}");
             (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'], namespaces)
             kubeLocks << lock
 	  } else {
@@ -226,6 +227,7 @@ def call(Map config) {
         stage('SelectNamespace') {
          try {
           if(!doNotRunTests) {
+            println("Picking a namespace from this pool: ${namespaces}");
             (kubectlNamespace, lock) = kubeHelper.selectAndLockNamespace(pipeConfig['UID'], namespaces)
             kubeLocks << lock
           } else {
