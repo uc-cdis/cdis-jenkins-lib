@@ -39,7 +39,7 @@ metadata:
 spec:
   containers:
   - name: shell
-    image: quay.io/cdis/gen3-ci-worker:master
+    image: quay.io/cdis/gen3-ci-worker:jenkins_use_node_14
     imagePullPolicy: Always
     command:
     - sleep
