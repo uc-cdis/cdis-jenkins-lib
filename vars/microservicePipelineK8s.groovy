@@ -37,6 +37,15 @@ metadata:
     app: ephemeral-ci-run
     netnolimit: "yes"
 spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: eks.amazonaws.com/capacityType
+            operator: In
+            values:
+            - ONDEMAND
   containers:
   - name: shell
     image: quay.io/cdis/gen3-ci-worker:master
