@@ -40,7 +40,7 @@ def call(Map config) {
     println(jenkins_env_pool)
     println("---------------------------------------------------------------")
 
-    def AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs(pool=jenkins_env_pool)
+    def AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs(pool: jenkins_env_pool)
 
     pipeline {
         agent {
