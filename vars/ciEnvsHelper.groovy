@@ -1,7 +1,7 @@
 def fetchCIEnvs(pool = "service") {
   println("----------------------- FETCHCIENVS.POOL ---------------------")
-    println(pool)
-    println("---------------------------------------------------------------")
+  println(pool)
+  println("---------------------------------------------------------------")
   try{
     def jenkins_envs_url;
     if(pool == "service") {
@@ -9,6 +9,9 @@ def fetchCIEnvs(pool = "service") {
     } else if(pool == "release") {
       jenkins_envs_url="https://cdistest-public-test-bucket.s3.amazonaws.com/jenkins-envs-releases.txt";
     }
+    println("----------------------- FETCHCIENVS.POOL ---------------------")
+    println(pool)
+    println("---------------------------------------------------------------")
     println("Shooting a request to: " + jenkins_envs_url);
     def get = new URL(jenkins_envs_url).openConnection();
     def getRC = get.getResponseCode();
