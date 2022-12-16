@@ -29,18 +29,12 @@ def call(Map config) {
     println(pipeConfig)
     println("--------------------------------------------------------")
 
-    def jenkins_env_pool
+    def AVAILABLE_NAMESPACES
     if (pipeConfig.MANIFEST == "True") {
-        jenkins_env_pool = "release"
+        AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs(pool: "release")
     } else {
-        jenkins_env_pool = "service"
+        AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs(pool: "service")
     }
-
-    println("----------------------- JENKINS_ENV_POOL ---------------------")
-    println(jenkins_env_pool)
-    println("---------------------------------------------------------------")
-
-    def AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs(pool: jenkins_env_pool)
 
     pipeline {
         agent {
