@@ -25,12 +25,20 @@ def call(Map config) {
 
     pipeConfig = pipelineHelper.setupConfig(config)
 
+    println("----------------------- PIPECONFIG ---------------------")
+    println(pipeConfig)
+    println("--------------------------------------------------------")
+
     def jenkins_env_pool
     if (pipeConfig.MANIFEST == "True") {
         jenkins_env_pool = "release"
     } else {
         jenkins_env_pool = "service"
     }
+
+    println("----------------------- JENKINS_ENV_POOL ---------------------")
+    println(jenkins_env_pool)
+    println("---------------------------------------------------------------")
 
     def AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs(pool=jenkins_env_pool)
 
