@@ -10,7 +10,7 @@ def fetchCIEnvs(pool = "service") {
       jenkins_envs_url="https://cdistest-public-test-bucket.s3.amazonaws.com/jenkins-envs-releases.txt";
     }
     println("----------------------- JENKINS_ENVS_URL ---------------------")
-    println(pjenkins_envs_urlool)
+    println(jenkins_envs_url)
     println("---------------------------------------------------------------")
     println("Shooting a request to: " + jenkins_envs_url);
     def get = new URL(jenkins_envs_url).openConnection();
