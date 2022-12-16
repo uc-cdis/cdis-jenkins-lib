@@ -13,7 +13,6 @@ def call(Map config) {
     doNotRunTests = false
     runParallelTests = false
     skipQuayBuild = false
-    isManifestPr = true
     debug = "false"
     isGen3Release = "false"
     isNightlyBuild = "false"
@@ -22,13 +21,17 @@ def call(Map config) {
     testedEnv = "" // for manifest pipeline
     regexMatchRepoOwner = "" // to track the owner of the github repository
 
-    if (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST == false || pipeConfig.MANIFEST != "True") {
-        isManifestPr = false
-    }
-    def AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs(isManifestPr=isManifestPr)
     pipelineHelper.cancelPreviousRunningBuilds()
 
     pipeConfig = pipelineHelper.setupConfig(config)
+
+    if (pipeConfig.MANIFEST == "True") {
+        jenkins_env_pool = "release"
+    } else {
+        jenkins_env_pool = "service"
+    }
+
+    def AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs(pool=jenkins_env_pool)
 
     pipeline {
         agent {

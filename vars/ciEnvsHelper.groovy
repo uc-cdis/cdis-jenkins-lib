@@ -1,7 +1,9 @@
-def fetchCIEnvs(runOnGen3CIWorker = false, isManifestPr = false) {
+def fetchCIEnvs(pool = "service") {
   try{
-    def jenkins_envs_url="https://cdistest-public-test-bucket.s3.amazonaws.com/jenkins-envs-services.txt";
-    if (isManifestPr) {
+    def jenkins_envs_url;
+    if(pool == "service") {
+      "https://cdistest-public-test-bucket.s3.amazonaws.com/jenkins-envs-services.txt";
+    } else if(pool == "release") {
       jenkins_envs_url="https://cdistest-public-test-bucket.s3.amazonaws.com/jenkins-envs-releases.txt";
     }
     println("Shooting a request to: " + jenkins_envs_url);
