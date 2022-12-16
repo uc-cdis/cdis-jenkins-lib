@@ -25,6 +25,7 @@ def call(Map config) {
 
     pipeConfig = pipelineHelper.setupConfig(config)
 
+    def jenkins_env_pool
     if (pipeConfig.MANIFEST == "True") {
         jenkins_env_pool = "release"
     } else {
