@@ -1,6 +1,6 @@
 def fetchCIEnvs(pool = "service") {
   println("----------------------- FETCHCIENVS.POOL ---------------------")
-  println(pool)
+  println("Pool value is ${pool}")
   println("---------------------------------------------------------------")
   try{
     def jenkins_envs_url;
