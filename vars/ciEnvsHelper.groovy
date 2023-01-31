@@ -1,13 +1,14 @@
 def fetchCIEnvs(pool = "service") {
-  println("----------------------- FETCHCIENVS.POOL ---------------------")
-  println("Pool value is ${pool}")
-  println("---------------------------------------------------------------")
   try{
     def jenkins_envs_url;
     if(pool == "service") {
       jenkins_envs_url="https://cdistest-public-test-bucket.s3.amazonaws.com/jenkins-envs-services.txt";
+      println "In service pool";
+      println(jenkins_envs_url);
     } else if(pool == "release") {
       jenkins_envs_url="https://cdistest-public-test-bucket.s3.amazonaws.com/jenkins-envs-releases.txt";
+      println "In release pool";
+      println(jenkins_envs_url);
     }
     println("----------------------- JENKINS_ENVS_URL ---------------------")
     println(jenkins_envs_url)
