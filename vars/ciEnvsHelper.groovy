@@ -1,4 +1,5 @@
 def fetchCIEnvs(pool = "service") {
+  println "#### the pool is ${pool}"
   try{
     def jenkins_envs_url;
     if(pool.equals("service")) {
