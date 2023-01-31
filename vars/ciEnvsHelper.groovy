@@ -1,11 +1,11 @@
 def fetchCIEnvs(pool = "service") {
   try{
     def jenkins_envs_url;
-    if(pool == "service") {
+    if(pool.equals("service")) {
       jenkins_envs_url="https://cdistest-public-test-bucket.s3.amazonaws.com/jenkins-envs-services.txt";
       println "In service pool";
       println(jenkins_envs_url);
-    } else if(pool == "release") {
+    } else if(pool.equals("release")) {
       jenkins_envs_url="https://cdistest-public-test-bucket.s3.amazonaws.com/jenkins-envs-releases.txt";
       println "In release pool";
       println(jenkins_envs_url);
