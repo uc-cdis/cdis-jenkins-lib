@@ -31,9 +31,9 @@ def call(Map config) {
 
     def AVAILABLE_NAMESPACES
     if (pipeConfig.MANIFEST == "True") {
-        AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs(pool: "release")
+        AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs("release")
     } else {
-        AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs(pool: "service")
+        AVAILABLE_NAMESPACES = ciEnvsHelper.fetchCIEnvs("service")
     }
 
     pipeline {
