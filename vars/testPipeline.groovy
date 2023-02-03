@@ -14,16 +14,5 @@ def call(body) {
   body.delegate = config
   body()
 
-  // enabling this now across the board to eliminate selenium-hub + nodes flakyness
-  microservicePipelineK8s(config)
-
-  /*
-  if (prLabels.any{label -> label.name == "gen3-qa-in-a-box"}) {
-    println('Found [gen3-qa-in-a-box] label, running CI on an ephemeral pod with selenium-standalone...')
-
-    microservicePipelineK8s(config)
-  } else {
-    println('Running un-kubernetisized legacy pipeline...')
-    microservicePipeline(config)
-  }*/
+  microservicePipeline(config)
 }
