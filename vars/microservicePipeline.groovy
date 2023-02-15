@@ -560,6 +560,23 @@ spec:
                     }
                 }
             }
+            stage('CleanK8s') {
+                steps {
+                    script {
+                        try {
+                        if(!doNotRunTests) {
+                                kubeHelper.deleteDeployments(kubectlNamespace)
+                        } else {
+                                Utils.markStageSkippedForConditional(STAGE_NAME)
+                            }
+                        } catch (e) {
+                            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
+                            pipelineHelper.handleError(e)
+                        }
+                        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
+                    }
+                }
+            }
         }
         post {
             always {
