@@ -82,6 +82,15 @@ def waitForPods(String kubectlNamespace) {
 }
 
 /**
+* Delete all pods
+*/
+def deleteDeployments(String kubectlNamespace) {
+  kube(kubectlNamespace, {
+    sh "kubectl delete --all deployments"
+  })
+}
+
+/**
 * Save logs and store them in our Jenkins archiving folder to help people debug issues with K8sReset
 */
 def saveLogs(String kubectlNamespace) {
