@@ -56,6 +56,11 @@ spec:
             operator: In
             values:
             - ONDEMAND
+        - matchExpressions:
+          - key: karpenter.sh/capacity-type
+            operator: In
+            values:
+            - on-demand
   containers:
   - name: shell
     image: quay.io/cdis/gen3-ci-worker:master
