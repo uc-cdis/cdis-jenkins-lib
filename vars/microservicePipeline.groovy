@@ -69,6 +69,10 @@ spec:
     - sleep
     args:
     - infinity
+    resources:
+      limits:
+        cpu: 1
+        memory: 2Gi
     env:
     - name: AWS_DEFAULT_REGION
       value: us-east-1
