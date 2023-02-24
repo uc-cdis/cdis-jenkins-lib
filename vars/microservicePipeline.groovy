@@ -74,6 +74,8 @@ spec:
         cpu: 1
         memory: 4Gi
     env:
+    - name: NODE_TLS_REJECT_UNAUTHORIZED
+      value: 0
     - name: AWS_DEFAULT_REGION
       value: us-east-1
     - name: JAVA_OPTS
