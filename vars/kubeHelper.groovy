@@ -87,6 +87,7 @@ def waitForPods(String kubectlNamespace) {
 def deleteDeployments(String kubectlNamespace) {
   kube(kubectlNamespace, {
     sh "kubectl delete --all deployments --namespace ${kubectlNamespace}"
+    sh "kubectl delete --all pods --namespace ${kubectlNamespace}"
   })
 }
 

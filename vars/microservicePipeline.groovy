@@ -69,7 +69,13 @@ spec:
     - sleep
     args:
     - infinity
+    resources:
+      limits:
+        cpu: 1
+        memory: 4Gi
     env:
+    - name: NODE_TLS_REJECT_UNAUTHORIZED
+      value: 0
     - name: AWS_DEFAULT_REGION
       value: us-east-1
     - name: JAVA_OPTS
@@ -548,48 +554,16 @@ spec:
                     }
                 }
             }
-            stage('CleanS3') {
-                steps {
-                    script {
-                        try {
-                        if(!doNotRunTests) {
-                                testHelper.cleanS3(kubectlNamespace)
-                        } else {
-                                Utils.markStageSkippedForConditional(STAGE_NAME)
-                            }
-                        } catch (e) {
-                            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
-                            pipelineHelper.handleError(e)
-                        }
-                        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
-                    }
-                }
-            }
-            stage('CleanK8s') {
-                steps {
-                    script {
-                        try {
-                        if(!doNotRunTests) {
-                                kubeHelper.deleteDeployments(kubectlNamespace)
-                        } else {
-                                Utils.markStageSkippedForConditional(STAGE_NAME)
-                            }
-                        } catch (e) {
-                            metricsHelper.writeMetricWithResult(STAGE_NAME, false)
-                            pipelineHelper.handleError(e)
-                        }
-                        metricsHelper.writeMetricWithResult(STAGE_NAME, true)
-                    }
-                }
-            }
         }
         post {
             always {
                 script {
+                    testHelper.cleanS3(kubectlNamespace)
+                    kubeHelper.deleteDeployments(kubectlNamespace)
                     kubeHelper.teardown(kubeLocks)
                     testHelper.teardown(doNotRunTests)
                     pipelineHelper.teardown(currentBuild.result)
-            }
+                }
             }
         }
     }
