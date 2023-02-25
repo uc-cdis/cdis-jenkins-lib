@@ -455,10 +455,13 @@ spec:
                 }
                 steps {
                     script {
-		    	sh("echo \"before: http_proxy=$http_proxy https_proxy=$https_proxy\"")
+		    	sh("echo Before")
+			sh("echo \$http_proxy")
+			sh("echo \$https_proxy")
 		    	sh("unset http_proxy")
-			sh("unset https_proxy")
-			sh("echo \"after: http_proxy=$http_proxy https_proxy=$https_proxy\"")
+			sh("echo After")
+			sh("echo \$http_proxy")
+			sh("echo \$https_proxy")
 			
                         if(!runParallelTests) {
                             try {
