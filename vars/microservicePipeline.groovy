@@ -70,9 +70,9 @@ spec:
     args:
     - infinity
     resources:
-      limits:
+      requests:
         cpu: 1
-        memory: 4Gi
+        memory: 2Gi
     env:
     - name: NODE_TLS_REJECT_UNAUTHORIZED
       value: 0
