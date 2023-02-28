@@ -461,6 +461,7 @@ spec:
                                     unset_https_proxy
                                     echo "new proxy values are http_proxy=$http_proxy https_proxy=$https_proxy"
                             '''
+                        if(!runParallelTests) {
                             try {
                                 if(!doNotRunTests) {
                                     testHelper.soonToBeLegacyRunIntegrationTests(
