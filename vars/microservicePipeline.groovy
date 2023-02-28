@@ -455,12 +455,12 @@ spec:
                 }
                 steps {
                     script {
-                            sh '''#!/bin/bash
-                                    echo "original proxy values are http_proxy=$http_proxy https_proxy=$https_proxy"
-                                    unset http_proxy
-                                    unset_https_proxy
-                                    echo "new proxy values are http_proxy=$http_proxy https_proxy=$https_proxy"
-                            '''
+                        sh '''#!/bin/bash
+                                echo "original proxy values are http_proxy=$http_proxy https_proxy=$https_proxy"
+                                unset http_proxy
+                                unset_https_proxy
+                                echo "new proxy values are http_proxy=$http_proxy https_proxy=$https_proxy"
+                        '''
                         if(!runParallelTests) {
                             try {
                                 if(!doNotRunTests) {
