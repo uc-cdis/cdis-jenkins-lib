@@ -457,8 +457,8 @@ spec:
                     script {
                         sh '''#!/bin/bash
                                 echo "original proxy values are http_proxy=$http_proxy https_proxy=$https_proxy"
-                                unset http_proxy
-                                unset_https_proxy
+                                export http_proxy=cloud-proxy.internal.io:3128
+                                export https_proxy=cloud-proxy.internal.io:3128
                                 echo "new proxy values are http_proxy=$http_proxy https_proxy=$https_proxy"
                         '''
                         if(!runParallelTests) {
