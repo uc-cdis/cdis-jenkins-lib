@@ -556,8 +556,10 @@ spec:
         post {
             always {
                 script {
-                    testHelper.cleanS3(kubectlNamespace)
-                    kubeHelper.deleteDeployments(kubectlNamespace)
+                    if(!doNotRunTests) {
+                        testHelper.cleanS3(kubectlNamespace)
+                        kubeHelper.deleteDeployments(kubectlNamespace)
+                    }
                     kubeHelper.teardown(kubeLocks)
                     testHelper.teardown(doNotRunTests)
                     pipelineHelper.teardown(currentBuild.result)
