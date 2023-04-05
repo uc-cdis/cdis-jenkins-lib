@@ -10,6 +10,7 @@ import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 def call(Map config) {
     List<String> namespaces = []
     List<String> selectedTests = []
+    List<String> selectedTags = []
     doNotRunTests = false
     runParallelTests = false
     skipQuayBuild = false
@@ -142,6 +143,12 @@ spec:
                                         selectedTests.add(selectedTest)
                                         debug = "true"
                                         break
+                                    case ~/^@.*/:
+                                        println('Selecting a specific test tag')
+                                        println "selected tag: " + label['name']
+                                        selectedTags.add(label['name'])
+                                        debug = "true"
+                                        break
                                     case "parallel-testing":
                                         println('Run labelled test suites in parallel')
                                         runParallelTests = true
@@ -188,7 +195,7 @@ spec:
                                 namespaces = AVAILABLE_NAMESPACES
                             }
                             // If a specific test suite is not specified, run them all
-                            if (selectedTests.size == 0) {
+                            if (selectedTests.size == 0 && selectedTags.size == 0) {
                                 selectedTests.add("all")
 
                                 // include long running tests.in the nightly-build
@@ -464,6 +471,7 @@ spec:
                                         isGen3Release,
                                         isNightlyBuild,
                                         selectedTests,
+                                        selectedTags,
                                         debug
                                     )
                                 } else {
