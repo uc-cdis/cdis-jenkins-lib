@@ -62,6 +62,14 @@ spec:
             values:
             - on-demand
   containers:
+  - name: jnlp
+    image: 'jenkins/inbound-agent:4.11-1-jdk11'
+    args: ['\$(JENKINS_SECRET)', '\$(JENKINS_NAME)']
+    resources:
+      requests:
+        cpu: 500m
+        memory: 500Mi
+        ephemeral-storage: 500Mi
   - name: shell
     image: quay.io/cdis/gen3-ci-worker:master
     imagePullPolicy: Always
