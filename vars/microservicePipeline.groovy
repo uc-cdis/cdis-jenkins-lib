@@ -43,6 +43,8 @@ def call(Map config) {
 apiVersion: v1
 kind: Pod
 metadata:
+  annotations:
+    karpenter.sh/do-not-evict: true
   labels:
     app: ephemeral-ci-run
     netnolimit: "yes"
