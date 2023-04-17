@@ -65,8 +65,6 @@ spec:
             - on-demand
   containers:
   - name: jnlp
-    image: 'jenkins/inbound-agent:4.11-1-jdk11'
-    args: ['\$(JENKINS_SECRET)', '\$(JENKINS_NAME)']
     resources:
       requests:
         cpu: 500m
