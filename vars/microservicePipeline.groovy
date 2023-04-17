@@ -65,6 +65,8 @@ spec:
             - on-demand
   containers:
   - name: jnlp
+    command: ["/bin/sh","-c"]
+    args: ["sleep 30; /usr/local/bin/jenkins-agent"]
     resources:
       requests:
         cpu: 500m
