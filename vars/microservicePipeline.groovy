@@ -43,6 +43,8 @@ def call(Map config) {
 apiVersion: v1
 kind: Pod
 metadata:
+  annotations:
+    karpenter.sh/do-not-evict: true
   labels:
     app: ephemeral-ci-run
     netnolimit: "yes"
@@ -63,8 +65,8 @@ spec:
             - on-demand
   containers:
   - name: jnlp
-    image: 'jenkins/inbound-agent:4.11-1-jdk11'
-    args: ['\$(JENKINS_SECRET)', '\$(JENKINS_NAME)']
+    command: ["/bin/sh","-c"]
+    args: ["sleep 30; /usr/local/bin/jenkins-agent"]
     resources:
       requests:
         cpu: 500m
