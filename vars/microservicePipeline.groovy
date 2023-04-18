@@ -75,14 +75,14 @@ spec:
     livenessProbe:
       exec:
         command:
-	- curl
+        - curl
         - http://jenkins-master-service:8080/tcpSlaveAgentListener/
       failureThreshold: 3
       periodSeconds: 10
     startupProbe:
       exec:
         command:
-	- curl
+        - curl
         - http://jenkins-master-service:8080/tcpSlaveAgentListener/
       failureThreshold: 30
       periodSeconds: 10
