@@ -72,6 +72,20 @@ spec:
         cpu: 500m
         memory: 500Mi
         ephemeral-storage: 500Mi
+    livenessProbe:
+      exec:
+        command:
+	- curl
+        - http://jenkins-master-service:8080/tcpSlaveAgentListener/
+      failureThreshold: 3
+      periodSeconds: 10
+    startupProbe:
+      exec:
+        command:
+	- curl
+        - http://jenkins-master-service:8080/tcpSlaveAgentListener/
+      failureThreshold: 30
+      periodSeconds: 10
   - name: shell
     image: quay.io/cdis/gen3-ci-worker:master
     imagePullPolicy: Always
