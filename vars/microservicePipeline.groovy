@@ -63,6 +63,11 @@ spec:
             operator: In
             values:
             - on-demand
+  initContainers:
+  - name: wait-for-jenkins-connection
+    image: quay.io/cdis/gen3-ci-worker:master
+    command: ["/bin/sh","-c"]
+    args: ["while [ $(curl -sw '%{http_code}' http://jenkins-master-service:8080/tcpSlaveAgentListener/ -o /dev/null) -ne 200 ]; do sleep 5; echo 'Waiting for jenkins connection ...'; done"]
   containers:
   - name: jnlp
     command: ["/bin/sh","-c"]
@@ -72,20 +77,6 @@ spec:
         cpu: 500m
         memory: 500Mi
         ephemeral-storage: 500Mi
-    livenessProbe:
-      exec:
-        command:
-        - curl
-        - http://jenkins-master-service:8080/tcpSlaveAgentListener/
-      failureThreshold: 3
-      periodSeconds: 10
-    startupProbe:
-      exec:
-        command:
-        - curl
-        - http://jenkins-master-service:8080/tcpSlaveAgentListener/
-      failureThreshold: 30
-      periodSeconds: 10
   - name: shell
     image: quay.io/cdis/gen3-ci-worker:master
     imagePullPolicy: Always
