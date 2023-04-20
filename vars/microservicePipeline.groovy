@@ -209,8 +209,10 @@ spec:
                             if (namespaces.size == 0) {
                                 namespaces = AVAILABLE_NAMESPACES
                             }
-                            // If a specific test suite is not specified, run them all
+                            // If a specific test suite or tag is not specified, run them all
                             if (selectedTests.size == 0 && selectedTags.size == 0) {
+                                println("#################### DEBUG: Selected tags:  ${selectedTags}")
+                                println("#################### DEBUG: Selected tags size: ${selectedTags.size}")
                                 selectedTests.add("all")
 
                                 // include long running tests.in the nightly-build
