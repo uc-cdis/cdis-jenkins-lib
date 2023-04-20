@@ -56,7 +56,7 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
           }
         }
         selectedTags.each {selectedTag ->
-          testResult = sh(script: "bash ./run-tests-by-tag.sh ${namespace} --testedEnv=${testedEnv} --seleniumTimeout=7200 --selectedTag=${selectedTag} --debug=${debug}", returnStatus: true);
+          testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --seleniumTimeout=7200 --selectedTag=${selectedTag} --debug=${debug}", returnStatus: true);
           if (testResult != 0){
             TestSuitesNonZeroStatusCodes.add(testResult)
           }
