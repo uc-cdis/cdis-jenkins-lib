@@ -34,7 +34,7 @@ def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) 
 * @param service - name of service the test is being run for
 * @param testedEnv - environment the test is being run for (for manifest PRs)
 */
-def soonToBeLegacyRunIntegrationTests(String namespace, String service, String testedEnv, String isGen3Release, String isNightlyBuild = "false", List<String> selectedTests = ['all'], List<String> selectedTags = [], String debug="false") {
+def soonToBeLegacyRunIntegrationTests(String namespace, String service, String testedEnv, String isGen3Release, String isNightlyBuild = "false", List<String> selectedTests = [], List<String> selectedTags = [], String debug="false") {
   withCredentials([
     usernamePassword(credentialsId: 'ras-test-user1-for-ci-tests', usernameVariable: 'RAS_TEST_USER_1_USERNAME', passwordVariable: 'RAS_TEST_USER_1_PASSWORD'),
     usernamePassword(credentialsId: 'ras-test-user2-for-ci-tests', usernameVariable: 'RAS_TEST_USER_2_USERNAME', passwordVariable: 'RAS_TEST_USER_2_PASSWORD'),
