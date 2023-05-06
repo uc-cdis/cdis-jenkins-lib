@@ -78,6 +78,15 @@ spec:
         cpu: 500m
         memory: 500Mi
         ephemeral-storage: 500Mi
+  - name: selenium
+    image: selenium/standalone-chrome:112.0
+    ports:
+    - containerPort: 4444
+    readinessProbe:
+        httpGet:
+        path: /wd/hub/sessions
+        port: 4444
+    imagePullPolicy: Always
   - name: shell
     image: quay.io/cdis/gen3-ci-worker:master
     imagePullPolicy: Always
