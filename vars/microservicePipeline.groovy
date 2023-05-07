@@ -83,7 +83,7 @@ spec:
     ports:
     - containerPort: 4444
     readinessProbe:
-        httpGet:
+      httpGet:
         path: /wd/hub/sessions
         port: 4444
     imagePullPolicy: Always
