@@ -88,6 +88,11 @@ spec:
         path: /status
         port: 4444
       timeoutSeconds: 60
+    resources:
+      requests:
+        cpu: 500m
+        memory: 500Mi
+        ephemeral-storage: 500Mi
   - name: shell
     image: quay.io/cdis/gen3-ci-worker:master
     imagePullPolicy: Always
@@ -97,9 +102,9 @@ spec:
     - infinity
     resources:
       requests:
-        cpu: 2
-        memory: 2Gi
-        ephemeral-storage: 2Gi
+        cpu: 0.2
+        memory: 200Mi
+        ephemeral-storage: 200Mi
     env:
     - name: AWS_DEFAULT_REGION
       value: us-east-1
