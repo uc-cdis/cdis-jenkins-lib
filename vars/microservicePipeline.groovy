@@ -118,31 +118,31 @@ spec:
   serviceAccount: jenkins-service
   serviceAccountName: jenkins-service
 '''
-        defaultContainer 'shell'
+                defaultContainer 'shell'
             }
         }
         stages {
             stage('CleanWorkspace') {
                 steps {
-                script {
-                        try {
-                        cleanWs()
-                    } catch (e) {
-                        pipelineHelper.handleError(e)
+                    script {
+                            try {
+                            cleanWs()
+                        } catch (e) {
+                            pipelineHelper.handleError(e)
+                        }
                     }
                 }
-            }
             }
             stage('FetchCode') {
-            steps {
-                script {
-                    try {
-                        gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
-                    } catch (e) {
-                        pipelineHelper.handleError(e)
+                steps {
+                    script {
+                        try {
+                            gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
+                        } catch (e) {
+                            pipelineHelper.handleError(e)
+                        }
                     }
                 }
-            }
             }
             stage('CheckPRLabels') {
                 steps {
@@ -411,11 +411,11 @@ spec:
                 }
             }
             stage('VerifyClusterHealth') {
-		options {
+                options {
                     timeout(time: 30, unit: 'MINUTES')   // timeout on this stage
                 }
                 steps {
-                script {
+                    script {
                         try {
                             if(!doNotRunTests) {
                                 kubeHelper.waitForPods(kubectlNamespace)
@@ -436,7 +436,7 @@ spec:
                     timeout(time: 10, unit: 'MINUTES')   // timeout on this stage
                 }
                 steps {
-                script {
+                    script {
                         try {
                             if(!doNotRunTests) {
                                 testHelper.simulateData(kubectlNamespace, testedEnv)
@@ -453,7 +453,7 @@ spec:
             }
             stage('FetchDataClient') {
                 steps {
-                script {
+                    script {
                         try {
                             if(!doNotRunTests) {
                                 // we get the data client from master, unless the service being
@@ -476,7 +476,7 @@ spec:
                 }
             }
             stage('RunTests') {
-		options {
+                options {
                     timeout(time: 3, unit: 'HOURS')   // timeout on this stage
                 }
                 steps {
