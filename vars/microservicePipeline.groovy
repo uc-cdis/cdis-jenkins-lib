@@ -83,6 +83,11 @@ spec:
     imagePullPolicy: Always
     ports:
     - containerPort: 4444
+    readinessProbe:
+      httpGet:
+        path: /status
+        port: 4444
+      timeoutSeconds: 60
   - name: shell
     image: quay.io/cdis/gen3-ci-worker:master
     imagePullPolicy: Always
@@ -92,7 +97,7 @@ spec:
     - infinity
     resources:
       requests:
-        cpu: 1
+        cpu: 2
         memory: 2Gi
         ephemeral-storage: 2Gi
     env:
