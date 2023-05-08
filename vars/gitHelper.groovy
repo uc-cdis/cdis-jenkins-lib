@@ -25,7 +25,7 @@ def fetchAllRepos(String currentRepoName) {
     } else {
       git(
         url: 'https://github.com/uc-cdis/gen3-qa.git',
-        branch: 'chore/selenium_container_in_pr_pod'
+        branch: 'master'
       );
     }
   }
