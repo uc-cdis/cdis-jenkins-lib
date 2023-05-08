@@ -78,6 +78,21 @@ spec:
         cpu: 500m
         memory: 500Mi
         ephemeral-storage: 500Mi
+  - name: selenium
+    image: selenium/standalone-chrome:112.0
+    imagePullPolicy: Always
+    ports:
+    - containerPort: 4444
+    readinessProbe:
+      httpGet:
+        path: /status
+        port: 4444
+      timeoutSeconds: 60
+    resources:
+      requests:
+        cpu: 500m
+        memory: 500Mi
+        ephemeral-storage: 500Mi
   - name: shell
     image: quay.io/cdis/gen3-ci-worker:master
     imagePullPolicy: Always
@@ -87,9 +102,9 @@ spec:
     - infinity
     resources:
       requests:
-        cpu: 1
-        memory: 2Gi
-        ephemeral-storage: 2Gi
+        cpu: 0.2
+        memory: 200Mi
+        ephemeral-storage: 200Mi
     env:
     - name: AWS_DEFAULT_REGION
       value: us-east-1
@@ -113,31 +128,31 @@ spec:
   serviceAccount: jenkins-service
   serviceAccountName: jenkins-service
 '''
-        defaultContainer 'shell'
+                defaultContainer 'shell'
             }
         }
         stages {
             stage('CleanWorkspace') {
                 steps {
-                script {
-                        try {
-                        cleanWs()
-                    } catch (e) {
-                        pipelineHelper.handleError(e)
+                    script {
+                            try {
+                            cleanWs()
+                        } catch (e) {
+                            pipelineHelper.handleError(e)
+                        }
                     }
                 }
-            }
             }
             stage('FetchCode') {
-            steps {
-                script {
-                    try {
-                        gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
-                    } catch (e) {
-                        pipelineHelper.handleError(e)
+                steps {
+                    script {
+                        try {
+                            gitHelper.fetchAllRepos(pipeConfig['currentRepoName'])
+                        } catch (e) {
+                            pipelineHelper.handleError(e)
+                        }
                     }
                 }
-            }
             }
             stage('CheckPRLabels') {
                 steps {
@@ -406,11 +421,11 @@ spec:
                 }
             }
             stage('VerifyClusterHealth') {
-		options {
+                options {
                     timeout(time: 30, unit: 'MINUTES')   // timeout on this stage
                 }
                 steps {
-                script {
+                    script {
                         try {
                             if(!doNotRunTests) {
                                 kubeHelper.waitForPods(kubectlNamespace)
@@ -431,7 +446,7 @@ spec:
                     timeout(time: 10, unit: 'MINUTES')   // timeout on this stage
                 }
                 steps {
-                script {
+                    script {
                         try {
                             if(!doNotRunTests) {
                                 testHelper.simulateData(kubectlNamespace, testedEnv)
@@ -448,7 +463,7 @@ spec:
             }
             stage('FetchDataClient') {
                 steps {
-                script {
+                    script {
                         try {
                             if(!doNotRunTests) {
                                 // we get the data client from master, unless the service being
@@ -471,7 +486,7 @@ spec:
                 }
             }
             stage('RunTests') {
-		options {
+                options {
                     timeout(time: 3, unit: 'HOURS')   // timeout on this stage
                 }
                 steps {
