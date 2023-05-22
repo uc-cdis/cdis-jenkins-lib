@@ -217,6 +217,7 @@ spec:
                                         break
                                     case "skip-cleanup":
                                         skipCleanUp = true
+                                        break
                                     default:
                                         println('no-effect label')
                                         break
