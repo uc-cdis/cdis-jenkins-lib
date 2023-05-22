@@ -215,7 +215,7 @@ spec:
                                     case "skip-quay-build":
                                         skipQuayBuild = true
                                         break
-                                    case "skip-cleanup"
+                                    case "skip-cleanup":
                                         skipCleanUp = true
                                     default:
                                         println('no-effect label')
