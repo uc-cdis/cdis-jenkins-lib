@@ -215,6 +215,8 @@ spec:
                                     case "skip-quay-build":
                                         skipQuayBuild = true
                                         break
+                                    case "skip-cleanup"
+                                        skipCleanUp = true
                                     default:
                                         println('no-effect label')
                                         break
@@ -597,7 +599,9 @@ spec:
                 script {
                     if(!doNotRunTests) {
                         testHelper.cleanS3(kubectlNamespace)
-                        kubeHelper.deleteDeployments(kubectlNamespace)
+                        if(!skipCleanUp) {
+                            kubeHelper.deleteDeployments(kubectlNamespace)
+                        }
                     }
                     kubeHelper.teardown(kubeLocks)
                     testHelper.teardown(doNotRunTests)
