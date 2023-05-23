@@ -14,6 +14,7 @@ def call(Map config) {
     doNotRunTests = false
     runParallelTests = false
     skipQuayBuild = false
+    skipK8sCleanUp = false
     debug = "false"
     isGen3Release = "false"
     isNightlyBuild = "false"
@@ -214,6 +215,9 @@ spec:
                                         break
                                     case "skip-quay-build":
                                         skipQuayBuild = true
+                                        break
+                                    case "skip-k8s-cleanup":
+                                        skipK8sCleanUp = true
                                         break
                                     default:
                                         println('no-effect label')
@@ -597,7 +601,9 @@ spec:
                 script {
                     if(!doNotRunTests) {
                         testHelper.cleanS3(kubectlNamespace)
-                        kubeHelper.deleteDeployments(kubectlNamespace)
+                        if(!skipK8sCleanUp) {
+                            kubeHelper.deleteDeployments(kubectlNamespace)
+                        }
                     }
                     kubeHelper.teardown(kubeLocks)
                     testHelper.teardown(doNotRunTests)
