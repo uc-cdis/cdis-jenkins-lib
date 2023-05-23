@@ -80,7 +80,7 @@ spec:
         memory: 500Mi
         ephemeral-storage: 500Mi
   - name: selenium
-    image: selenium/standalone-chrome:112.0
+    image: 707767160287.dkr.ecr.us-east-1.amazonaws.com/gen3/selenium-standalone-chrome:112.0
     imagePullPolicy: Always
     ports:
     - containerPort: 4444
