@@ -14,6 +14,7 @@ def call(Map config) {
     doNotRunTests = false
     runParallelTests = false
     skipQuayBuild = false
+    skipCleanUp = false
     debug = "false"
     isGen3Release = "false"
     isNightlyBuild = "false"
