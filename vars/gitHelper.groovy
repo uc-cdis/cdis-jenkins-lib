@@ -37,7 +37,7 @@ def fetchAllRepos(String currentRepoName) {
     } else {
       git(
         url: 'https://github.com/uc-cdis/data-simulator.git',
-        branch: '1.4.0'
+        tag: '1.4.0'
       );
     }
   }
