@@ -36,9 +36,9 @@ def fetchAllRepos(String currentRepoName) {
       checkout scm;
     } else {
       git(
-        url: 'https://github.com/uc-cdis/data-simulator.git',
-        branch: 'master'
+        url: 'https://github.com/uc-cdis/data-simulator.git'
       );
+      sh "git checkout tags/1.4.0"
     }
   }
   dir('cdis-manifest') {
