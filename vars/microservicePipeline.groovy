@@ -132,6 +132,9 @@ spec:
                 defaultContainer 'shell'
             }
         }
+        environment {
+            PUPPETEER_SKIP_DOWNLOAD = 'true'
+        }
         stages {
             stage('CleanWorkspace') {
                 steps {
