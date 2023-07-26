@@ -46,7 +46,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   annotations:
-    karpenter.sh/do-not-evict: true
+    karpenter.sh/do-not-evict: "true"
   labels:
     app: ephemeral-ci-run
     netnolimit: "yes"
