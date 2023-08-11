@@ -64,7 +64,9 @@ def deploy(String kubectlNamespace) {
 */
 def reset(String kubectlNamespace) {
   kube(kubectlNamespace, {
+    sh "bash ${cloudAutomationPath()}/gen3/bin/secrets.sh decode wts-g3auto"
     resetResult = sh(returnStatus: true, script: "yes | bash ${cloudAutomationPath()}/gen3/bin/reset.sh")
+    sh "bash ${cloudAutomationPath()}/gen3/bin/secrets.sh decode wts-g3auto"
     if (resetResult != 0) {
       throw new Exception("The K8s Reset operation failed.")
     }
