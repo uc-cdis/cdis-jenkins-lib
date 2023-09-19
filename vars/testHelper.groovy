@@ -366,13 +366,25 @@ def deleteGCPServiceAccounts(jenkinsNamespace) {
       println("deleting jniaid svc accounts");
       JPREFIX="jniaid"
       break;
-    case "ci-env-1":
-      println("deleting cienv1 svc accounts");
-      JPREFIX="cienv1"
-      break;
     case "jenkins-new":
       println("deleting jnew svc accounts");
       JPREFIX="jnew"
+      break;
+    case "jenkins-new-1":
+      println("deleting jnew1 svc accounts");
+      JPREFIX="jnew1"
+      break;
+    case "jenkins-new-2":
+      println("deleting jnew2 svc accounts");
+      JPREFIX="jnew2"
+      break;
+    case "jenkins-new-3":
+      println("deleting jnew3 svc accounts");
+      JPREFIX="jnew3"
+      break;
+    case "jenkins-new-4":
+      println("deleting jnew4 svc accounts");
+      JPREFIX="jnew4"
       break;
     default:
       println("invalid jenkins namespace: " + SELECTED_JENKINS_NAMESPACE);
