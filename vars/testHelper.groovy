@@ -371,19 +371,19 @@ def deleteGCPServiceAccounts(jenkinsNamespace) {
       JPREFIX="jnew"
       break;
     case "jenkins-new-1":
-      println("deleting jnew svc accounts");
+      println("deleting jnew1 svc accounts");
       JPREFIX="jnew1"
       break;
     case "jenkins-new-2":
-      println("deleting jnew svc accounts");
+      println("deleting jnew2 svc accounts");
       JPREFIX="jnew2"
       break;
     case "jenkins-new-3":
-      println("deleting jnew svc accounts");
+      println("deleting jnew3 svc accounts");
       JPREFIX="jnew3"
       break;
     case "jenkins-new-4":
-      println("deleting jnew svc accounts");
+      println("deleting jnew4 svc accounts");
       JPREFIX="jnew4"
       break;
     default:
