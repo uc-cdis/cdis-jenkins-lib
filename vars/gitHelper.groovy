@@ -62,7 +62,7 @@ def fetchAllRepos(String currentRepoName) {
     } else {
       git(
         url: 'https://github.com/uc-cdis/cloud-automation.git',
-        branch: 'GPE-788'
+        branch: 'feat/gpe-979'
       );
     }
   }
