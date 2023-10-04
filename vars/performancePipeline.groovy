@@ -26,16 +26,28 @@ def call(body) {
         kubeLocks << lock
       }
       stage('WaitForQuayBuild') {
+        def currentBranchFormatted = pipeConfig['currentBranchFormatted']
+        if (currentBranchFormatted.length() > 63) {
+            def newCurrentBranchFormatted = currentBranchFormatted.substring(0,63)
+            println("### ## currentBranchFormatted \"${currentBranchFormatted}\" is longer than 63 characters. It will will be truncated to ${newCurrentBranchFormatted}")
+            currentBranchFormatted = newCurrentBranchFormatted
+        }
         quayHelper.waitForBuild(
           pipeConfig['quayRegistry'],
-          pipeConfig['currentBranchFormatted']
+          currentBranchFormatted
         )
       }
       stage('ModifyManifest') {
+        def currentBranchFormatted = pipeConfig.serviceTesting.branch
+        if (currentBranchFormatted.length() > 63) {
+            def newCurrentBranchFormatted = currentBranchFormatted.substring(0,63)
+            println("### ## currentBranchFormatted \"${currentBranchFormatted}\" is longer than 63 characters. It will will be truncated to ${newCurrentBranchFormatted}")
+            currentBranchFormatted = newCurrentBranchFormatted
+        }
         manifestHelper.editService(
           kubeHelper.getHostname(kubectlNamespace),
           pipeConfig.serviceTesting.name,
-          pipeConfig.serviceTesting.branch
+          currentBranchFormatted
         )
       }
       stage('K8sDeploy') {

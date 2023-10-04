@@ -270,6 +270,11 @@ spec:
                                     // handle feature branch image builds from forked repos
                                     def isOpenSourceContribution = regexMatchRepoOwner[1] != "uc-cdis"
                                     def currentBranchFormatted = isOpenSourceContribution ? "automatedCopy-${pipeConfig['currentBranchFormatted']}" : pipeConfig['currentBranchFormatted'];
+                                    if (currentBranchFormatted.length() > 63) {
+                                        def newCurrentBranchFormatted = currentBranchFormatted.substring(0,63)
+                                        println("### ## currentBranchFormatted \"${currentBranchFormatted}\" is longer than 63 characters. It will will be truncated to ${newCurrentBranchFormatted}")
+                                        currentBranchFormatted = newCurrentBranchFormatted
+                                    }
                                     println("### ## currentBranchFormatted: ${currentBranchFormatted}")
 
                                     if(!skipQuayBuild) {
