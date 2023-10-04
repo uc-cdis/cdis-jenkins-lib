@@ -354,6 +354,11 @@ spec:
                                     )
                                 } else if  (pipeConfig.MANIFEST == null || pipeConfig.MANIFEST == false || pipeConfig.MANIFEST != "True") {
                                     def quayBranchName = regexMatchRepoOwner[1] == "uc-cdis" ? pipeConfig.serviceTesting.branch : "automatedCopy-${pipeConfig.serviceTesting.branch}";
+                                    if (quayBranchName.length() > 63) {
+                                        def newQuayBranchName = quayBranchName.substring(0,63)
+                                        println("### ## quayBranchName \"${quayBranchName}\" is longer than 63 characters. It will will be truncated to ${newQuayBranchName}")
+                                        quayBranchName = newQuayBranchName
+                                    }
                                     println("### ## quayBranchName: ${quayBranchName}")
                                     if (pipeConfig.IMAGES_TO_BUILD != null && pipeConfig.IMAGES_TO_BUILD.size > 0) {
                                         for (image_to_build in pipeConfig.IMAGES_TO_BUILD) {
@@ -362,7 +367,6 @@ spec:
                                                 image_to_build,
                                                 quayBranchName
                                             )
-
                                         }
                                     } else {
                                         manifestHelper.editService(
