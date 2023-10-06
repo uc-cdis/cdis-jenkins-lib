@@ -29,9 +29,27 @@ def call(body) {
         def currentBranchFormatted = pipeConfig['currentBranchFormatted']
         if (currentBranchFormatted.length() > 63) {
             def newCurrentBranchFormatted = currentBranchFormatted.substring(0,63)
-            println("### ## currentBranchFormatted \"${currentBranchFormatted}\" is longer than 63 characters. It will will be truncated to ${newCurrentBranchFormatted}")
+            println("### ## currentBranchFormatted \"${currentBranchFormatted}\" is longer than 63 characters. It will will be truncated to \"${newCurrentBranchFormatted}\"")
             currentBranchFormatted = newCurrentBranchFormatted
+            def validImageTagName = currentBranchFormatted ==~ /^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?$/
+            if (!validImageTagName) {
+                if (currentBranchFormatted.endsWith("-") || currentBranchFormatted.endsWith(".") || currentBranchFormatted.endsWith("_")) {
+                    newCurrentBranchFormatted = currentBranchFormatted.substring(0,currentBranchFormatted.length()-1)+"0"
+                    validImageTagName = newCurrentBranchFormatted ==~ /^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?$/
+                    if (validImageTagName) {
+                        println("### ## currentBranchFormatted \"${currentBranchFormatted}\" violates validation, it will be changed to \"${newCurrentBranchFormatted}\"")
+                        currentBranchFormatted = newCurrentBranchFormatted
+                    } else {
+                        throw new Exception("currentBranchFormatted \"${currentBranchFormatted}\" violates validation and cannot be used")
+                    }
+                } else {
+                    throw new Exception("currentBranchFormatted \"${currentBranchFormatted}\" violates validation and cannot be used")
+                }
+            } else {
+                println("### ## currentBranchFormatted \"${currentBranchFormatted}\" passes validation")
+            }
         }
+        println("### ## currentBranchFormatted: ${currentBranchFormatted}")
         quayHelper.waitForBuild(
           pipeConfig['quayRegistry'],
           currentBranchFormatted
@@ -41,9 +59,27 @@ def call(body) {
         def currentBranchFormatted = pipeConfig.serviceTesting.branch
         if (currentBranchFormatted.length() > 63) {
             def newCurrentBranchFormatted = currentBranchFormatted.substring(0,63)
-            println("### ## currentBranchFormatted \"${currentBranchFormatted}\" is longer than 63 characters. It will will be truncated to ${newCurrentBranchFormatted}")
+            println("### ## currentBranchFormatted \"${currentBranchFormatted}\" is longer than 63 characters. It will will be truncated to \"${newCurrentBranchFormatted}\"")
             currentBranchFormatted = newCurrentBranchFormatted
+            def validImageTagName = currentBranchFormatted ==~ /^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?$/
+            if (!validImageTagName) {
+                if (currentBranchFormatted.endsWith("-") || currentBranchFormatted.endsWith(".") || currentBranchFormatted.endsWith("_")) {
+                    newCurrentBranchFormatted = currentBranchFormatted.substring(0,currentBranchFormatted.length()-1)+"0"
+                    validImageTagName = newCurrentBranchFormatted ==~ /^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?$/
+                    if (validImageTagName) {
+                        println("### ## currentBranchFormatted \"${currentBranchFormatted}\" violates validation, it will be changed to \"${newCurrentBranchFormatted}\"")
+                        currentBranchFormatted = newCurrentBranchFormatted
+                    } else {
+                        throw new Exception("currentBranchFormatted \"${currentBranchFormatted}\" violates validation and cannot be used")
+                    }
+                } else {
+                    throw new Exception("currentBranchFormatted \"${currentBranchFormatted}\" violates validation and cannot be used")
+                }
+            } else {
+                println("### ## currentBranchFormatted \"${currentBranchFormatted}\" passes validation")
+            }
         }
+        println("### ## currentBranchFormatted: ${currentBranchFormatted}")
         manifestHelper.editService(
           kubeHelper.getHostname(kubectlNamespace),
           pipeConfig.serviceTesting.name,

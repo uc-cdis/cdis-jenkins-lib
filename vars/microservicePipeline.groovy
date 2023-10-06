@@ -271,11 +271,28 @@ spec:
                                     def isOpenSourceContribution = regexMatchRepoOwner[1] != "uc-cdis"
                                     def currentBranchFormatted = isOpenSourceContribution ? "automatedCopy-${pipeConfig['currentBranchFormatted']}" : pipeConfig['currentBranchFormatted'];
                                     if (currentBranchFormatted.length() > 63) {
-                                        def newCurrentBranchFormatted = currentBranchFormatted.substring(0,63)
-                                        println("### ## currentBranchFormatted \"${currentBranchFormatted}\" is longer than 63 characters. It will will be truncated to ${newCurrentBranchFormatted}")
-                                        currentBranchFormatted = newCurrentBranchFormatted
+                                    def newCurrentBranchFormatted = currentBranchFormatted.substring(0,63)
+                                    println("### ## currentBranchFormatted \"${currentBranchFormatted}\" is longer than 63 characters. It will will be truncated to \"${newCurrentBranchFormatted}\"")
+                                    currentBranchFormatted = newCurrentBranchFormatted
+                                    def validImageTagName = currentBranchFormatted ==~ /^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?$/
+                                    if (!validImageTagName) {
+                                        if (currentBranchFormatted.endsWith("-") || currentBranchFormatted.endsWith(".") || currentBranchFormatted.endsWith("_")) {
+                                            newCurrentBranchFormatted = currentBranchFormatted.substring(0,currentBranchFormatted.length()-1)+"0"
+                                            validImageTagName = newCurrentBranchFormatted ==~ /^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?$/
+                                            if (validImageTagName) {
+                                                println("### ## currentBranchFormatted \"${currentBranchFormatted}\" violates validation, it will be changed to \"${newCurrentBranchFormatted}\"")
+                                                currentBranchFormatted = newCurrentBranchFormatted
+                                            } else {
+                                                throw new Exception("currentBranchFormatted \"${currentBranchFormatted}\" violates validation and cannot be used")
+                                            }
+                                        } else {
+                                            throw new Exception("currentBranchFormatted \"${currentBranchFormatted}\" violates validation and cannot be used")
+                                        }
+                                    } else {
+                                        println("### ## currentBranchFormatted \"${currentBranchFormatted}\" passes validation")
                                     }
-                                    println("### ## currentBranchFormatted: ${currentBranchFormatted}")
+                                }
+                                println("### ## currentBranchFormatted: ${currentBranchFormatted}")
 
                                     if(!skipQuayBuild) {
                                         if(pipeConfig.IMAGES_TO_BUILD != null && pipeConfig.IMAGES_TO_BUILD.size > 0){
@@ -361,8 +378,25 @@ spec:
                                     def quayBranchName = regexMatchRepoOwner[1] == "uc-cdis" ? pipeConfig.serviceTesting.branch : "automatedCopy-${pipeConfig.serviceTesting.branch}";
                                     if (quayBranchName.length() > 63) {
                                         def newQuayBranchName = quayBranchName.substring(0,63)
-                                        println("### ## quayBranchName \"${quayBranchName}\" is longer than 63 characters. It will will be truncated to ${newQuayBranchName}")
+                                        println("### ## quayBranchName \"${quayBranchName}\" is longer than 63 characters. It will will be truncated to \"${newQuayBranchName}\"")
                                         quayBranchName = newQuayBranchName
+                                        def validImageTagName = quayBranchName ==~ /^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?$/
+                                        if (!validImageTagName) {
+                                            if (quayBranchName.endsWith("-") || quayBranchName.endsWith(".") || quayBranchName.endsWith("_")) {
+                                                newQuayBranchName = quayBranchName.substring(0,quayBranchName.length()-1)+"0"
+                                                validImageTagName = newQuayBranchName ==~ /^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?$/
+                                                if (validImageTagName) {
+                                                    println("### ## quayBranchName \"${quayBranchName}\" violates validation, it will be changed to \"${newQuayBranchName}\"")
+                                                    quayBranchName = newQuayBranchName
+                                                } else {
+                                                    throw new Exception("quayBranchName \"${quayBranchName}\" violates validation and cannot be used")
+                                                }
+                                            } else {
+                                                throw new Exception("quayBranchName \"${quayBranchName}\" violates validation and cannot be used")
+                                            }
+                                        } else {
+                                            println("### ## quayBranchName \"${quayBranchName}\" passes validation")
+                                        }
                                     }
                                     println("### ## quayBranchName: ${quayBranchName}")
                                     if (pipeConfig.IMAGES_TO_BUILD != null && pipeConfig.IMAGES_TO_BUILD.size > 0) {
