@@ -25,7 +25,7 @@ def fetchAllRepos(String currentRepoName) {
     } else {
       git(
         url: 'https://github.com/uc-cdis/gen3-qa.git',
-        branch: 'fix-sim-py3.9'
+        branch: 'master'
       );
     }
   }
@@ -62,7 +62,7 @@ def fetchAllRepos(String currentRepoName) {
     } else {
       git(
         url: 'https://github.com/uc-cdis/cloud-automation.git',
-        branch: 'fix-sim-py3.9'
+        branch: 'master'
       );
     }
   }
