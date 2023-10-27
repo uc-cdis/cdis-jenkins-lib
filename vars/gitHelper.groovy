@@ -5,7 +5,7 @@
 */
 def setGitEnvVars(String currentRepoName) {
   dir('tmpGitClone') {
-    (gitCommit, gitPreviousCommit) = sh(script: 'git log --author=Jenkins --invert-grep -10 --pretty="format: %h"', returnStdout: true).split('\n')
+    (gitCommit, gitPreviousCommit) = sh(script: 'git log --pretty="format: %h"', returnStdout: true).split('\n')
     println(gitCommit)
     println(gitPreviousCommit)
     env.GIT_COMMIT = gitCommit.trim()
