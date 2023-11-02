@@ -89,6 +89,10 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   sh(returnStatus : true, script: "if cat tmpGitClone/$changedDir/manifest.json | jq --exit-status '.global.frontend_root' >/dev/null; then "
     + "jq -r .global.frontend_root < tmpGitClone/$changedDir/manifest.json > frontend_root.json; "
     + "fi")
+  // copy es7 if present
+  sh(returnStatus : true, script: "if cat tmpGitClone/$changedDir/manifest.json | jq --exit-status '.global.es7' >/dev/null; then "
+    + "jq -r .global.es7 < tmpGitClone/$changedDir/manifest.json > es7.json; "
+    + "fi")
   def manifestBlockKeys = ["portal", "ssjdispatcher", "indexd", "metadata", "mariner", "awsstoragegateway"]
   for (String item : manifestBlockKeys) {
     sh(returnStdout: true, script: "if cat tmpGitClone/${changedDir}/manifest.json | jq --exit-status '.${item}' >/dev/null; then "
@@ -143,6 +147,10 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   // replace global.frontend_root
   sh(returnStdout: true, script: "if [ -f \"frontend_root.json\" ]; then "
     + "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --arg sp \"\$(cat frontend_root.json)\" '.global.frontend_root = \$sp' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
+    + "fi")
+  // replace global.es7
+  sh(returnStdout: true, script: "if [ -f \"es7.json\" ]; then "
+    + "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --arg sp \"\$(cat es7.json)\" '.global.es7 = \$sp' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
     + "fi")
   def manifestMergeBlockKeys = ["ssjdispatcher", "indexd", "metadata", "mariner", "awsstoragegateway"]
   for (String item : manifestMergeBlockKeys) {
