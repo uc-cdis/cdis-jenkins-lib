@@ -411,9 +411,7 @@ spec:
                                 Utils.markStageSkippedForConditional(STAGE_NAME)
                             }
                         } catch (ex) {
-                            // ignore aborted pipelines (not a failure, just some subsequent commit that initiated a new build)
-                            if (ex.getClass().getCanonicalName() != "hudson.AbortException" &&
-                            ex.getClass().getCanonicalName() != "org.jenkinsci.plugins.workflow.steps.FlowInterruptedException") {
+                            if (ex.getClass().getCanonicalName() != "org.jenkinsci.plugins.workflow.steps.FlowInterruptedException") {
                                 metricsHelper.writeMetricWithResult(STAGE_NAME, false)
                                 kubeHelper.sendSlackNotification(kubectlNamespace, isNightlyBuild)
                                 kubeHelper.saveLogs(kubectlNamespace)
