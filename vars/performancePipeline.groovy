@@ -56,7 +56,7 @@ def call(body) {
       stage("RunPerformanceTests") {
         dir('gen3-qa') {
           testHelper.gen3Qa(kubectlNamespace,
-            { sh "bash ./run-performance-tests.sh ${namespace}" },
+            { sh 'bash ./run-performance-tests.sh ${namespace}' },
             ["TEST_DATA_PATH=''",
               "PROGRAM_SLASH_PROJECT=jnkns/jenkins"]
           )
@@ -68,10 +68,10 @@ def call(body) {
     }
     finally {
       stage('Post') {
-        sh "rm -rf $env.WORKSPACE/regressions/dumps/"
-        sh "rm -rf $env.WORKSPACE/testData/DataImportOrderPath.txt"
+        sh 'rm -rf $env.WORKSPACE/regressions/dumps/'
+        sh 'rm -rf $env.WORKSPACE/testData/DataImportOrderPath.txt'
         dir('gen3-qa') {
-          sh "rm -rf DataImportOrder.txt"
+          sh 'rm -rf DataImportOrder.txt'
         }
         kubeHelper.teardown(kubeLocks)
         testHelper.teardown(false)

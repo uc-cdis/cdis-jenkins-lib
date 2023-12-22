@@ -45,8 +45,8 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
     dir('gen3-qa') {
       gen3Qa(namespace, {
         // clean up old test artifacts in the workspace
-        sh "/bin/rm -rf output/ || true"
-        sh "mkdir output"
+        sh '/bin/rm -rf output/ || true'
+        sh 'mkdir output'
         testResult = null
         TestSuitesNonZeroStatusCodes = [];
         selectedTests.each {selectedTest ->
@@ -155,14 +155,14 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
   ]) {
     dir('gen3-qa') {
       gen3Qa(namespace, {
-        sh "mkdir -p output"
+        sh 'mkdir -p output'
 
         // Need a mutex so only one parallel test can execute the codeceptjs bootstrap script
         // We must run the gcp setup from https://github.com/uc-cdis/gen3-qa/blob/master/test_setup.js only once
         // otherwise we will face "There were concurrent policy changes" errors
         // The first thread to reach this stage must drop a marker file
         if (fileExists('gen3-qa-mutex.marker')) {
-          echo 'gen3-qa-mutex.marker found!'
+          echo "gen3-qa-mutex.marker found!"
 
           sh(script: """
             #!/bin/bash +x
@@ -170,7 +170,7 @@ def runIntegrationTests(String namespace, String service, String testedEnv, Stri
             sed -i '/bootstrap:/d' codecept.conf.js
           """, returntdout: true);
         } else {
-          echo 'the marker file has not been created yet, creating gen3-qa-mutex.marker now...'
+          echo "the marker file has not been created yet, creating gen3-qa-mutex.marker now..."
           writeFile(file: 'gen3-qa-mutex.marker', text: "--> ${selectedTest} got here first!")
           // Give a chance for the first thread to run the codeceptjs bootstrapping script
         }
@@ -259,7 +259,7 @@ gatherAllTestSuiteLabels
 def simulateData(String namespace, String testedEnv="") {
   dir('gen3-qa') {
     gen3Qa(namespace, {
-      sh "bash ./jenkins-simulate-data.sh ${namespace} ${testedEnv}"
+      sh 'bash ./jenkins-simulate-data.sh ${namespace} ${testedEnv}'
     })
   }
 }
@@ -279,14 +279,14 @@ def fetchDataClient(String dataClientBranch="master") {
     download_location = "dataclient.zip"
     sh String.format("aws s3 cp s3://cdis-dc-builds/%s/dataclient_%s.zip %s", branch, os, download_location)
     assert fileExists(download_location)
-    sh "unzip ${download_location}"
+    sh 'unzip ${download_location}'
 
     // make sure we can execute it
     executable_name = "gen3-client"
     assert fileExists(executable_name)
-    sh "mv ${executable_name} $env.WORKSPACE/${executable_name}"
-    sh "chmod u+x $env.WORKSPACE/${executable_name}"
-    sh "$env.WORKSPACE/${executable_name} --version"
+    sh 'mv ${executable_name} $env.WORKSPACE/${executable_name}'
+    sh 'chmod u+x $env.WORKSPACE/${executable_name}'
+    sh '$env.WORKSPACE/${executable_name} --version'
 
     println "Data client successfully set up at: $env.WORKSPACE/${executable_name}"
   }
@@ -314,15 +314,15 @@ def cleanS3(namespace) {
       // move the file to the current workspace so that other jenkins
       // sessions will not try to use it to clean up
       try {
-        sh "mv $filePath $localCopy || true"
+        sh 'mv $filePath $localCopy || true'
         fileContents = new File(localCopy).text
 
         for (guid in fileContents.readLines()) {
           // if the file does not exist, no error is thrown
-          sh "aws s3 rm --recursive s3://$qaBucket/$guid"
+          sh 'aws s3 rm --recursive s3://$qaBucket/$guid'
         }
 
-        sh "rm $localCopy"
+        sh 'rm $localCopy'
       }
       catch (FileNotFoundException e) {
         // if we can't move it, another session is using it: do nothing
@@ -419,7 +419,7 @@ def deleteGCPServiceAccounts(jenkinsNamespace) {
 def checkPodHealth(String namespace, String testedEnv) {
   dir('gen3-qa') {
     gen3Qa(namespace, {
-      sh "bash ./check-pod-health.sh $testedEnv"
+      sh 'bash ./check-pod-health.sh $testedEnv'
     })
   }
 }

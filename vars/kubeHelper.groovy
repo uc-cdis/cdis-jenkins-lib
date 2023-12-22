@@ -53,8 +53,8 @@ def klock(String method, String owner, String lockName, String kubectlNamespace)
 */
 def deploy(String kubectlNamespace) {
   kube(kubectlNamespace, {
-    sh "bash ${cloudAutomationPath()}/gen3/bin/kube-roll-all.sh"
-    sh "bash ${cloudAutomationPath()}/gen3/bin/kube-wait4-pods.sh || true"
+    sh 'bash ${cloudAutomationPath()}/gen3/bin/kube-roll-all.sh'
+    sh 'bash ${cloudAutomationPath()}/gen3/bin/kube-wait4-pods.sh || true'
   })
 }
 
@@ -68,7 +68,7 @@ def reset(String kubectlNamespace) {
     if (resetResult != 0) {
       throw new Exception("The K8s Reset operation failed.")
     }
-    sh "bash ${cloudAutomationPath()}/gen3/bin/kube-setup-spark.sh || true"
+    sh 'bash ${cloudAutomationPath()}/gen3/bin/kube-setup-spark.sh || true'
   })
 }
 
@@ -77,7 +77,7 @@ def reset(String kubectlNamespace) {
 */
 def waitForPods(String kubectlNamespace) {
   kube(kubectlNamespace, {
-    sh "bash ${cloudAutomationPath()}/gen3/bin/kube-wait4-pods.sh default true"
+    sh 'bash ${cloudAutomationPath()}/gen3/bin/kube-wait4-pods.sh default true'
   })
 }
 
@@ -86,8 +86,8 @@ def waitForPods(String kubectlNamespace) {
 */
 def deleteDeployments(String kubectlNamespace) {
   kube(kubectlNamespace, {
-    sh "kubectl delete --all deployments --namespace ${kubectlNamespace}"
-    sh "kubectl delete --all pods --namespace ${kubectlNamespace}"
+    sh 'kubectl delete --all deployments --namespace ${kubectlNamespace}'
+    sh 'kubectl delete --all pods --namespace ${kubectlNamespace}'
   })
 }
 

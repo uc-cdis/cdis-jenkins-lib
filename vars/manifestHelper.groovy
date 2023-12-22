@@ -63,11 +63,11 @@ def setDictionary(String commonsHostname) {
   echo "Editing cdis-manifest/${commonsHostname} dictionary to set ${prBranchName}"
 
   // keep backup of the original manifest
-  sh "cp cdis-manifest/${commonsHostname}/manifest.json cdis-manifest/${commonsHostname}/manifest.json.old"
+  sh 'cp cdis-manifest/${commonsHostname}/manifest.json cdis-manifest/${commonsHostname}/manifest.json.old'
   // swap current dictionary for the target dictionary
   sh(returnStatus: true, script: "cat cdis-manifest/${commonsHostname}/manifest.json.old | jq --arg theNewDict ${branchDictionary} '.global.dictionary_url |= \$theNewDict' > cdis-manifest/${commonsHostname}/manifest.json")
 
-  sh "cat cdis-manifest/${commonsHostname}/manifest.json"
+  sh 'cat cdis-manifest/${commonsHostname}/manifest.json'
 }
 
 /**
@@ -84,7 +84,7 @@ def mergeManifest(String changedDir, String selectedNamespace) {
     + "jq -r .global.netpolicy < tmpGitClone/$changedDir/manifest.json > netpolicy.json; "
     + "fi")
   // fetch sower block from the target environment
-  sh "jq -r .sower < tmpGitClone/$changedDir/manifest.json > sower_block.json"
+  sh 'jq -r .sower < tmpGitClone/$changedDir/manifest.json > sower_block.json'
   // copy frontend_root if present
   sh(returnStatus : true, script: "if cat tmpGitClone/$changedDir/manifest.json | jq --exit-status '.global.frontend_root' >/dev/null; then "
     + "jq -r .global.frontend_root < tmpGitClone/$changedDir/manifest.json > frontend_root.json; "
