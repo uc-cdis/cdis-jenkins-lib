@@ -80,7 +80,7 @@ def handleError(e) {
 * @param buildResult - the current build result (accessible by currentBuild.result)
 */
 def teardown(String buildResult) {
-  sh(script: "sed -i 's/*//g/ pipeline.log")
+  sh(script: "sed -i 's/*//g' pipeline.log")
   archiveArtifacts(artifacts: '**/output/*.png', allowEmptyArchive: true)
   archiveArtifacts(artifacts: '**/output/*.log', allowEmptyArchive: true)
   archiveArtifacts(artifacts: '**/output/*.log.gz', allowEmptyArchive: true)
