@@ -81,14 +81,7 @@ def handleError(e) {
 */
 def teardown(String buildResult) {
   sh(script: "pwd")
-  echo "**************************************************************"
-  sh(script: "ls -R")
-  echo "**************************************************************"
-  sh(script: "find . -name log -type f")
-  echo "**************************************************************"
-  sh(script: "find . -name pipeline.log -type f")
-  echo "**************************************************************"
-  sh(script: "sed -i 's/\\*//g' pipeline.log")
+  sh(script: "cat ./gen3-qa/output/gen3-qa.log")
   archiveArtifacts(artifacts: '**/output/*.png', allowEmptyArchive: true)
   archiveArtifacts(artifacts: '**/output/*.log', allowEmptyArchive: true)
   archiveArtifacts(artifacts: '**/output/*.log.gz', allowEmptyArchive: true)
