@@ -82,7 +82,7 @@ def handleError(e) {
 def teardown(String buildResult) {
   sh(script: "pwd")
   echo "**************************************************************"
-  sh(script: "tree .")
+  sh(script: "ls -R")
   echo "**************************************************************"
   sh(script: "find . -name log -type f")
   echo "**************************************************************"
