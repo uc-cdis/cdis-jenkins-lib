@@ -82,9 +82,11 @@ def handleError(e) {
 def teardown(String buildResult) {
   sh(script: "pwd")
   echo "**************************************************************"
-  sh(script: "find / -name log -type f")
+  sh(script: "tree .")
   echo "**************************************************************"
-  sh(script: "find / -name pipeline.log -type f")
+  sh(script: "find . -name log -type f")
+  echo "**************************************************************"
+  sh(script: "find . -name pipeline.log -type f")
   echo "**************************************************************"
   sh(script: "sed -i 's/\\*//g' pipeline.log")
   archiveArtifacts(artifacts: '**/output/*.png', allowEmptyArchive: true)
