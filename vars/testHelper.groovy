@@ -36,9 +36,9 @@ def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) 
 */
 def soonToBeLegacyRunIntegrationTests(String namespace, String service, String testedEnv, String isGen3Release, String isNightlyBuild = "false", List<String> selectedTests = [], List<String> selectedTags = [], String debug="false") {
   withCredentials([
-    usernamePassword(credentialsId: 'ras-test-user1-for-ci-tests', usernameVariable: 'RAS_TEST_USER_1_USERNAME', passwordVariable: 'RAS_TEST_USER_1_PASSWORD'),
-    usernamePassword(credentialsId: 'ras-test-user2-for-ci-tests', usernameVariable: 'RAS_TEST_USER_2_USERNAME', passwordVariable: 'RAS_TEST_USER_2_PASSWORD'),
-    usernamePassword(credentialsId: 'jenkins-user-api-token', usernameVariable: 'JENKINS_USERNAME', passwordVariable: 'JENKINS_USER_API_TOKEN'),
+    // usernamePassword(credentialsId: 'ras-test-user1-for-ci-tests', usernameVariable: 'RAS_TEST_USER_1_USERNAME', passwordVariable: 'RAS_TEST_USER_1_PASSWORD'),
+    // usernamePassword(credentialsId: 'ras-test-user2-for-ci-tests', usernameVariable: 'RAS_TEST_USER_2_USERNAME', passwordVariable: 'RAS_TEST_USER_2_PASSWORD'),
+    // usernamePassword(credentialsId: 'jenkins-user-api-token', usernameVariable: 'JENKINS_USERNAME', passwordVariable: 'JENKINS_USER_API_TOKEN'),
     string(credentialsId: 'DD_API_KEY', variable: 'DD_API_KEY'),
     string(credentialsId: 'DD_APP_KEY', variable: 'DD_APP_KEY')
   ]) {
@@ -147,9 +147,9 @@ def runScriptToCreateProgramsAndProjects(String namespace) {
 */
 def runIntegrationTests(String namespace, String service, String testedEnv, String selectedTest) {
   withCredentials([
-    usernamePassword(credentialsId: 'ras-test-user1-for-ci-tests', usernameVariable: 'RAS_TEST_USER_1_USERNAME', passwordVariable: 'RAS_TEST_USER_1_PASSWORD'),
-    usernamePassword(credentialsId: 'ras-test-user2-for-ci-tests', usernameVariable: 'RAS_TEST_USER_2_USERNAME', passwordVariable: 'RAS_TEST_USER_2_PASSWORD'),
-    usernamePassword(credentialsId: 'jenkins-user-api-token', usernameVariable: 'JENKINS_USERNAME', passwordVariable: 'JENKINS_USER_API_TOKEN'),
+    // usernamePassword(credentialsId: 'ras-test-user1-for-ci-tests', usernameVariable: 'RAS_TEST_USER_1_USERNAME', passwordVariable: 'RAS_TEST_USER_1_PASSWORD'),
+    // usernamePassword(credentialsId: 'ras-test-user2-for-ci-tests', usernameVariable: 'RAS_TEST_USER_2_USERNAME', passwordVariable: 'RAS_TEST_USER_2_PASSWORD'),
+    // usernamePassword(credentialsId: 'jenkins-user-api-token', usernameVariable: 'JENKINS_USERNAME', passwordVariable: 'JENKINS_USER_API_TOKEN'),
     string(credentialsId: 'DD_API_KEY', variable: 'DD_API_KEY'),
     string(credentialsId: 'DD_APP_KEY', variable: 'DD_APP_KEY')
   ]) {
