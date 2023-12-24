@@ -67,7 +67,7 @@ spec:
             - on-demand
   initContainers:
   - name: wait-for-jenkins-connection
-    image: quay.io/cdis/gen3-ci-worker:master
+    image: quay.io/cdis/gen3-ci-worker:chore_downgrade_jenkins
     command: ["/bin/sh","-c"]
     args: ["while [ $(curl -sw '%{http_code}' http://jenkins-master-service:8080/tcpSlaveAgentListener/ -o /dev/null) -ne 200 ]; do sleep 5; echo 'Waiting for jenkins connection ...'; done"]
   containers:
