@@ -95,7 +95,7 @@ spec:
         memory: 500Mi
         ephemeral-storage: 500Mi
   - name: shell
-    image: quay.io/cdis/gen3-ci-worker:master
+    image: quay.io/cdis/gen3-ci-worker:chore_downgrade_jenkins
     imagePullPolicy: Always
     command:
     - sleep
