@@ -136,8 +136,6 @@ def mergeManifest(String changedDir, String selectedNamespace) {
   sh(returnStdout: true, script: "if [ -f \"netpolicy.json\" ]; then "
     + "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r 'del(.global.netpolicy)' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json;"
     + "fi")
-  // String globalSansNetPolicy = sh(returnStdout: true, script: "jq 'del(.global.netpolicy)' cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json")
-  // println(globalSansNetPolicy)
   // replace Portal block
   sh(returnStdout: true, script: "if [ -f \"portal_block.json\" ]; then "
     + "old=\$(cat cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json) && echo \$old | jq -r --argjson sp \"\$(cat portal_block.json)\" '(.portal) = \$sp' > cdis-manifest/${selectedNamespace}.planx-pla.net/manifest.json; "
