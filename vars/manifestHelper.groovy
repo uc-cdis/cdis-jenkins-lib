@@ -1,4 +1,4 @@
-f/* groovylint-disable LineLength */
+/* groovylint-disable LineLength */
 /**
 * Jenkins environments are used for continuous integration, therefore, they should
 * always run the latest-latest code for all components
