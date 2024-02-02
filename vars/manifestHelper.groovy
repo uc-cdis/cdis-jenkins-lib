@@ -1,4 +1,4 @@
-/* groovylint-disable LineLength */
+f/* groovylint-disable LineLength */
 /**
 * Jenkins environments are used for continuous integration, therefore, they should
 * always run the latest-latest code for all components
@@ -79,7 +79,7 @@ def setDictionary(String commonsHostname) {
 def mergeManifest(String changedDir, String selectedNamespace) {
   String od = sh(returnStdout: true, script: "jq -r .global.dictionary_url < tmpGitClone/$changedDir/manifest.json").trim()
   String pa = sh(returnStdout: true, script: "jq -r .global.portal_app < tmpGitClone/$changedDir/manifest.json").trim()
-  fetch netpolicy from the target environment
+  // fetch netpolicy from the target environment
   sh(returnStatus : true, script: "if cat tmpGitClone/$changedDir/manifest.json | jq --exit-status '.global.netpolicy' >/dev/null; then "
     + "jq -r .global.netpolicy < tmpGitClone/$changedDir/manifest.json > netpolicy.json; "
     + "fi")
