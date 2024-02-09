@@ -88,7 +88,6 @@ def deleteDeployments(String kubectlNamespace) {
   kube(kubectlNamespace, {
     sh "kubectl delete --all deployments --namespace ${kubectlNamespace}"
     sh "kubectl delete --all pods --namespace ${kubectlNamespace}"
-    sh "kubectl delete --all service --namespace ${kubectlNamespace}"
   })
 }
 
