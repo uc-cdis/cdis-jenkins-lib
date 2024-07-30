@@ -5,7 +5,7 @@
 */
 def setGitEnvVars(String currentRepoName) {
   dir('tmpGitClone') {
-    (gitCommit, gitPreviousCommit) = sh(script: 'git log --author=Jenkins --invert-grep -10 --pretty="format: %h"', returnStdout: true).split('\n')
+    (gitCommit, gitPreviousCommit) = sh(script: 'git log --pretty="format: %h"', returnStdout: true).split('\n')
     println(gitCommit)
     println(gitPreviousCommit)
     env.GIT_COMMIT = gitCommit.trim()
@@ -103,5 +103,22 @@ def getLatestChangeOfBranch(String branchName=env.CHANGE_BRANCH) {
     sh("git diff --name-only origin/master...$branchName")
 
     return fileChanges
+  }
+}
+
+/**
+* Returns the timestamp of the latest commit
+*/
+def getTimestampOfLatestCommit(String branchName=env.CHANGE_BRANCH) {
+  dir('tmpGitClone') {
+    if (null == branchName) {
+      error("unable to determine branch");
+    }
+    sh("git config --add remote.origin.fetch +refs/heads/master:refs/remotes/origin/master")
+    sh("git fetch --no-tags")
+    println("Branchname: ${branchName}")
+    String ts = sh(returnStdout: true, script: "git log origin/$branchName -1 --format=%ct").trim()
+
+    return ts
   }
 }

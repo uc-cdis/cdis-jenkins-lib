@@ -82,6 +82,16 @@ def waitForPods(String kubectlNamespace) {
 }
 
 /**
+* Delete all pods
+*/
+def deleteDeployments(String kubectlNamespace) {
+  kube(kubectlNamespace, {
+    sh "kubectl delete --all deployments --namespace ${kubectlNamespace}"
+    sh "kubectl delete --all pods --namespace ${kubectlNamespace}"
+  })
+}
+
+/**
 * Save logs and store them in our Jenkins archiving folder to help people debug issues with K8sReset
 */
 def saveLogs(String kubectlNamespace) {
@@ -133,7 +143,7 @@ def selectAndLockNamespace(String lockOwner, List<String> namespaces = null) {
     for (int i=0; i < namespaces.size(); ++i) {
       namespaceIndex = (randNum + i) % namespaces.size();
       kubectlNamespace = namespaces.get(namespaceIndex)
-      println("attempting to lock namespace ${kubectlNamespace} with a wait time of 1 minutes")
+      println("attempting to lock namespace ${kubectlNamespace} with a wait time of 1 minute")
       if (klock('lock', lockOwner, lockName, kubectlNamespace)) {
         echo("namespace ${kubectlNamespace}")
         return [kubectlNamespace, newKubeLock(kubectlNamespace, lockOwner, lockName)]

@@ -34,7 +34,7 @@ def gen3Qa(String namespace, Closure body, List<String> add_env_variables = []) 
 * @param service - name of service the test is being run for
 * @param testedEnv - environment the test is being run for (for manifest PRs)
 */
-def soonToBeLegacyRunIntegrationTests(String namespace, String service, String testedEnv, String isGen3Release, String isNightlyBuild = "false", List<String> selectedTests = ['all']) {
+def soonToBeLegacyRunIntegrationTests(String namespace, String service, String testedEnv, String isGen3Release, String isNightlyBuild = "false", List<String> selectedTests = [], List<String> selectedTags = [], String debug="false") {
   withCredentials([
     usernamePassword(credentialsId: 'ras-test-user1-for-ci-tests', usernameVariable: 'RAS_TEST_USER_1_USERNAME', passwordVariable: 'RAS_TEST_USER_1_PASSWORD'),
     usernamePassword(credentialsId: 'ras-test-user2-for-ci-tests', usernameVariable: 'RAS_TEST_USER_2_USERNAME', passwordVariable: 'RAS_TEST_USER_2_PASSWORD'),
@@ -50,7 +50,13 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
         testResult = null
         TestSuitesNonZeroStatusCodes = [];
         selectedTests.each {selectedTest ->
-          testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --seleniumTimeout=7200 --selectedTest=${selectedTest}", returnStatus: true);
+          testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --seleniumTimeout=7200 --selectedTest=${selectedTest} --debug=${debug}", returnStatus: true);
+          if (testResult != 0){
+            TestSuitesNonZeroStatusCodes.add(testResult)
+          }
+        }
+        selectedTags.each {selectedTag ->
+          testResult = sh(script: "bash ./run-tests.sh ${namespace} --service=${service} --testedEnv=${testedEnv} --isGen3Release=${isGen3Release} --seleniumTimeout=7200 --selectedTag=${selectedTag} --debug=${debug}", returnStatus: true);
           if (testResult != 0){
             TestSuitesNonZeroStatusCodes.add(testResult)
           }
@@ -360,13 +366,25 @@ def deleteGCPServiceAccounts(jenkinsNamespace) {
       println("deleting jniaid svc accounts");
       JPREFIX="jniaid"
       break;
-    case "ci-env-1":
-      println("deleting cienv1 svc accounts");
-      JPREFIX="cienv1"
-      break;
     case "jenkins-new":
       println("deleting jnew svc accounts");
       JPREFIX="jnew"
+      break;
+    case "jenkins-new-1":
+      println("deleting jnew1 svc accounts");
+      JPREFIX="jnew1"
+      break;
+    case "jenkins-new-2":
+      println("deleting jnew2 svc accounts");
+      JPREFIX="jnew2"
+      break;
+    case "jenkins-new-3":
+      println("deleting jnew3 svc accounts");
+      JPREFIX="jnew3"
+      break;
+    case "jenkins-new-4":
+      println("deleting jnew4 svc accounts");
+      JPREFIX="jnew4"
       break;
     default:
       println("invalid jenkins namespace: " + SELECTED_JENKINS_NAMESPACE);
