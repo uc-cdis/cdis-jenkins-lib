@@ -25,7 +25,7 @@ def fetchAllRepos(String currentRepoName) {
     } else {
       git(
         url: 'https://github.com/uc-cdis/gen3-qa.git',
-        branch: 'master'
+        branch: 'chore/fix_pfbexport_test'
       );
     }
   }
@@ -79,7 +79,7 @@ def fetchAllRepos(String currentRepoName) {
 def getLatestChangeOfBranch(String branchName=env.CHANGE_BRANCH) {
   dir('tmpGitClone') {
     if (null == branchName) {
-      error("unable to determine branch");    
+      error("unable to determine branch");
     }
     sh("git config --add remote.origin.fetch +refs/heads/master:refs/remotes/origin/master")
     sh("git fetch --no-tags")
