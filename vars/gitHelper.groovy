@@ -50,7 +50,7 @@ def fetchAllRepos(String currentRepoName) {
     } else {
       git(
         url: 'https://github.com/uc-cdis/gitops-qa.git',
-        branch: 'master'
+        branch: 'chore/fix_jenkins_dcp'
       )
     }
   }
