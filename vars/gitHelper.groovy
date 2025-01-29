@@ -25,7 +25,7 @@ def fetchAllRepos(String currentRepoName) {
     } else {
       git(
         url: 'https://github.com/uc-cdis/gen3-qa.git',
-        branch: 'master'
+        branch: 'chore/update_user_email_ids'
       );
     }
   }
@@ -50,7 +50,7 @@ def fetchAllRepos(String currentRepoName) {
     } else {
       git(
         url: 'https://github.com/uc-cdis/gitops-qa.git',
-        branch: 'master'
+        branch: 'chore/test_example_org_test_accounts'
       )
     }
   }
