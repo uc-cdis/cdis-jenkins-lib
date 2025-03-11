@@ -107,7 +107,7 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
           }
           failureMsg += "\n " + commonMsg
 
-          slackSend(color: 'bad', channel: isNightlyBuild == "true" ? "#nightly-builds" : "#gen3-qa-notifications", message: failureMsg)
+          slackSend(color: 'bad', channel: isNightlyBuild == "true" ? "#nightly-builds #gen3-dev-oncall" : "#gen3-qa-notifications", message: failureMsg)
           currentBuild.result = 'ABORTED'
           error("aborting build - testsuite failed")
         } else {
