@@ -101,7 +101,7 @@ def soonToBeLegacyRunIntegrationTests(String namespace, String service, String t
                 commaSeparatedListOfLabels += ","
               }
             }
-            failureMsg += " To label & retry, just send the following message: \n @qa-bot replay-pr ${REPO_NAME} ${PR_NUMBER} ${commaSeparatedListOfLabels}"
+            failureMsg += " To label & retry, just send the following message: \n `@qa-bot replay-pr ${REPO_NAME} ${PR_NUMBER} ${commaSeparatedListOfLabels}`"
           } else {
             failureMsg += " >10 test suites failed on this PR check :rotating_light:. This might indicate an environmental/config issue. cc: @planxqa :allthethings: :allthethings: :allthethings:"
           }
@@ -218,7 +218,7 @@ def processCIResults(String namespace, String isNightlyBuild = "false", List<Str
         failureMsg += failedTestSuites.collect { " - *${it}* failed :red_circle:" }.join "\n"
         commaSeparatedListOfLabels = failedTestSuites.join ","
 
-        failureMsg += " To label :label: & retry :jenkins:, just send the following message: \n @qa-bot replay-pr ${REPO_NAME} ${PR_NUMBER} ${commaSeparatedListOfLabels}"
+        failureMsg += " To label :label: & retry :jenkins:, just send the following message: \n `@qa-bot replay-pr ${REPO_NAME} ${PR_NUMBER} ${commaSeparatedListOfLabels}`"
 
         failureMsg += "\n " + commonMsg
 
